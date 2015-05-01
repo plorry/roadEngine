@@ -60,11 +60,11 @@ var Game = exports.Game = function () {
     });
 
     this.d = new Driver({
-        image: gamejs.image.load(conf.Images.shrub01),
+        spriteSheet: gamejs.image.load(conf.Images.player_cart),
         road: road,
         distance: 2,
         height: 32,
-        width: 32,
+        width: 52,
         position: 0
     });
 

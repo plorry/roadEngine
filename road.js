@@ -19,6 +19,8 @@ var RoadObject = exports.RoadObject = Entity.extend({
         this.diffDistance = this.distance - this.road.currentDistance;
         this.scaleFactor;
         this.image = this.road.images[options.image];
+        this.angleToCamera = 0;
+        this.rotates = options.rotates || false;
 
         if (this.side == 'left') {
             if (this.image) {
@@ -28,7 +30,12 @@ var RoadObject = exports.RoadObject = Entity.extend({
         }
     },
 
-    update: function(dt) {
+    update: function(dt, camera) {
+        if (this.rotates) {
+            var distanceToCamera = this.distance - camera.distance;
+            var positionToCamera = this.position - camera.center;
+            this.angleToCamera = Math.atan((positionToCamera / 100) / distanceToCamera);
+        }
     },
 
     draw: function(display, offset, height, distance) {
@@ -347,7 +354,7 @@ Road.prototype = {
 
     update: function(dt, camera) {
         this.roadObjects.forEach(function(ro) {
-            ro.update(dt);
+            ro.update(dt, camera);
         });
         this.drawRoadObjects = this.collectRoadObjects(camera.distance);
         this.upcomingTurns = this.collectTurns(camera.distance);
@@ -494,7 +501,7 @@ Line.prototype = {
                     var thisHeight = this.height + stepNum;
                     var thisWidth = this.road.getWidthAt(thisDistance) * 40 / thisDiffDistance
                     var sliceLength = thisDiffDistance - this.diffDistance;
-                    this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
+                    //this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
                     var destRect = new gamejs.Rect([(this.road.displayWidth/2) - thisWidth - this.offset
                         + (100 / thisDiffDistance), thisHeight], [thisWidth * 2, 1]);
                     camera.view.blit(sliceImage, destRect);

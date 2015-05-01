@@ -7,20 +7,31 @@ var Images = exports.Images = {
     hHouse01: './assets/house01.png',
     shrub01: './assets/shrub01.png',
     tree01: './assets/tree01.png',
-    test_texture: './assets/test_texture.png'
+    test_texture: './assets/test_texture.png',
+    player_cart: './assets/player-sprite.png'
 };
 
 var globals = exports.globals = {
     fps: 30
 };
 },{}],2:[function(require,module,exports){
-var RoadObject = require('./road').RoadObject;
+var animate = require('gramework').animate,
+    _ = require('underscore'),
+    RoadObject = require('./road').RoadObject;
 
 var DRAG_FACTOR = 0.01;
 
 var Driver = exports.Driver = RoadObject.extend({
     initialize: function(options) {
         Driver.super_.prototype.initialize.apply(this, arguments);
+        this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 26, 16);
+        var anim_angles = {};
+        _.range(-6,6).forEach(function(num) {
+            anim_angles[num] = {
+                frames: [(num * 2) + 12], rate: 15, loop: true
+            };
+        });
+        this.anim = new animate.Animation(this.spriteSheet, 0, anim_angles);
         this.road.roadObjects.push(this);
         this.image = options.image;
         this.accel = 0;
@@ -28,6 +39,20 @@ var Driver = exports.Driver = RoadObject.extend({
         this.speed = 0;
         this.angle = 0;
         this.angularSpeed = 0;
+        this.rotates = true;
+        this.animationMap = [
+            {range: [-90, -75], anim: -5},
+            {range: [-75, -60], anim: -4},
+            {range: [-60, -45], anim: -3},
+            {range: [-45, -30], anim: -2},
+            {range: [-30,-15], anim: -1},
+            {range: [-15, 15], anim: 0},
+            {range: [15, 30], anim: 1},
+            {range: [30, 45], anim: 2},
+            {range: [45, 60], anim: 3},
+            {range: [60, 75], anim: 4},
+            {range: [75, 90], anim: 5}
+        ];
     },
 
     left_boost_on: function() {
@@ -46,10 +71,28 @@ var Driver = exports.Driver = RoadObject.extend({
         this.right_boost = false;
     },
 
-    update: function(dt) {
+    update: function(dt, camera) {
+        Driver.super_.prototype.update.apply(this, arguments);
+
+        this.animationMap.some(function(anim) {
+            if ((this.angleToCamera - this.angle) * (180 / Math.PI) > anim.range[0]
+                && (this.angleToCamera - this.angle) * (180 / Math.PI) + this.angle < anim.range[1]) {
+                // In range
+                this.anim.start(anim.anim);
+                return true;
+            }
+        }, this);
+
+        this.image = this.anim.update(dt);
+
         this.accel = 0;
         this.topSpeed = 0;
         this.angularSpeed = 0;
+
+        if (this.road.getAltitudeAt(this.distance) > 0) {
+            this.accel += 0.001;
+        }
+
         if (this.left_boost) {
             this.accel += 0.001;
             this.angularSpeed += 0.02;
@@ -78,12 +121,12 @@ var Driver = exports.Driver = RoadObject.extend({
         } if (this.angle < -Math.PI) {
             this.angle += 2 * Math.PI;
         }
-        document.getElementById('debug').innerHTML = this.angle;
+        document.getElementById('debug').innerHTML = this.angleToCamera * (180 / Math.PI);
         this.distance += this.speed * (Math.cos(this.angle));
         this.position += (this.speed * (Math.sin(this.angle))) * 100;
     }
 });
-},{"./road":50}],3:[function(require,module,exports){
+},{"./road":50,"gramework":5,"underscore":49}],3:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     conf = require('./conf'),
     RoadScene = require('./roadscene').RoadScene,
@@ -146,11 +189,11 @@ var Game = exports.Game = function () {
     });
 
     this.d = new Driver({
-        image: gamejs.image.load(conf.Images.shrub01),
+        spriteSheet: gamejs.image.load(conf.Images.player_cart),
         road: road,
         distance: 2,
         height: 32,
-        width: 32,
+        width: 52,
         position: 0
     });
 
@@ -423,7 +466,7 @@ Animation.prototype.setState = function(name) {
 };
 
 Animation.prototype.update = function(msDuration) {
-    if (!this.currentAnimation) {
+    if (this.currentAnimation === undefined) {
         throw new Error('No animation started.');
     }
 
@@ -8688,6 +8731,8 @@ var RoadObject = exports.RoadObject = Entity.extend({
         this.diffDistance = this.distance - this.road.currentDistance;
         this.scaleFactor;
         this.image = this.road.images[options.image];
+        this.angleToCamera = 0;
+        this.rotates = options.rotates || false;
 
         if (this.side == 'left') {
             if (this.image) {
@@ -8697,7 +8742,12 @@ var RoadObject = exports.RoadObject = Entity.extend({
         }
     },
 
-    update: function(dt) {
+    update: function(dt, camera) {
+        if (this.rotates) {
+            var distanceToCamera = this.distance - camera.distance;
+            var positionToCamera = this.position - camera.center;
+            this.angleToCamera = Math.atan((positionToCamera / 100) / distanceToCamera);
+        }
     },
 
     draw: function(display, offset, height, distance) {
@@ -9016,7 +9066,7 @@ Road.prototype = {
 
     update: function(dt, camera) {
         this.roadObjects.forEach(function(ro) {
-            ro.update(dt);
+            ro.update(dt, camera);
         });
         this.drawRoadObjects = this.collectRoadObjects(camera.distance);
         this.upcomingTurns = this.collectTurns(camera.distance);
@@ -9163,7 +9213,7 @@ Line.prototype = {
                     var thisHeight = this.height + stepNum;
                     var thisWidth = this.road.getWidthAt(thisDistance) * 40 / thisDiffDistance
                     var sliceLength = thisDiffDistance - this.diffDistance;
-                    this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
+                    //this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
                     var destRect = new gamejs.Rect([(this.road.displayWidth/2) - thisWidth - this.offset
                         + (100 / thisDiffDistance), thisHeight], [thisWidth * 2, 1]);
                     camera.view.blit(sliceImage, destRect);
