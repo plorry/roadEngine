@@ -126,7 +126,7 @@ Road.prototype = {
         this.roadObjects.push(roadObject);
     },
 
-    addCar: function(distance, options) {
+    addCar: function(distance, roadObject) {
         if (options.image in this.images == false){
             // Image not yet stored, must load
             this.images[options.image] = gamejs.image.load(conf.Images[options.image]);

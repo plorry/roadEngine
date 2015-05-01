@@ -1,24 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var animate = require('gramework').animate,
-    Entity = require('gramework').Entity,
-    _ = require('underscore');
-
-var Biker = exports.Biker = Entity.extend({
-    initialize: function(options) {
-        this.spriteSheet = options.spriteSheet;
-        this.anim = new animate.Animation(this.spriteSheet, "static", {static:
-            {
-                frames: _.range(0,5), rate: 15, loop: true
-            }});
-        this.image = this.anim.update(0);
-        this.anim.setFrame(0);
-    },
-
-    update: function(dt) {
-        this.image = this.anim.update(dt);
-    }
-});
-},{"gramework":5,"underscore":49}],2:[function(require,module,exports){
 var Images = exports.Images = {
     bike_lane: './assets/bike_lane.png',
     bg_toronto: './assets/toronto.jpg',
@@ -33,15 +13,84 @@ var Images = exports.Images = {
 var globals = exports.globals = {
     fps: 30
 };
-},{}],3:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
+var RoadObject = require('./road').RoadObject;
+
+var DRAG_FACTOR = 0.01;
+
+var Driver = exports.Driver = RoadObject.extend({
+    initialize: function(options) {
+        Driver.super_.prototype.initialize.apply(this, arguments);
+        this.road.roadObjects.push(this);
+        this.image = options.image;
+        this.accel = 0;
+        this.topSpeed = 0.5;
+        this.speed = 0;
+        this.angle = 0;
+        this.angularSpeed = 0;
+    },
+
+    left_boost_on: function() {
+        this.left_boost = true;
+    },
+
+    right_boost_on: function() {
+        this.right_boost = true;
+    },
+
+    left_boost_off: function() {
+        this.left_boost = false;
+    },
+
+    right_boost_off: function() {
+        this.right_boost = false;
+    },
+
+    update: function(dt) {
+        this.accel = 0;
+        this.topSpeed = 0;
+        this.angularSpeed = 0;
+        if (this.left_boost) {
+            this.accel += 0.001;
+            this.angularSpeed += 0.02;
+        }
+        if (this.right_boost) {
+            this.accel += 0.001;
+            this.angularSpeed -= 0.02;
+        }
+        if (this.right_boost && this.left_boost) {
+            if (this.angle < 0) {
+                this.angularSpeed += 0.01;
+            } else if (this.angle > 0) {
+                this.angularSpeed -= 0.01;
+            }
+        }
+
+        this.accel -= DRAG_FACTOR * this.speed;
+
+        this.speed += this.accel;
+        if (this.speed < 0) {
+            this.speed = 0;
+        }
+        this.angle += this.angularSpeed;
+        if (this.angle > Math.PI) {
+            this.angle -= 2 * Math.PI;
+        } if (this.angle < -Math.PI) {
+            this.angle += 2 * Math.PI;
+        }
+        document.getElementById('debug').innerHTML = this.angle;
+        this.distance += this.speed * (Math.cos(this.angle));
+        this.position += (this.speed * (Math.sin(this.angle))) * 100;
+    }
+});
+},{"./road":50}],3:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     conf = require('./conf'),
     RoadScene = require('./roadscene').RoadScene,
     GameController = require('gramework').input.GameController,
-    Biker = require('./biker').Biker,
     animate = require('gramework').animate,
     Road = require('./road').Road,
-    Car = require('./road').Car,
+    Driver = require('./driver').Driver,
     _ = require('underscore');
 
 // Container for the entire game.
@@ -53,62 +102,13 @@ var roadSpec = {
             angle: 70,
             end: 15
         },
-        20: {
-            angle: -70,
-            end: 25
-        },
-        30: {
-            angle: 70,
-            end: 35
-        },
 
-        40: {
-            angle: -70,
-            end: 45
-        },
-        50: {
-            angle: 70,
-            end: 55
-        },
-
-        60: {
-            angle: -70,
-            end: 65
-        },
-
-        125: {
-            angle: 70,
-            end: 135
-        }
     },
 
     hills: {
-
-    },
-    
-    crossStreets: {
-        5: {
-            end: 6
-        },
-
-        20: {
-            end: 21
-        },
-
-        25: {
-            end: 27
-        }
-    },
-
-    bikeLanes: {
-        0: {
-            end: 500
-        }
-    },
-
-    sidewalks: {
-        0: {
-            end: 500
+        10: {
+            height: 300,
+            end: 70
         }
     },
 
@@ -116,6 +116,7 @@ var roadSpec = {
 };
 
 var Game = exports.Game = function () {
+    console.log(document.getElementById('debug'));
     var road = new Road({
         texturePath: conf.Images.test_texture,
         roadSpec: roadSpec
@@ -132,26 +133,7 @@ var Game = exports.Game = function () {
         });
     });
 
-    this.car = road.addCar(2, {
-        image: 'shrub01',
-        road: road,
-        distance: 2,
-        height: 32,
-        width: 32,
-        position: 0
-    });
-
     this.cont = new GameController();
-    var bike = new Biker({
-        x:120,
-        y:150,
-        width:64,
-        height:70,
-        spriteSheet: new animate.SpriteSheet(
-            gamejs.image.load(conf.Images.biker),
-            64,
-            70)
-    });
 
     this.paused = false;
 
@@ -163,7 +145,16 @@ var Game = exports.Game = function () {
         image_path: conf.Images.bg_toronto
     });
 
-    this.scene.pushEntity(bike);
+    this.d = new Driver({
+        image: gamejs.image.load(conf.Images.shrub01),
+        road: road,
+        distance: 2,
+        height: 32,
+        width: 32,
+        position: 0
+    });
+
+    this.scene.camera.follow(this.d);
 
     this.initialize();
 };
@@ -195,6 +186,14 @@ Game.prototype.initialize = function() {
             console.log(game.scene.road.currentAngle);
         },
         cancel: function() {
+        },
+
+        left_boost: function() {
+            game.d.left_boost_on();
+        },
+
+        right_boost: function() {
+            game.d.right_boost_on();
         }
     };
 
@@ -209,6 +208,14 @@ Game.prototype.initialize = function() {
 
         up: function() {
             game.scene.slow();
+        },
+
+        left_boost: function() {
+            game.d.left_boost_off();
+        },
+
+        right_boost: function() {
+            game.d.right_boost_off();
         }
     }
 
@@ -219,7 +226,6 @@ Game.prototype.draw = function(surface) {
 };
 
 Game.prototype.event = function(ev) {
-    
     var key = this.cont.handle(ev);
 
     if (key) {
@@ -228,6 +234,23 @@ Game.prototype.event = function(ev) {
         }
         if (key.action == 'keyUp') {
             this.controlMapUp[key.label]();
+        }
+    } else {
+        if (ev.key === 191) {
+            // Right boost
+            if (ev.type === 1) {
+                this.controlMapDown['right_boost']();
+            } else if (ev.type === 2) {
+                this.controlMapUp['right_boost']();
+            }
+        }
+        if (ev.key == 90) {
+            // Left boost
+            if (ev.type === 1) {
+                this.controlMapDown['left_boost']();
+            } else if (ev.type === 2) {
+                this.controlMapUp['left_boost']();
+            }
         }
     }
 };
@@ -238,7 +261,7 @@ Game.prototype.update = function(dt) {
     this.scene.update(dt);
 };
 
-},{"./biker":1,"./conf":2,"./road":50,"./roadscene":51,"gramework":5,"underscore":49}],4:[function(require,module,exports){
+},{"./conf":1,"./driver":2,"./road":50,"./roadscene":51,"gramework":5,"underscore":49}],4:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     Game = require('./game').Game,
     Dispatcher = require('gramework').Dispatcher,
@@ -272,7 +295,7 @@ var images = Object.keys(conf.Images).map(function(img) {
 gramework.init();
 gamejs.preload(images);
 gamejs.ready(main);
-},{"./conf":2,"./game":3,"gramework":5}],5:[function(require,module,exports){
+},{"./conf":1,"./game":3,"gramework":5}],5:[function(require,module,exports){
 var gamejs = require('gamejs'),
     inherits = require('super');
 
@@ -8772,7 +8795,7 @@ Road.prototype = {
         this.roadObjects.push(roadObject);
     },
 
-    addCar: function(distance, options) {
+    addCar: function(distance, roadObject) {
         if (options.image in this.images == false){
             // Image not yet stored, must load
             this.images[options.image] = gamejs.image.load(conf.Images[options.image]);
@@ -9174,7 +9197,7 @@ var Car = exports.Car = RoadObject.extend({
         this.accel = 0.001;
     }
 });
-},{"./conf":2,"gramework":5,"underscore":49}],51:[function(require,module,exports){
+},{"./conf":1,"gramework":5,"underscore":49}],51:[function(require,module,exports){
 var Scene = require('gramework').Scene,
     gamejs = require('gramework').gamejs,
     _ = require('underscore');
@@ -9256,11 +9279,12 @@ _.extend(Camera.prototype, {
         this.tilt = 0;
         this.center = options.center || 0;
         this.angle = options.angle || 0;
-        this.speed = options.speed || {x: 0, y: 0, z: 0.05};
+        this.speed = options.speed || {x: 0, y: 0, z: 0};
         this.accel = options.accel || {x: 0, y: 0, z: 0};
         this.view = new gamejs.Surface(new gamejs.Rect([0, 0], [dimensions.width, dimensions.height]));
         this.outView = this.view.clone();
         this.background = options.background;
+        this._follow;
     },
 
     setAngle: function(angle) {
@@ -9299,7 +9323,15 @@ _.extend(Camera.prototype, {
         this.speed.z = speed;
     },
 
+    follow: function(roadObject) {
+        this._follow = roadObject;
+    },
+
     update: function(dt) {
+        if (this._follow) {
+            this.speed.z = ((this._follow.distance - 1) - this.distance)/ 10;
+        }
+
         this.setXSpeed(this.speed.x + this.accel.x);
         this.setYSpeed(this.speed.y + this.accel.y);
         this.setZSpeed(this.speed.z + this.accel.z);
