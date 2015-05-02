@@ -28,3 +28,4 @@ node_modules
 
 # Them zip files
 *.zip
+.DS_STORE

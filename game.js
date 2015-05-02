@@ -12,18 +12,20 @@ var gamejs = require('gramework').gamejs,
 var roadSpec = {
     turns: {
         
-        5: {
+        20: {
             angle: 70,
-            end: 15
+            end: 25
         },
 
     },
 
     hills: {
-        10: {
-            height: 300,
-            end: 70
+        
+        0: {
+            height: 1200,
+            end: 300
         }
+        
     },
 
     roadObjects: []
@@ -63,8 +65,8 @@ var Game = exports.Game = function () {
         spriteSheet: gamejs.image.load(conf.Images.player_cart),
         road: road,
         distance: 2,
-        height: 32,
-        width: 52,
+        height: 48,
+        width: 78,
         position: 0
     });
 

@@ -130,8 +130,8 @@ _.extend(Camera.prototype, {
     update: function(dt) {
         if (this._follow) {
             this.speed.z = ((this._follow.distance - 1) - this.distance)/ 10;
+            this.speed.x = ((this._follow.position) - this.center);
         }
-
         this.setXSpeed(this.speed.x + this.accel.x);
         this.setYSpeed(this.speed.y + this.accel.y);
         this.setZSpeed(this.speed.z + this.accel.z);

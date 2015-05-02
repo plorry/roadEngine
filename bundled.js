@@ -7,7 +7,7 @@ var Images = exports.Images = {
     hHouse01: './assets/house01.png',
     shrub01: './assets/shrub01.png',
     tree01: './assets/tree01.png',
-    test_texture: './assets/test_texture.png',
+    test_texture: './assets/road-texture.png',
     player_cart: './assets/player-sprite.png'
 };
 
@@ -24,7 +24,7 @@ var DRAG_FACTOR = 0.01;
 var Driver = exports.Driver = RoadObject.extend({
     initialize: function(options) {
         Driver.super_.prototype.initialize.apply(this, arguments);
-        this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 26, 16);
+        this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 78, 48);
         var anim_angles = {};
         _.range(-6,6).forEach(function(num) {
             anim_angles[num] = {
@@ -41,17 +41,19 @@ var Driver = exports.Driver = RoadObject.extend({
         this.angularSpeed = 0;
         this.rotates = true;
         this.animationMap = [
-            {range: [-90, -75], anim: -5},
-            {range: [-75, -60], anim: -4},
-            {range: [-60, -45], anim: -3},
-            {range: [-45, -30], anim: -2},
-            {range: [-30,-15], anim: -1},
-            {range: [-15, 15], anim: 0},
-            {range: [15, 30], anim: 1},
-            {range: [30, 45], anim: 2},
-            {range: [45, 60], anim: 3},
-            {range: [60, 75], anim: 4},
-            {range: [75, 90], anim: 5}
+            {range: [-90, -80], anim: -6},
+            {range: [-80, -65], anim: -5},
+            {range: [-65, -50], anim: -4},
+            {range: [-50, -35], anim: -3},
+            {range: [-35, -20], anim: -2},
+            {range: [-20,-7], anim: -1},
+            {range: [-7, 7], anim: 0},
+            {range: [7, 20], anim: 1},
+            {range: [20, 35], anim: 2},
+            {range: [35, 50], anim: 3},
+            {range: [50, 65], anim: 4},
+            {range: [65, 80], anim: 5}
+            //{range: [80, 90], anim: 6}
         ];
     },
 
@@ -90,7 +92,7 @@ var Driver = exports.Driver = RoadObject.extend({
         this.angularSpeed = 0;
 
         if (this.road.getAltitudeAt(this.distance) > 0) {
-            this.accel += 0.001;
+            this.accel += (0.001 * Math.cos(this.angle));
         }
 
         if (this.left_boost) {
@@ -115,13 +117,13 @@ var Driver = exports.Driver = RoadObject.extend({
         if (this.speed < 0) {
             this.speed = 0;
         }
+        this.angle -= (this.speed * (Math.cos(this.angle))) * this.road.getAngleRateAt(this.distance);
         this.angle += this.angularSpeed;
-        if (this.angle > Math.PI) {
-            this.angle -= 2 * Math.PI;
-        } if (this.angle < -Math.PI) {
-            this.angle += 2 * Math.PI;
+        if (this.angle > Math.PI / 2) {
+            this.angle = Math.PI /2;
+        } if (this.angle < -Math.PI / 2) {
+            this.angle = -Math.PI/2;
         }
-        document.getElementById('debug').innerHTML = this.angleToCamera * (180 / Math.PI);
         this.distance += this.speed * (Math.cos(this.angle));
         this.position += (this.speed * (Math.sin(this.angle))) * 100;
     }
@@ -141,18 +143,20 @@ var gamejs = require('gramework').gamejs,
 var roadSpec = {
     turns: {
         
-        5: {
+        20: {
             angle: 70,
-            end: 15
+            end: 25
         },
 
     },
 
     hills: {
-        10: {
-            height: 300,
-            end: 70
+        
+        0: {
+            height: 1200,
+            end: 300
         }
+        
     },
 
     roadObjects: []
@@ -192,8 +196,8 @@ var Game = exports.Game = function () {
         spriteSheet: gamejs.image.load(conf.Images.player_cart),
         road: road,
         distance: 2,
-        height: 32,
-        width: 52,
+        height: 48,
+        width: 78,
         position: 0
     });
 
@@ -8894,8 +8898,15 @@ Road.prototype = {
         return angle * 0.017;
     },
     */
-    getDeltaAngle: function() {
-        return this.lineProperties[1].angle - this.lineProperties[0].angle || 0;
+    getAngleRateAt: function(distance) {
+        var angle = 0;
+        for (d in this.upcomingTurns) {
+            if (distance > d && distance < turn.end) {
+                angle = turn.angle / (turn.end - d);
+            }
+        }
+        // console.log(angle);
+        return angle * 0.017;
     },
 
     getAngleAt: function(distance, cameraDistance) {
@@ -9072,6 +9083,7 @@ Road.prototype = {
         this.upcomingTurns = this.collectTurns(camera.distance);
         this.upcomingHills = this.collectHills(camera.distance);
         this.cameraOffset = (Math.tan(camera.angle) * ANGLE_SCALE_CONSTANT);
+        document.getElementById('debug').innerHTML = this.getAngleRateAt(camera.distance);
         this.lines.forEach(function(line) {
             line.update(dt, camera);
         });
@@ -9213,7 +9225,7 @@ Line.prototype = {
                     var thisHeight = this.height + stepNum;
                     var thisWidth = this.road.getWidthAt(thisDistance) * 40 / thisDiffDistance
                     var sliceLength = thisDiffDistance - this.diffDistance;
-                    //this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
+                    this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
                     var destRect = new gamejs.Rect([(this.road.displayWidth/2) - thisWidth - this.offset
                         + (100 / thisDiffDistance), thisHeight], [thisWidth * 2, 1]);
                     camera.view.blit(sliceImage, destRect);
@@ -9380,8 +9392,8 @@ _.extend(Camera.prototype, {
     update: function(dt) {
         if (this._follow) {
             this.speed.z = ((this._follow.distance - 1) - this.distance)/ 10;
+            this.speed.x = ((this._follow.position) - this.center);
         }
-
         this.setXSpeed(this.speed.x + this.accel.x);
         this.setYSpeed(this.speed.y + this.accel.y);
         this.setZSpeed(this.speed.z + this.accel.z);

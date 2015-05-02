@@ -182,8 +182,15 @@ Road.prototype = {
         return angle * 0.017;
     },
     */
-    getDeltaAngle: function() {
-        return this.lineProperties[1].angle - this.lineProperties[0].angle || 0;
+    getAngleRateAt: function(distance) {
+        var angle = 0;
+        for (d in this.upcomingTurns) {
+            if (distance > d && distance < turn.end) {
+                angle = turn.angle / (turn.end - d);
+            }
+        }
+        // console.log(angle);
+        return angle * 0.017;
     },
 
     getAngleAt: function(distance, cameraDistance) {
@@ -360,6 +367,7 @@ Road.prototype = {
         this.upcomingTurns = this.collectTurns(camera.distance);
         this.upcomingHills = this.collectHills(camera.distance);
         this.cameraOffset = (Math.tan(camera.angle) * ANGLE_SCALE_CONSTANT);
+        document.getElementById('debug').innerHTML = this.getAngleRateAt(camera.distance);
         this.lines.forEach(function(line) {
             line.update(dt, camera);
         });
@@ -501,7 +509,7 @@ Line.prototype = {
                     var thisHeight = this.height + stepNum;
                     var thisWidth = this.road.getWidthAt(thisDistance) * 40 / thisDiffDistance
                     var sliceLength = thisDiffDistance - this.diffDistance;
-                    //this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
+                    this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
                     var destRect = new gamejs.Rect([(this.road.displayWidth/2) - thisWidth - this.offset
                         + (100 / thisDiffDistance), thisHeight], [thisWidth * 2, 1]);
                     camera.view.blit(sliceImage, destRect);

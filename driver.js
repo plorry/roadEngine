@@ -7,7 +7,7 @@ var DRAG_FACTOR = 0.01;
 var Driver = exports.Driver = RoadObject.extend({
     initialize: function(options) {
         Driver.super_.prototype.initialize.apply(this, arguments);
-        this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 26, 16);
+        this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 78, 48);
         var anim_angles = {};
         _.range(-6,6).forEach(function(num) {
             anim_angles[num] = {
@@ -24,17 +24,19 @@ var Driver = exports.Driver = RoadObject.extend({
         this.angularSpeed = 0;
         this.rotates = true;
         this.animationMap = [
-            {range: [-90, -75], anim: -5},
-            {range: [-75, -60], anim: -4},
-            {range: [-60, -45], anim: -3},
-            {range: [-45, -30], anim: -2},
-            {range: [-30,-15], anim: -1},
-            {range: [-15, 15], anim: 0},
-            {range: [15, 30], anim: 1},
-            {range: [30, 45], anim: 2},
-            {range: [45, 60], anim: 3},
-            {range: [60, 75], anim: 4},
-            {range: [75, 90], anim: 5}
+            {range: [-90, -80], anim: -6},
+            {range: [-80, -65], anim: -5},
+            {range: [-65, -50], anim: -4},
+            {range: [-50, -35], anim: -3},
+            {range: [-35, -20], anim: -2},
+            {range: [-20,-7], anim: -1},
+            {range: [-7, 7], anim: 0},
+            {range: [7, 20], anim: 1},
+            {range: [20, 35], anim: 2},
+            {range: [35, 50], anim: 3},
+            {range: [50, 65], anim: 4},
+            {range: [65, 80], anim: 5}
+            //{range: [80, 90], anim: 6}
         ];
     },
 
@@ -73,7 +75,7 @@ var Driver = exports.Driver = RoadObject.extend({
         this.angularSpeed = 0;
 
         if (this.road.getAltitudeAt(this.distance) > 0) {
-            this.accel += 0.001;
+            this.accel += (0.001 * Math.cos(this.angle));
         }
 
         if (this.left_boost) {
@@ -98,13 +100,13 @@ var Driver = exports.Driver = RoadObject.extend({
         if (this.speed < 0) {
             this.speed = 0;
         }
+        this.angle -= (this.speed * (Math.cos(this.angle))) * this.road.getAngleRateAt(this.distance);
         this.angle += this.angularSpeed;
-        if (this.angle > Math.PI) {
-            this.angle -= 2 * Math.PI;
-        } if (this.angle < -Math.PI) {
-            this.angle += 2 * Math.PI;
+        if (this.angle > Math.PI / 2) {
+            this.angle = Math.PI /2;
+        } if (this.angle < -Math.PI / 2) {
+            this.angle = -Math.PI/2;
         }
-        document.getElementById('debug').innerHTML = this.angleToCamera * (180 / Math.PI);
         this.distance += this.speed * (Math.cos(this.angle));
         this.position += (this.speed * (Math.sin(this.angle))) * 100;
     }
