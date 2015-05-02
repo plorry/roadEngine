@@ -1,6 +1,7 @@
 var animate = require('gramework').animate,
     _ = require('underscore'),
-    RoadObject = require('./road').RoadObject;
+    RoadObject = require('./road').RoadObject,
+    Car = require('./road').Car;
 
 var DRAG_FACTOR = 0.01;
 
@@ -11,7 +12,7 @@ var Driver = exports.Driver = RoadObject.extend({
         var anim_angles = {};
         _.range(-6,6).forEach(function(num) {
             anim_angles[num] = {
-                frames: [(num * 2) + 12], rate: 15, loop: true
+                frames: [(num) + 6], rate: 15, loop: true
             };
         });
         this.anim = new animate.Animation(this.spriteSheet, 0, anim_angles);
@@ -29,9 +30,9 @@ var Driver = exports.Driver = RoadObject.extend({
             {range: [-65, -50], anim: -4},
             {range: [-50, -35], anim: -3},
             {range: [-35, -20], anim: -2},
-            {range: [-20,-7], anim: -1},
-            {range: [-7, 7], anim: 0},
-            {range: [7, 20], anim: 1},
+            {range: [-20,-10], anim: -1},
+            {range: [-10, 10], anim: 0},
+            {range: [10, 20], anim: 1},
             {range: [20, 35], anim: 2},
             {range: [35, 50], anim: 3},
             {range: [50, 65], anim: 4},
@@ -107,5 +108,16 @@ var Driver = exports.Driver = RoadObject.extend({
         }
         this.distance += this.speed * (Math.cos(this.angle));
         this.position += (this.speed * (Math.sin(this.angle))) * 100;
+    }
+});
+
+
+var Enemy = exports.Enemy = Car.extend({
+    initialize: function(options) {
+        Enemy.super_.prototype.initialize.apply(this, arguments);
+    },
+
+    update: function(dt) {
+        Enemy.super_.prototype.update.apply(this, arguments);
     }
 });

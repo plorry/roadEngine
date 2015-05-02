@@ -1,7 +1,18 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var RoadScene = require('./roadscene').RoadScene,
+    gamejs = require('gramework').gamejs,
+    Enemy = require('./driver').Enemy,
+    _ = require('underscore');
+
+
+var CartScene = exports.CartScene = RoadScene.extend({
+
+});
+
+},{"./driver":3,"./roadscene":52,"gramework":6,"underscore":50}],2:[function(require,module,exports){
 var Images = exports.Images = {
     bike_lane: './assets/bike_lane.png',
-    bg_toronto: './assets/toronto.jpg',
+    background: './assets/background.png',
     biker: './assets/bike_test.png',
     cityhall: './assets/city_hall.png',
     hHouse01: './assets/house01.png',
@@ -14,10 +25,11 @@ var Images = exports.Images = {
 var globals = exports.globals = {
     fps: 30
 };
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 var animate = require('gramework').animate,
     _ = require('underscore'),
-    RoadObject = require('./road').RoadObject;
+    RoadObject = require('./road').RoadObject,
+    Car = require('./road').Car;
 
 var DRAG_FACTOR = 0.01;
 
@@ -28,7 +40,7 @@ var Driver = exports.Driver = RoadObject.extend({
         var anim_angles = {};
         _.range(-6,6).forEach(function(num) {
             anim_angles[num] = {
-                frames: [(num * 2) + 12], rate: 15, loop: true
+                frames: [(num) + 6], rate: 15, loop: true
             };
         });
         this.anim = new animate.Animation(this.spriteSheet, 0, anim_angles);
@@ -46,9 +58,9 @@ var Driver = exports.Driver = RoadObject.extend({
             {range: [-65, -50], anim: -4},
             {range: [-50, -35], anim: -3},
             {range: [-35, -20], anim: -2},
-            {range: [-20,-7], anim: -1},
-            {range: [-7, 7], anim: 0},
-            {range: [7, 20], anim: 1},
+            {range: [-20,-10], anim: -1},
+            {range: [-10, 10], anim: 0},
+            {range: [10, 20], anim: 1},
             {range: [20, 35], anim: 2},
             {range: [35, 50], anim: 3},
             {range: [50, 65], anim: 4},
@@ -126,10 +138,22 @@ var Driver = exports.Driver = RoadObject.extend({
         this.position += (this.speed * (Math.sin(this.angle))) * 100;
     }
 });
-},{"./road":50,"gramework":5,"underscore":49}],3:[function(require,module,exports){
+
+
+var Enemy = exports.Enemy = Car.extend({
+    initialize: function(options) {
+        Enemy.super_.prototype.initialize.apply(this, arguments);
+    },
+
+    update: function(dt) {
+        Enemy.super_.prototype.update.apply(this, arguments);
+    }
+});
+
+},{"./road":51,"gramework":6,"underscore":50}],4:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     conf = require('./conf'),
-    RoadScene = require('./roadscene').RoadScene,
+    CartScene = require('./cart_scene').CartScene,
     GameController = require('gramework').input.GameController,
     animate = require('gramework').animate,
     Road = require('./road').Road,
@@ -141,27 +165,21 @@ var gamejs = require('gramework').gamejs,
 var roadSpec = {
     turns: {
         
-        21: {
+        31: {
             angle: 70,
-            end: 27
-        },
-
-        51: {
-            angle: -70,
-            end: 57
+            end: 37
         }
     },
 
     hills: {
-        
-        0: {
-            height: 70,
-            end: 20
+        2: {
+            height: -40,
+            end: 30
         },
 
         30: {
-            height: 70,
-            end: 50
+            height: 30,
+            end: 35
         }
     },
 
@@ -190,12 +208,12 @@ var Game = exports.Game = function () {
 
     this.paused = false;
 
-    this.scene = new RoadScene({
+    this.scene = new CartScene({
         width:320,
         height:220,
         pixelScale: 2,
         road: road,
-        image_path: conf.Images.bg_toronto
+        image_path: conf.Images.background
     });
 
     this.d = new Driver({
@@ -312,10 +330,10 @@ Game.prototype.event = function(ev) {
 Game.prototype.update = function(dt) {
     if (dt > 1000 / 3) dt = 1000 / 3;
     this.scene.update(dt);
-    document.getElementById('debug').innerHTML = 1 / (dt / 1000);
+    document.getElementById('debug').innerHTML = Math.floor(1 / (dt / 1000)) + 'fps';
 };
 
-},{"./conf":1,"./driver":2,"./road":50,"./roadscene":51,"gramework":5,"underscore":49}],4:[function(require,module,exports){
+},{"./cart_scene":1,"./conf":2,"./driver":3,"./road":51,"gramework":6,"underscore":50}],5:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     Game = require('./game').Game,
     Dispatcher = require('gramework').Dispatcher,
@@ -349,7 +367,7 @@ var images = Object.keys(conf.Images).map(function(img) {
 gramework.init();
 gamejs.preload(images);
 gamejs.ready(main);
-},{"./conf":1,"./game":3,"gramework":5}],5:[function(require,module,exports){
+},{"./conf":2,"./game":4,"gramework":6}],6:[function(require,module,exports){
 var gamejs = require('gamejs'),
     inherits = require('super');
 
@@ -387,7 +405,7 @@ module.exports = {
 //TODO: Kill this in favour of Entity
 //exports.actors = require('./gramework/actors');
 
-},{"./gramework/animate":6,"./gramework/camera":7,"./gramework/dispatcher":8,"./gramework/entity":9,"./gramework/image":10,"./gramework/input":11,"./gramework/layers":12,"./gramework/particles":13,"./gramework/scenes":14,"./gramework/state":15,"./gramework/tilemap":16,"./gramework/uielements":17,"./gramework/vectors":18,"gamejs":19,"super":47}],6:[function(require,module,exports){
+},{"./gramework/animate":7,"./gramework/camera":8,"./gramework/dispatcher":9,"./gramework/entity":10,"./gramework/image":11,"./gramework/input":12,"./gramework/layers":13,"./gramework/particles":14,"./gramework/scenes":15,"./gramework/state":16,"./gramework/tilemap":17,"./gramework/uielements":18,"./gramework/vectors":19,"gamejs":20,"super":48}],7:[function(require,module,exports){
 var gamejs = require('gamejs'),
     inherits = require('super'),
     _ = require('underscore');
@@ -507,7 +525,7 @@ Animation.prototype.isFinished = function() {
     return this._isFinished;
 };
 
-},{"gamejs":19,"super":47,"underscore":48}],7:[function(require,module,exports){
+},{"gamejs":20,"super":48,"underscore":49}],8:[function(require,module,exports){
 /*
  * Create a camera around a display.
  *
@@ -680,7 +698,7 @@ _.extend(Camera.prototype, {
     }
 });
 
-},{"gamejs":19,"underscore":48}],8:[function(require,module,exports){
+},{"gamejs":20,"underscore":49}],9:[function(require,module,exports){
 /*global document*/
 var _ = require('underscore'),
     inherits = require('super'),
@@ -793,7 +811,7 @@ _.extend(Dispatcher.prototype, {
     }
 });
 
-},{"./state":15,"super":47,"underscore":48}],9:[function(require,module,exports){
+},{"./state":16,"super":48,"underscore":49}],10:[function(require,module,exports){
 // A stripped down, simpler Actors module.
 var gamejs = require('gamejs'),
     inherits = require('super'),
@@ -850,14 +868,14 @@ Entity.prototype.setPos = function(x, y) {
     this.rect.y = y;
 };
 
-},{"gamejs":19,"super":47}],10:[function(require,module,exports){
+},{"gamejs":20,"super":48}],11:[function(require,module,exports){
 var gamejs = require('gamejs');
 
 var imgfy = exports.imgfy = function(path) {
     return gamejs.image.load(path);
 };
 
-},{"gamejs":19}],11:[function(require,module,exports){
+},{"gamejs":20}],12:[function(require,module,exports){
 var gamejs = require('gamejs'),
     inherits = require('super'),
     Vec2d = require('./vectors').Vec2d,
@@ -956,7 +974,7 @@ GameController.prototype.movementVector = function() {
     return vel.normalized();
 };
 
-},{"./vectors":18,"gamejs":19,"super":47,"underscore":48}],12:[function(require,module,exports){
+},{"./vectors":19,"gamejs":20,"super":48,"underscore":49}],13:[function(require,module,exports){
 var imgfy = require('./image').imgfy;
 
 // Use for repeating Backgrounds on a screen, adjust speed
@@ -990,7 +1008,7 @@ Scrollable.prototype = {
     }
 };
 
-},{"./image":10}],13:[function(require,module,exports){
+},{"./image":11}],14:[function(require,module,exports){
 var gamejs = require('gamejs');
 
 var Particle = exports.Particle = function(position, options) {
@@ -1081,7 +1099,7 @@ Emitter.prototype.draw = function(surface) {
     }, this);
 };
 
-},{"gamejs":19}],14:[function(require,module,exports){
+},{"gamejs":20}],15:[function(require,module,exports){
 var gamejs = require('gamejs'),
     inherits = require('super'),
     Camera = require('./camera'),
@@ -1199,7 +1217,7 @@ _.extend(Scene.prototype, {
     }
 });
 
-},{"./camera":7,"gamejs":19,"super":47,"underscore":48}],15:[function(require,module,exports){
+},{"./camera":8,"gamejs":20,"super":48,"underscore":49}],16:[function(require,module,exports){
 var gamejs = require('gamejs'),
     inherits = require('super');
 
@@ -1262,7 +1280,7 @@ module.exports = {
     FadeTransition: FadeTransition
 };
 
-},{"gamejs":19,"super":47}],16:[function(require,module,exports){
+},{"gamejs":20,"super":48}],17:[function(require,module,exports){
 /*jshint es5:true */
 /*
  * Tilemap module.
@@ -1428,7 +1446,7 @@ module.exports = {
     TileMap: TileMap
 };
 
-},{"gamejs":19,"super":47,"underscore":48}],17:[function(require,module,exports){
+},{"gamejs":20,"super":48,"underscore":49}],18:[function(require,module,exports){
 /*jshint es5:true */
 /*
  * Interface Entity module.
@@ -1905,7 +1923,7 @@ SliderWidget.prototype.init = function(options){
 };
 */
 
-},{"./entity":9,"gamejs":19,"super":47,"underscore":48}],18:[function(require,module,exports){
+},{"./entity":10,"gamejs":20,"super":48,"underscore":49}],19:[function(require,module,exports){
 /*jslint es5: true*/
 /*
  * Vector Utilities
@@ -2082,7 +2100,7 @@ Vec2d.prototype = {
 };
 
 
-},{"gamejs":19,"underscore":48}],19:[function(require,module,exports){
+},{"gamejs":20,"underscore":49}],20:[function(require,module,exports){
 var matrix = require('./gamejs/utils/matrix');
 var objects = require('./gamejs/utils/objects');
 var Callback = require('./gamejs/callback').Callback;
@@ -3068,7 +3086,7 @@ exports.onEvent = function(fn, scope) {
 exports.onTick = function(fn, scope) {
   exports.time._CALLBACK = new Callback(fn, scope);
 };
-},{"./gamejs/callback":20,"./gamejs/display":21,"./gamejs/draw":22,"./gamejs/event":23,"./gamejs/font":24,"./gamejs/http":25,"./gamejs/image":26,"./gamejs/mask":27,"./gamejs/mixer":28,"./gamejs/noise":29,"./gamejs/pathfinding/astar":30,"./gamejs/sprite":31,"./gamejs/surfacearray":32,"./gamejs/time":33,"./gamejs/tmx":34,"./gamejs/transform":35,"./gamejs/utils/arrays":36,"./gamejs/utils/base64":37,"./gamejs/utils/math":39,"./gamejs/utils/matrix":40,"./gamejs/utils/objects":41,"./gamejs/utils/prng":42,"./gamejs/utils/uri":43,"./gamejs/utils/vectors":44,"./gamejs/worker":45,"./gamejs/xml":46}],20:[function(require,module,exports){
+},{"./gamejs/callback":21,"./gamejs/display":22,"./gamejs/draw":23,"./gamejs/event":24,"./gamejs/font":25,"./gamejs/http":26,"./gamejs/image":27,"./gamejs/mask":28,"./gamejs/mixer":29,"./gamejs/noise":30,"./gamejs/pathfinding/astar":31,"./gamejs/sprite":32,"./gamejs/surfacearray":33,"./gamejs/time":34,"./gamejs/tmx":35,"./gamejs/transform":36,"./gamejs/utils/arrays":37,"./gamejs/utils/base64":38,"./gamejs/utils/math":40,"./gamejs/utils/matrix":41,"./gamejs/utils/objects":42,"./gamejs/utils/prng":43,"./gamejs/utils/uri":44,"./gamejs/utils/vectors":45,"./gamejs/worker":46,"./gamejs/xml":47}],21:[function(require,module,exports){
 /**
  * Manage a callback with scope
  */
@@ -3082,7 +3100,7 @@ var Callback = exports.Callback = function(fn, scope) {
 Callback.prototype.trigger = function() {
 	this.fn.apply(this.fnScope, arguments);
 };
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var Surface = require('../gamejs').Surface;
 
 /**
@@ -3339,7 +3357,7 @@ var getSurface = exports.getSurface = function() {
    return SURFACE;
 };
 
-},{"../gamejs":19,"./event":23}],22:[function(require,module,exports){
+},{"../gamejs":20,"./event":24}],23:[function(require,module,exports){
 /**
  * @fileoverview Utilities for drawing geometrical objects to Surfaces. If you want to put images on
  * the screen see gamejs/image.
@@ -3591,7 +3609,7 @@ exports.bezierCurve = function(surface, color, startPos, endPos, ct1Pos, ct2Pos,
 
    ctx.restore();
 };
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var display = require('./display');
 var Callback = require('./callback').Callback;
 
@@ -3860,7 +3878,7 @@ exports.init = function() {
 
 };
 
-},{"./callback":20,"./display":21}],24:[function(require,module,exports){
+},{"./callback":21,"./display":22}],25:[function(require,module,exports){
 var Surface = require('../gamejs').Surface;
 var objects = require('./utils/objects');
 
@@ -3951,7 +3969,7 @@ objects.accessors(Font.prototype, {
 
 });
 
-},{"../gamejs":19,"./utils/objects":41}],25:[function(require,module,exports){
+},{"../gamejs":20,"./utils/objects":42}],26:[function(require,module,exports){
 /**
  * @fileoverview Make synchronous http requests to your game's serverside component.
  *
@@ -4069,7 +4087,7 @@ exports.save = function(url, data, type) {
    return stringify(post(ajaxBaseHref() + url, {payload: data}, type));
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var gamejs = require('../gamejs');
 
 /**
@@ -4202,7 +4220,7 @@ var addToCache = function(img) {
    return;
 };
 
-},{"../gamejs":19}],27:[function(require,module,exports){
+},{"../gamejs":20}],28:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var objects = require('./utils/objects');
 
@@ -4454,7 +4472,7 @@ objects.accessors(Mask.prototype, {
    }
 });
 
-},{"../gamejs":19,"./utils/objects":41}],28:[function(require,module,exports){
+},{"../gamejs":20,"./utils/objects":42}],29:[function(require,module,exports){
 var gamejs = require('../gamejs');
 
 /**
@@ -4649,7 +4667,7 @@ exports.Sound = function Sound(uriOrAudio) {
    return this;
 };
 
-},{"../gamejs":19}],29:[function(require,module,exports){
+},{"../gamejs":20}],30:[function(require,module,exports){
 /**
  * @fileoverview
  * A noise generator comparable to Perlin noise, which is useful
@@ -4875,7 +4893,7 @@ Simplex.prototype.get3d = function(xin, yin, zin) {
   return 32.0*(n0 + n1 + n2 + n3);
 };
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /**
  * @fileoverview
  * AStar Path finding algorithm
@@ -5033,7 +5051,7 @@ Map.prototype.actualDistance = function(pointA, pointB) {
    return 1;
 };
 
-},{"../utils/binaryheap":38}],31:[function(require,module,exports){
+},{"../utils/binaryheap":39}],32:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var arrays = require('./utils/arrays');
 var $o = require('./utils/objects');
@@ -5460,7 +5478,7 @@ exports.collideCircle = function(spriteA, spriteB) {
    return $v.distance(spriteA.rect.center, spriteB.rect.center) <= rA + rB;
 };
 
-},{"../gamejs":19,"./utils/arrays":36,"./utils/objects":41,"./utils/vectors":44}],32:[function(require,module,exports){
+},{"../gamejs":20,"./utils/arrays":37,"./utils/objects":42,"./utils/vectors":45}],33:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var accessors = require('./utils/objects').accessors;
 /**
@@ -5592,7 +5610,7 @@ var SurfaceArray = exports.SurfaceArray = function(surfaceOrDimensions) {
    return this;
 };
 
-},{"../gamejs":19,"./utils/objects":41}],33:[function(require,module,exports){
+},{"../gamejs":20,"./utils/objects":42}],34:[function(require,module,exports){
 /**
  * @fileoverview
  * Only used by GameJs internally to provide a game loop.
@@ -5642,7 +5660,7 @@ var perInterval = function() {
    return;
 };
 
-},{"./callback":20}],34:[function(require,module,exports){
+},{"./callback":21}],35:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var objects = require('./utils/objects');
 var xml = require('./xml');
@@ -5942,7 +5960,7 @@ var setProperties = function(object, node) {
    return object;
 };
 
-},{"../gamejs":19,"./utils/base64":37,"./utils/objects":41,"./utils/uri":43,"./xml":46}],35:[function(require,module,exports){
+},{"../gamejs":20,"./utils/base64":38,"./utils/objects":42,"./utils/uri":44,"./xml":47}],36:[function(require,module,exports){
 var Surface = require('../gamejs').Surface;
 var matrix = require('./utils/matrix');
 var math = require('./utils/math');
@@ -6047,7 +6065,7 @@ exports.flip = function(surface, flipHorizontal, flipVertical) {
    return newSurface;
 };
 
-},{"../gamejs":19,"./utils/math":39,"./utils/matrix":40,"./utils/vectors":44}],36:[function(require,module,exports){
+},{"../gamejs":20,"./utils/math":40,"./utils/matrix":41,"./utils/vectors":45}],37:[function(require,module,exports){
 /**
  * @fileoverview Utility functions for working with Obiects
  * @param {Object} item
@@ -6078,7 +6096,7 @@ exports.shuffle = function(array) {
     return array;
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 /**
  * @fileoverview
  * Base64 encode / decode
@@ -6139,7 +6157,7 @@ exports.decodeAsArray = function(input, bytes) {
    return array;
 }
 ;
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 /**
  * Binary Heap
  *
@@ -6295,7 +6313,7 @@ BinaryHeap.prototype.bubbleUp = function(idx) {
    return;
 };
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /**
  *
  * absolute angle to relative angle, in degrees
@@ -6364,7 +6382,7 @@ exports.centroid = function() {
    ];
 };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /**
  * @fileoverview Matrix manipulation, used by GameJs itself. You
  * probably do not need this unless you manipulate a Context's transformation
@@ -6456,7 +6474,7 @@ var scale = exports.scale = function(m1, svec) {
    return multiply(m1, [sx, 0, 0, sy, 0, 0]);
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /**
  * @fileoverview Utility functions for working with Objects
  */
@@ -6559,7 +6577,7 @@ exports.accessors = function(object, props) {
    return;
 };
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /**
  * @fileoverview A seedable random-number generator.
  *
@@ -6710,7 +6728,7 @@ exports.random = function() {
 exports.init = function(seed) {
   alea = new Alea(seed);
 };
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 /**
  * @fileoverview Utilies for URI handling.
  *
@@ -6828,7 +6846,7 @@ var removeDotSegments = function(path) {
    return out.join('/');
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 var math=require('./math');
 
 /**
@@ -6954,7 +6972,7 @@ exports.truncate = function(v, maxLength) {
    return v;
 };
 
-},{"./math":39}],45:[function(require,module,exports){
+},{"./math":40}],46:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var uri = require('./utils/uri');
 var Callback = require('./callback').Callback;
@@ -7179,7 +7197,7 @@ function guid(moduleId) {
    };
    return moduleId + '@' + (S4()+S4());
 }
-},{"../gamejs":19,"./callback":20,"./utils/uri":43}],46:[function(require,module,exports){
+},{"../gamejs":20,"./callback":21,"./utils/uri":44}],47:[function(require,module,exports){
 /**
  * @fileoverview
  *
@@ -7314,7 +7332,7 @@ Document.fromURL = function(url) {
    return new Document(response.responseXML);
 };
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 /**
  * slice
  */
@@ -7440,7 +7458,7 @@ exports.merge = function (arr) {
   return main;
 };
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 //     Underscore.js 1.5.2
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -8718,9 +8736,9 @@ exports.merge = function (arr) {
 
 }).call(this);
 
-},{}],49:[function(require,module,exports){
-module.exports=require(48)
 },{}],50:[function(require,module,exports){
+module.exports=require(49)
+},{}],51:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     Entity = require('gramework').Entity,
     _ = require('underscore'),
@@ -9167,18 +9185,10 @@ Line.prototype = {
         this.angle = this.road.getAngleAt(this.distance, camera.distance);
         this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo)) / this.diffDistance) + (this.road.cameraOffset);
 
-        // NextLine properties
-        // if (!this.temporary) {
-            //this.nextLine = this.road.lineProperties[this.lineNo - 1];
-            //if (this.nextLine) {
-                this.nextDistance = camera.distance + this.nextDiffDistance;
-                this.nextAltitude = this.road.getAltitudeAt(this.nextDistance);
-                this.nextHeight = camera.horizon - (this.lineNo - 1) + Math.floor((this.nextAltitude - camera.height - this.road.getAltitudeAt(camera.distance)) / this.nextDiffDistance);
-            //} else {
-                // this.nextDistance = 0;
-                // this.nextAltitude = 0;
-                // this.nextHeight = 0;
-            //}
+        this.nextDistance = camera.distance + this.nextDiffDistance;
+        this.nextAltitude = this.road.getAltitudeAt(this.nextDistance);
+        this.nextHeight = camera.horizon - (this.lineNo - 1) + Math.floor((this.nextAltitude - camera.height - this.road.getAltitudeAt(camera.distance)) / this.nextDiffDistance);
+
         if (this.temporary) {
             this.height = this.parentHeight;
         }
@@ -9190,9 +9200,6 @@ Line.prototype = {
             var numSteps = this.nextHeight - this.height;
             var deltaDistance = this.nextDistance - this.distance;
             var increment = 1 / numSteps;
-            // console.log(numSteps);
-            // console.log(increment);
-            // console.log(numSteps);
             _.range(numSteps).forEach(function(stepNum) {
                 
                 var lineNo = this.lineNo - ((stepNum + 1) * increment);
@@ -9204,23 +9211,7 @@ Line.prototype = {
                     temporary: true
                 });
                 tempLine.update(dt, camera);
-
-                // console.log(stepNum);
-
-                this.road.lines.push(tempLine);
-                
-                // var thisDiffDistance = 100 / (201 - (this.lineNo - (increment * stepNum)));
-                // var thisDistance = camera.distance + thisDiffDistance;
-                // var sliceImage = this.getLineSlice(thisDistance);
-                // var thisHeight = this.height + stepNum;
-                // var thisWidth = this.road.getWidthAt(thisDistance) * 40 / thisDiffDistance
-                // var sliceLength = thisDiffDistance - this.diffDistance;
-                // this.offset += (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT) / thisDiffDistance;
-                // this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
-                // var destRect = new gamejs.Rect([(this.road.displayWidth/2) - thisWidth - this.offset
-                    // + (100 / thisDiffDistance), thisHeight], [thisWidth * 2, 1]);
-                // camera.view.blit(sliceImage, destRect);
-                
+                this.road.lines.push(tempLine);            
             }, this);
         }
         
@@ -9228,12 +9219,6 @@ Line.prototype = {
     },
 
     draw: function(camera) {
-        // var angle = thisLine.angle;
-
-        // var height = 300 - this.lineNo + Math.floor(altitude / diffDistance);
-        // var width = thisLine.width * 40 / diffDistance;
-
-        //var offset = (camera.center + thisLine.angleOffset) / diffDistance;
         // Check roadObjects
         if (this.height > 320) {
             return;
@@ -9266,30 +9251,6 @@ Line.prototype = {
             var destRect = new gamejs.Rect([(this.road.displayWidth/2) - this.width - this.offset
                 + (100 / this.diffDistance), this.height], [this.width * 2, 1]);
             camera.view.blit(sliceImage, destRect);
-
-            // Do we have a large alt gap between this line and next?
-            /*
-            if (this.height < this.nextHeight + 1 && this.lineNo > 1) {
-                
-                var numSteps = this.nextHeight - this.height;
-                var deltaDistance = this.nextDistance - this.distance;
-                var increment = 1 / numSteps;
-                _.range(numSteps).forEach(function(stepNum) {
-                    var thisDiffDistance = 100 / (201 - (this.lineNo - (increment * stepNum)));
-                    var thisDistance = camera.distance + thisDiffDistance;
-                    var sliceImage = this.getLineSlice(thisDistance);
-                    var thisHeight = this.height + stepNum;
-                    var thisWidth = this.road.getWidthAt(thisDistance) * 40 / thisDiffDistance
-                    var sliceLength = thisDiffDistance - this.diffDistance;
-                    // this.offset += (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT) / thisDiffDistance;
-                    // this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
-                    var destRect = new gamejs.Rect([(this.road.displayWidth/2) - thisWidth - this.offset
-                        + (100 / thisDiffDistance), thisHeight], [thisWidth * 2, 1]);
-                    camera.view.blit(sliceImage, destRect);
-                }, this);
-                
-            }
-            */
         }
 
         if (!this.temporary) {
@@ -9311,16 +9272,18 @@ var Car = exports.Car = RoadObject.extend({
         this.accel = options.accel || 0;
     },
 
-    update: function(dt) {
+    update: function(dt, camera) {
         this.speed += this.accel;
         this.distance += this.speed;
+
+        Car.super_.prototype.update.apply(this, arguments);
     },
 
     accelerate: function() {
         this.accel = 0.001;
     }
 });
-},{"./conf":1,"gramework":5,"underscore":49}],51:[function(require,module,exports){
+},{"./conf":2,"gramework":6,"underscore":50}],52:[function(require,module,exports){
 var Scene = require('gramework').Scene,
     gamejs = require('gramework').gamejs,
     _ = require('underscore');
@@ -9374,7 +9337,8 @@ var RoadScene = exports.RoadScene = Scene.extend({
     update: function(dt) {
         this.road.update(dt, this.camera);
         this.camera.setHeightOffset(this.road.getAltitudeAt(this.camera.distance));
-        this.camera.setHorizon(300 - (this.road.getAltitudeRateAt(this.camera.distance) * 30));
+        this.camera.setHeight(-this.road.getAltitudeRateAt(this.camera.distance) * 5);
+        this.camera.setHorizon(300 - (this.road.getAltitudeRateAt(this.camera.distance) * 10));
         this.camera.update(dt);
         //this.camera.setAngle(this.road.getAngleAt(this.camera.distance));
         this.road.setDistance(this.distance);
@@ -9383,7 +9347,7 @@ var RoadScene = exports.RoadScene = Scene.extend({
 
     draw: function(display, options) {
         this.camera.view.fill('#fff');
-        this.camera.view.blit(this.image, [0, 0]);
+        this.camera.view.blit(this.image, [0, (this.camera.horizon - 475)]);
         this.road.draw(this.camera);
         this.camera.draw(display);
         RoadScene.super_.prototype.draw.call(this, display, options);
@@ -9471,7 +9435,7 @@ _.extend(Camera.prototype, {
         this.setDistance(this.distance + this.speed.z);
 
         if (this.goToHorizon != this.horizonActual) {
-            this.horizonActual += (this.goToHorizon - this.horizonActual) / 5;
+            this.horizonActual += (this.goToHorizon - this.horizonActual) / 25;
         }
         this.horizon = Math.floor(this.horizonActual);
     },
@@ -9484,4 +9448,4 @@ _.extend(Camera.prototype, {
         display.blit(this.outView, display.rect);
     }
 });
-},{"gramework":5,"underscore":49}]},{},[4])
+},{"gramework":6,"underscore":50}]},{},[5])

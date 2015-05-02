@@ -51,7 +51,8 @@ var RoadScene = exports.RoadScene = Scene.extend({
     update: function(dt) {
         this.road.update(dt, this.camera);
         this.camera.setHeightOffset(this.road.getAltitudeAt(this.camera.distance));
-        this.camera.setHorizon(300 - (this.road.getAltitudeRateAt(this.camera.distance) * 30));
+        this.camera.setHeight(-this.road.getAltitudeRateAt(this.camera.distance) * 5);
+        this.camera.setHorizon(300 - (this.road.getAltitudeRateAt(this.camera.distance) * 10));
         this.camera.update(dt);
         //this.camera.setAngle(this.road.getAngleAt(this.camera.distance));
         this.road.setDistance(this.distance);
@@ -60,7 +61,7 @@ var RoadScene = exports.RoadScene = Scene.extend({
 
     draw: function(display, options) {
         this.camera.view.fill('#fff');
-        this.camera.view.blit(this.image, [0, 0]);
+        this.camera.view.blit(this.image, [0, (this.camera.horizon - 475)]);
         this.road.draw(this.camera);
         this.camera.draw(display);
         RoadScene.super_.prototype.draw.call(this, display, options);
@@ -148,7 +149,7 @@ _.extend(Camera.prototype, {
         this.setDistance(this.distance + this.speed.z);
 
         if (this.goToHorizon != this.horizonActual) {
-            this.horizonActual += (this.goToHorizon - this.horizonActual) / 5;
+            this.horizonActual += (this.goToHorizon - this.horizonActual) / 25;
         }
         this.horizon = Math.floor(this.horizonActual);
     },

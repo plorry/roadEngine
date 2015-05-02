@@ -1,6 +1,6 @@
 var gamejs = require('gramework').gamejs,
     conf = require('./conf'),
-    RoadScene = require('./roadscene').RoadScene,
+    CartScene = require('./cart_scene').CartScene,
     GameController = require('gramework').input.GameController,
     animate = require('gramework').animate,
     Road = require('./road').Road,
@@ -12,27 +12,21 @@ var gamejs = require('gramework').gamejs,
 var roadSpec = {
     turns: {
         
-        21: {
+        31: {
             angle: 70,
-            end: 27
-        },
-
-        51: {
-            angle: -70,
-            end: 57
+            end: 37
         }
     },
 
     hills: {
-        
-        0: {
-            height: 70,
-            end: 20
+        2: {
+            height: -40,
+            end: 30
         },
 
         30: {
-            height: 70,
-            end: 50
+            height: 30,
+            end: 35
         }
     },
 
@@ -61,12 +55,12 @@ var Game = exports.Game = function () {
 
     this.paused = false;
 
-    this.scene = new RoadScene({
+    this.scene = new CartScene({
         width:320,
         height:220,
         pixelScale: 2,
         road: road,
-        image_path: conf.Images.bg_toronto
+        image_path: conf.Images.background
     });
 
     this.d = new Driver({
@@ -183,5 +177,5 @@ Game.prototype.event = function(ev) {
 Game.prototype.update = function(dt) {
     if (dt > 1000 / 3) dt = 1000 / 3;
     this.scene.update(dt);
-    document.getElementById('debug').innerHTML = 1 / (dt / 1000);
+    document.getElementById('debug').innerHTML = Math.floor(1 / (dt / 1000)) + 'fps';
 };
