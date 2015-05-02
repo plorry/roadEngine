@@ -79,11 +79,12 @@ _.extend(Camera.prototype, {
         this.tilt = 0;
         this.center = options.center || 0;
         this.angle = options.angle || 0;
-        this.speed = options.speed || {x: 0, y: 0, z: 0.05};
+        this.speed = options.speed || {x: 0, y: 0, z: 0};
         this.accel = options.accel || {x: 0, y: 0, z: 0};
         this.view = new gamejs.Surface(new gamejs.Rect([0, 0], [dimensions.width, dimensions.height]));
         this.outView = this.view.clone();
         this.background = options.background;
+        this._follow;
     },
 
     setAngle: function(angle) {
@@ -122,7 +123,15 @@ _.extend(Camera.prototype, {
         this.speed.z = speed;
     },
 
+    follow: function(roadObject) {
+        this._follow = roadObject;
+    },
+
     update: function(dt) {
+        if (this._follow) {
+            this.speed.z = ((this._follow.distance - 1) - this.distance)/ 10;
+            this.speed.x = ((this._follow.position) - this.center);
+        }
         this.setXSpeed(this.speed.x + this.accel.x);
         this.setYSpeed(this.speed.y + this.accel.y);
         this.setZSpeed(this.speed.z + this.accel.z);

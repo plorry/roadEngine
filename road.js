@@ -19,6 +19,8 @@ var RoadObject = exports.RoadObject = Entity.extend({
         this.diffDistance = this.distance - this.road.currentDistance;
         this.scaleFactor;
         this.image = this.road.images[options.image];
+        this.angleToCamera = 0;
+        this.rotates = options.rotates || false;
 
         if (this.side == 'left') {
             if (this.image) {
@@ -28,7 +30,12 @@ var RoadObject = exports.RoadObject = Entity.extend({
         }
     },
 
-    update: function(dt) {
+    update: function(dt, camera) {
+        if (this.rotates) {
+            var distanceToCamera = this.distance - camera.distance;
+            var positionToCamera = this.position - camera.center;
+            this.angleToCamera = Math.atan((positionToCamera / 100) / distanceToCamera);
+        }
     },
 
     draw: function(display, offset, height, distance) {
@@ -126,7 +133,7 @@ Road.prototype = {
         this.roadObjects.push(roadObject);
     },
 
-    addCar: function(distance, options) {
+    addCar: function(distance, roadObject) {
         if (options.image in this.images == false){
             // Image not yet stored, must load
             this.images[options.image] = gamejs.image.load(conf.Images[options.image]);
@@ -175,8 +182,15 @@ Road.prototype = {
         return angle * 0.017;
     },
     */
-    getDeltaAngle: function() {
-        return this.lineProperties[1].angle - this.lineProperties[0].angle || 0;
+    getAngleRateAt: function(distance) {
+        var angle = 0;
+        for (d in this.upcomingTurns) {
+            if (distance > d && distance < turn.end) {
+                angle = turn.angle / (turn.end - d);
+            }
+        }
+        // console.log(angle);
+        return angle * 0.017;
     },
 
     getAngleAt: function(distance, cameraDistance) {
@@ -347,12 +361,13 @@ Road.prototype = {
 
     update: function(dt, camera) {
         this.roadObjects.forEach(function(ro) {
-            ro.update(dt);
+            ro.update(dt, camera);
         });
         this.drawRoadObjects = this.collectRoadObjects(camera.distance);
         this.upcomingTurns = this.collectTurns(camera.distance);
         this.upcomingHills = this.collectHills(camera.distance);
         this.cameraOffset = (Math.tan(camera.angle) * ANGLE_SCALE_CONSTANT);
+        document.getElementById('debug').innerHTML = this.getAngleRateAt(camera.distance);
         this.lines.forEach(function(line) {
             line.update(dt, camera);
         });

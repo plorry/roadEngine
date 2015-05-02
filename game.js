@@ -2,10 +2,9 @@ var gamejs = require('gramework').gamejs,
     conf = require('./conf'),
     RoadScene = require('./roadscene').RoadScene,
     GameController = require('gramework').input.GameController,
-    Biker = require('./biker').Biker,
     animate = require('gramework').animate,
     Road = require('./road').Road,
-    Car = require('./road').Car,
+    Driver = require('./driver').Driver,
     _ = require('underscore');
 
 // Container for the entire game.
@@ -13,73 +12,27 @@ var gamejs = require('gramework').gamejs,
 var roadSpec = {
     turns: {
         
-        5: {
-            angle: 70,
-            end: 15
-        },
         20: {
-            angle: -70,
+            angle: 70,
             end: 25
         },
-        30: {
-            angle: 70,
-            end: 35
-        },
 
-        40: {
-            angle: -70,
-            end: 45
-        },
-        50: {
-            angle: 70,
-            end: 55
-        },
-
-        60: {
-            angle: -70,
-            end: 65
-        },
-
-        125: {
-            angle: 70,
-            end: 135
-        }
     },
 
     hills: {
-
-    },
-    
-    crossStreets: {
-        5: {
-            end: 6
-        },
-
-        20: {
-            end: 21
-        },
-
-        25: {
-            end: 27
-        }
-    },
-
-    bikeLanes: {
+        
         0: {
-            end: 500
+            height: 1200,
+            end: 300
         }
-    },
-
-    sidewalks: {
-        0: {
-            end: 500
-        }
+        
     },
 
     roadObjects: []
 };
 
 var Game = exports.Game = function () {
+    console.log(document.getElementById('debug'));
     var road = new Road({
         texturePath: conf.Images.test_texture,
         roadSpec: roadSpec
@@ -96,26 +49,7 @@ var Game = exports.Game = function () {
         });
     });
 
-    this.car = road.addCar(2, {
-        image: 'shrub01',
-        road: road,
-        distance: 2,
-        height: 32,
-        width: 32,
-        position: 0
-    });
-
     this.cont = new GameController();
-    var bike = new Biker({
-        x:120,
-        y:150,
-        width:64,
-        height:70,
-        spriteSheet: new animate.SpriteSheet(
-            gamejs.image.load(conf.Images.biker),
-            64,
-            70)
-    });
 
     this.paused = false;
 
@@ -127,7 +61,16 @@ var Game = exports.Game = function () {
         image_path: conf.Images.bg_toronto
     });
 
-    this.scene.pushEntity(bike);
+    this.d = new Driver({
+        spriteSheet: gamejs.image.load(conf.Images.player_cart),
+        road: road,
+        distance: 2,
+        height: 48,
+        width: 78,
+        position: 0
+    });
+
+    this.scene.camera.follow(this.d);
 
     this.initialize();
 };
@@ -159,6 +102,14 @@ Game.prototype.initialize = function() {
             console.log(game.scene.road.currentAngle);
         },
         cancel: function() {
+        },
+
+        left_boost: function() {
+            game.d.left_boost_on();
+        },
+
+        right_boost: function() {
+            game.d.right_boost_on();
         }
     };
 
@@ -173,6 +124,14 @@ Game.prototype.initialize = function() {
 
         up: function() {
             game.scene.slow();
+        },
+
+        left_boost: function() {
+            game.d.left_boost_off();
+        },
+
+        right_boost: function() {
+            game.d.right_boost_off();
         }
     }
 
@@ -183,7 +142,6 @@ Game.prototype.draw = function(surface) {
 };
 
 Game.prototype.event = function(ev) {
-    
     var key = this.cont.handle(ev);
 
     if (key) {
@@ -192,6 +150,23 @@ Game.prototype.event = function(ev) {
         }
         if (key.action == 'keyUp') {
             this.controlMapUp[key.label]();
+        }
+    } else {
+        if (ev.key === 191) {
+            // Right boost
+            if (ev.type === 1) {
+                this.controlMapDown['right_boost']();
+            } else if (ev.type === 2) {
+                this.controlMapUp['right_boost']();
+            }
+        }
+        if (ev.key == 90) {
+            // Left boost
+            if (ev.type === 1) {
+                this.controlMapDown['left_boost']();
+            } else if (ev.type === 2) {
+                this.controlMapUp['left_boost']();
+            }
         }
     }
 };
