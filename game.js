@@ -11,68 +11,32 @@ var gamejs = require('gramework').gamejs,
 
 var roadSpec = {
     turns: {
-        
-        31: {
-            angle: 70,
-            end: 37
-        }
+
     },
 
     hills: {
-        2: {
-            height: -40,
-            end: 30
-        },
 
-        30: {
-            height: 30,
-            end: 35
-        }
     },
 
     roadObjects: []
 };
 
 var Game = exports.Game = function () {
-    var road = new Road({
-        texturePath: conf.Images.test_texture,
-        roadSpec: roadSpec
-    });
-    
-    _.range(0,75).forEach(function(value){
-        road.addRoadObject(value, {
-            road: road,
-            distance: value,
-            height: 200,
-            width: 200,
-            position: 500,
-            side: _.sample(['right', 'left']),
-            image: 'hHouse01'
-        });
-    });
     
     this.cont = new GameController();
 
     this.paused = false;
 
-    this.scene = new CartScene({
+    this.level01 = new CartScene({
         width:320,
         height:220,
         pixelScale: 2,
-        road: road,
+        road: new Road({
+            texturePath: conf.Images.test_texture,
+            roadSpec: roadSpec
+        }),
         image_path: conf.Images.background
     });
-
-    this.d = new Driver({
-        spriteSheet: gamejs.image.load(conf.Images.player_cart),
-        road: road,
-        distance: 2,
-        height: 64,
-        width: 80,
-        position: 0
-    });
-
-    this.scene.camera.follow(this.d);
 
     this.initialize();
 };
@@ -107,11 +71,11 @@ Game.prototype.initialize = function() {
         },
 
         left_boost: function() {
-            game.d.left_boost_on();
+            game.currentScene.left_boost_on();
         },
 
         right_boost: function() {
-            game.d.right_boost_on();
+            game.currentScene.right_boost_on();
         }
     };
 
@@ -129,18 +93,20 @@ Game.prototype.initialize = function() {
         },
 
         left_boost: function() {
-            game.d.left_boost_off();
+            game.currentScene.left_boost_off();
         },
 
         right_boost: function() {
-            game.d.right_boost_off();
+            game.currentScene.right_boost_off();
         }
-    }
+    };
+
+    this.setScene(this.level01);
 
 };
 
 Game.prototype.draw = function(surface) {
-    this.scene.draw(surface, {clear: false});
+    this.currentScene.draw(surface, {clear: false});
 };
 
 Game.prototype.event = function(ev) {
@@ -173,9 +139,13 @@ Game.prototype.event = function(ev) {
     }
 };
 
+Game.prototype.setScene = function(scene) {
+    this.currentScene = scene;
+};
+
 
 Game.prototype.update = function(dt) {
     if (dt > 1000 / 3) dt = 1000 / 3;
-    this.scene.update(dt);
-    document.getElementById('debug').innerHTML = Math.floor(1 / (dt / 1000)) + 'fps';
+    this.currentScene.update(dt);
+    document.getElementById('fps').innerHTML = Math.floor(1 / (dt / 1000));
 };

@@ -1,6 +1,8 @@
 var animate = require('gramework').animate,
     _ = require('underscore'),
     RoadObject = require('./road').RoadObject,
+    conf = require('./conf'),
+    gamejs = require('gramework').gamejs,
     Car = require('./road').Car;
 
 var DRAG_FACTOR = 0.01;
@@ -8,7 +10,9 @@ var DRAG_FACTOR = 0.01;
 var Driver = exports.Driver = RoadObject.extend({
     initialize: function(options) {
         Driver.super_.prototype.initialize.apply(this, arguments);
+        this.type = 'driver';
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 80, 64);
+        this.loseSpriteSheet = new animate.SpriteSheet(gamejs.image.load(conf.Images.lose_01), 144, 96);
         var anim_angles = {};
         _.range(-6,6).forEach(function(num) {
             anim_angles[num] = {
@@ -16,6 +20,11 @@ var Driver = exports.Driver = RoadObject.extend({
             };
         });
         this.anim = new animate.Animation(this.spriteSheet, 0, anim_angles);
+        this.animLose = new animate.Animation(this.loseSpriteSheet, 'crash', {
+            'crash': {
+                frames: _.range(0, 11), rate: 7, loop: false
+            }
+        });
         this.road.roadObjects.push(this);
         this.image = options.image;
         this.accel = 0;
@@ -39,6 +48,14 @@ var Driver = exports.Driver = RoadObject.extend({
             {range: [65, 80], anim: 5}
             //{range: [80, 90], anim: 6}
         ];
+
+        this.control = true;
+        this.isCrashing = false;
+    },
+
+    stop: function() {
+        this.speed = 0;
+        this.accel = 0;
     },
 
     left_boost_on: function() {
@@ -57,6 +74,42 @@ var Driver = exports.Driver = RoadObject.extend({
         this.right_boost = false;
     },
 
+    loseControl: function() {
+        this.control = false;
+    },
+
+    gainControl: function() {
+        this.control = true;
+    },
+
+    hasControl: function() {
+        return this.control;
+    },
+
+    crash: function() {
+        this.isCrashing = true;
+        this.loseControl();
+        this.width = 144;
+        this.height = 96;
+        this.rect.width = this.width;
+        this.rect.height = this.height;
+    },
+
+    checkCollisions: function(objects) {
+        objects.some(function(roadObject) {
+            if (roadObject.type == 'obstacle') {
+                // console.log(roadObject.myBox);
+                // console.log(this.myBox);
+                // debugger
+                if (this.inMyBox(roadObject)) {
+                    this.stop();
+                    this.crash();
+                    return true;
+                }
+            }
+        }, this);
+    },
+
     update: function(dt, camera) {
         Driver.super_.prototype.update.apply(this, arguments);
 
@@ -69,7 +122,11 @@ var Driver = exports.Driver = RoadObject.extend({
             }
         }, this);
 
-        this.image = this.anim.update(dt);
+        if (!this.isCrashing) {
+            this.image = this.anim.update(dt);
+        } else {
+            this.image = this.animLose.update(dt);
+        }
 
         this.accel = 0;
         this.topSpeed = 0;
@@ -79,23 +136,29 @@ var Driver = exports.Driver = RoadObject.extend({
             this.accel += (0.0005 * Math.cos(this.angle)) * this.road.getAltitudeRateAt(this.distance);
         }
 
-        if (this.left_boost) {
-            this.accel += 0.001;
-            this.angularSpeed += 0.02;
-        }
-        if (this.right_boost) {
-            this.accel += 0.001;
-            this.angularSpeed -= 0.02;
-        }
-        if (this.right_boost && this.left_boost) {
-            if (this.angle < 0) {
-                this.angularSpeed += 0.01;
-            } else if (this.angle > 0) {
-                this.angularSpeed -= 0.01;
+        if (this.hasControl()) {
+            if (this.left_boost) {
+                this.accel += 0.001;
+                this.angularSpeed += 0.02;
+            }
+            if (this.right_boost) {
+                this.accel += 0.001;
+                this.angularSpeed -= 0.02;
+            }
+            if (this.right_boost && this.left_boost) {
+                if (this.angle < 0) {
+                    this.angularSpeed += 0.01;
+                } else if (this.angle > 0) {
+                    this.angularSpeed -= 0.01;
+                }
             }
         }
 
-        this.accel -= DRAG_FACTOR * this.speed;
+        if (this.speed > 0.0005) {
+            this.accel -= DRAG_FACTOR * this.speed;
+        } else {
+            this.speed = 0;
+        }
 
         this.speed += this.accel;
 
@@ -108,6 +171,16 @@ var Driver = exports.Driver = RoadObject.extend({
         }
         this.distance += this.speed * (Math.cos(this.angle));
         this.position += (this.speed * (Math.sin(this.angle))) * 100;
+
+        /*
+        if (this.speed > 0.195) {
+            this.crash();
+        }
+        */
+        this.myBox = {
+            'position': [this.position - this.width / 2, this.position + this.width / 2],
+            'distance': [this.distance - 0.3, this.distance + 0.3]
+        };
     }
 });
 
@@ -115,9 +188,32 @@ var Driver = exports.Driver = RoadObject.extend({
 var Enemy = exports.Enemy = Car.extend({
     initialize: function(options) {
         Enemy.super_.prototype.initialize.apply(this, arguments);
+        this.type = 'enemy';
+        this.destinationPosition = 0;
+        this.minSpeed = 0.2;
+        this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 40, 24);
+        this.anim = new animate.Animation(this.spriteSheet, 'static', {
+            'static': {
+                frames: [0,1],
+                rate: 15,
+                loop: true
+            }
+        });
+    },
+
+    setDestinationPosition: function(position) {
+        this.destinationPosition = position;
     },
 
     update: function(dt) {
+        if (this.destinationPosition != this.postion) {
+            this.lateralSpeed = (this.destinationPosition - this.position) / 20;
+        }
+        this.image = this.anim.update(dt);
+        if (this.speed < this.minSpeed) {
+            this.speed = this.minSpeed;
+        }
+
         Enemy.super_.prototype.update.apply(this, arguments);
     }
 });

@@ -7,7 +7,7 @@ ANGLE_SCALE_CONSTANT = 100;
 
 var RoadObject = exports.RoadObject = Entity.extend({
     initialize: function(options) {
-        this.type = 'road object';
+        this.type = 'obstacle';
         this.height = options.height;
         this.width = options.width;
         this.color = options.color;
@@ -28,6 +28,24 @@ var RoadObject = exports.RoadObject = Entity.extend({
             }
             this.position = -this.position;
         }
+
+
+        this.myBox = {
+            'position': [this.position - this.width / 2, this.position + this.width / 2],
+            'distance': [this.distance - 0.3, this.distance + 0.3]
+        };
+    },
+
+    inMyBox: function(roadObject) {
+        var collision = false;
+        if (this.myBox.position[0] < roadObject.myBox.position[1]
+            && this.myBox.position[1] > roadObject.myBox.position[0]
+            && this.myBox.distance[0] < roadObject.myBox.distance[1]
+            && this.myBox.distance[1] > roadObject.myBox.distance[0]) {
+            collision = true;
+        }
+
+        return collision;
     },
 
     update: function(dt, camera) {
@@ -46,7 +64,7 @@ var RoadObject = exports.RoadObject = Entity.extend({
         var width = this.width * this.scaleFactor;
         var tHeight = this.height * this.scaleFactor;
         this.rect = new gamejs.Rect(
-            [(this.road.displayWidth/2) + (this.position) * this.scaleFactor - offset, height - tHeight],
+            [(this.road.displayWidth/2) + (this.position - this.width / 2) * this.scaleFactor - offset, height - tHeight],
             [width, tHeight]
         );
         if (this.image) {
@@ -502,13 +520,12 @@ Line.prototype = {
             // var stripe = Math.floor(Math.cos(distance * 3));
             // Draw the grass
             var grassRect = new gamejs.Rect([0, this.height], [this.road.displayWidth, 300])
-            gamejs.draw.rect(camera.view, "rgb(0,200,0)", grassRect);
+            gamejs.draw.rect(camera.view, "#3dbb5d", grassRect);
         }
         // Draw the road
         if (this.distance) {
             var sliceImage = this.getLineSlice(this.distance);
-            var destRect = new gamejs.Rect([(this.road.displayWidth/2) - this.width - this.offset
-                + (100 / this.diffDistance), this.height], [this.width * 2, 1]);
+            var destRect = new gamejs.Rect([(this.road.displayWidth/2) - this.width - this.offset, this.height], [this.width * 2, 1]);
             camera.view.blit(sliceImage, destRect);
         }
 
@@ -529,13 +546,20 @@ var Car = exports.Car = RoadObject.extend({
         this.speed = options.speed || 0;
         this.topSpeed = options.topSpeed || 0;
         this.accel = options.accel || 0;
+        this.lateralSpeed = 0;
     },
 
     update: function(dt, camera) {
         this.speed += this.accel;
         this.distance += this.speed;
+        this.position += this.lateralSpeed;
 
         Car.super_.prototype.update.apply(this, arguments);
+
+        this.myBox = {
+            'position': [this.position - this.width / 2, this.position + this.width / 2],
+            'distance': [this.distance - 0.3, this.distance + 0.3]
+        };
     },
 
     accelerate: function() {
