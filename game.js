@@ -12,31 +12,39 @@ var gamejs = require('gramework').gamejs,
 var roadSpec = {
     turns: {
         
-        20: {
+        21: {
             angle: 70,
-            end: 25
+            end: 27
         },
 
+        51: {
+            angle: -70,
+            end: 57
+        }
     },
 
     hills: {
         
         0: {
-            height: 1200,
-            end: 300
+            height: 70,
+            end: 20
+        },
+
+        30: {
+            height: 70,
+            end: 50
         }
-        
     },
 
     roadObjects: []
 };
 
 var Game = exports.Game = function () {
-    console.log(document.getElementById('debug'));
     var road = new Road({
         texturePath: conf.Images.test_texture,
         roadSpec: roadSpec
     });
+    
     _.range(0,75).forEach(function(value){
         road.addRoadObject(value, {
             road: road,
@@ -48,7 +56,7 @@ var Game = exports.Game = function () {
             image: 'hHouse01'
         });
     });
-
+    
     this.cont = new GameController();
 
     this.paused = false;
@@ -65,8 +73,8 @@ var Game = exports.Game = function () {
         spriteSheet: gamejs.image.load(conf.Images.player_cart),
         road: road,
         distance: 2,
-        height: 48,
-        width: 78,
+        height: 64,
+        width: 80,
         position: 0
     });
 
@@ -175,4 +183,5 @@ Game.prototype.event = function(ev) {
 Game.prototype.update = function(dt) {
     if (dt > 1000 / 3) dt = 1000 / 3;
     this.scene.update(dt);
+    document.getElementById('debug').innerHTML = 1 / (dt / 1000);
 };

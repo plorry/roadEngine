@@ -24,7 +24,7 @@ var DRAG_FACTOR = 0.01;
 var Driver = exports.Driver = RoadObject.extend({
     initialize: function(options) {
         Driver.super_.prototype.initialize.apply(this, arguments);
-        this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 78, 48);
+        this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 80, 64);
         var anim_angles = {};
         _.range(-6,6).forEach(function(num) {
             anim_angles[num] = {
@@ -41,7 +41,7 @@ var Driver = exports.Driver = RoadObject.extend({
         this.angularSpeed = 0;
         this.rotates = true;
         this.animationMap = [
-            {range: [-90, -80], anim: -6},
+            // {range: [-90, -80], anim: -6},
             {range: [-80, -65], anim: -5},
             {range: [-65, -50], anim: -4},
             {range: [-50, -35], anim: -3},
@@ -91,8 +91,8 @@ var Driver = exports.Driver = RoadObject.extend({
         this.topSpeed = 0;
         this.angularSpeed = 0;
 
-        if (this.road.getAltitudeAt(this.distance) > 0) {
-            this.accel += (0.001 * Math.cos(this.angle));
+        if (this.road.getAltitudeRateAt(this.distance) != 0) {
+            this.accel += (0.0005 * Math.cos(this.angle)) * this.road.getAltitudeRateAt(this.distance);
         }
 
         if (this.left_boost) {
@@ -114,9 +114,7 @@ var Driver = exports.Driver = RoadObject.extend({
         this.accel -= DRAG_FACTOR * this.speed;
 
         this.speed += this.accel;
-        if (this.speed < 0) {
-            this.speed = 0;
-        }
+
         this.angle -= (this.speed * (Math.cos(this.angle))) * this.road.getAngleRateAt(this.distance);
         this.angle += this.angularSpeed;
         if (this.angle > Math.PI / 2) {
@@ -143,31 +141,39 @@ var gamejs = require('gramework').gamejs,
 var roadSpec = {
     turns: {
         
-        20: {
+        21: {
             angle: 70,
-            end: 25
+            end: 27
         },
 
+        51: {
+            angle: -70,
+            end: 57
+        }
     },
 
     hills: {
         
         0: {
-            height: 1200,
-            end: 300
+            height: 70,
+            end: 20
+        },
+
+        30: {
+            height: 70,
+            end: 50
         }
-        
     },
 
     roadObjects: []
 };
 
 var Game = exports.Game = function () {
-    console.log(document.getElementById('debug'));
     var road = new Road({
         texturePath: conf.Images.test_texture,
         roadSpec: roadSpec
     });
+    
     _.range(0,75).forEach(function(value){
         road.addRoadObject(value, {
             road: road,
@@ -179,7 +185,7 @@ var Game = exports.Game = function () {
             image: 'hHouse01'
         });
     });
-
+    
     this.cont = new GameController();
 
     this.paused = false;
@@ -196,8 +202,8 @@ var Game = exports.Game = function () {
         spriteSheet: gamejs.image.load(conf.Images.player_cart),
         road: road,
         distance: 2,
-        height: 48,
-        width: 78,
+        height: 64,
+        width: 80,
         position: 0
     });
 
@@ -306,6 +312,7 @@ Game.prototype.event = function(ev) {
 Game.prototype.update = function(dt) {
     if (dt > 1000 / 3) dt = 1000 / 3;
     this.scene.update(dt);
+    document.getElementById('debug').innerHTML = 1 / (dt / 1000);
 };
 
 },{"./conf":1,"./driver":2,"./road":50,"./roadscene":51,"gramework":5,"underscore":49}],4:[function(require,module,exports){
@@ -8873,39 +8880,14 @@ Road.prototype = {
         this.currentRoad = roadSpec;
     },
 
-    // Helper Methods to get the road properties at a given distance
-    /*
-    getAngleAt: function(distance) {
-        var angle = 0;
-        for (d in this.upcomingTurns) {
-            var turn = this.upcomingTurns[d];
-            if (distance >= d && distance <= turn.end) {
-                angle = turn.angle * (distance - d) / (turn.end - d);
-                this.lastTurn = turn;
-                break;
-            }
-        }
-        for (d in this.currentRoad.turns) {
-            var turn = this.currentRoad.turns[d];
-            if (distance > turn.end) {
-                angle += turn.angle;
-            }
-            if (d > this.currentDistance + 200) {
-                break;
-            }
-        }
-        // 0.017 here is a hand-tuned constant based on what "looks right"
-        return angle * 0.017;
-    },
-    */
     getAngleRateAt: function(distance) {
         var angle = 0;
         for (d in this.upcomingTurns) {
+            var turn = this.upcomingTurns[d];
             if (distance > d && distance < turn.end) {
                 angle = turn.angle / (turn.end - d);
             }
         }
-        // console.log(angle);
         return angle * 0.017;
     },
 
@@ -8930,6 +8912,17 @@ Road.prototype = {
         return angle * 0.017;
     },
 
+    getAltitudeRateAt: function(distance) {
+        var altitude = 0;
+        for (d in this.upcomingHills) {
+            var hill = this.upcomingHills[d];
+            if (distance > d && distance < hill.end) {
+                altitude += hill.height / (hill.end - d);
+            }
+        }
+        return altitude;
+    },
+
     getAltitudeAt: function(distance) {
         var altitude = 0;
         for (d in this.upcomingHills) {
@@ -8939,8 +8932,6 @@ Road.prototype = {
             }
             if (distance > d && distance < hill.end) {
                 altitude += hill.height / ((hill.end - d) / (distance - d));
-                this.lastHill = hill;
-                break;
             }
         }
         return altitude * 10;
@@ -9083,13 +9074,12 @@ Road.prototype = {
         this.upcomingTurns = this.collectTurns(camera.distance);
         this.upcomingHills = this.collectHills(camera.distance);
         this.cameraOffset = (Math.tan(camera.angle) * ANGLE_SCALE_CONSTANT);
-        document.getElementById('debug').innerHTML = this.getAngleRateAt(camera.distance);
+        this.lines.sort(function(a, b) {
+            return a.lineNo - b.lineNo;
+        });
         this.lines.forEach(function(line) {
             line.update(dt, camera);
         });
-        for (i in this.toDraw) {
-
-        }
     },
 
     draw: function(camera) {
@@ -9109,13 +9099,26 @@ Road.prototype = {
         distanceVals.sort(function(a, b) {
             return a - b;
         });
-
+        /*
         for (i = distanceVals.length - 1; i > 0; i--) {
             distanceVal = distanceVals[i];
             this.toDraw[distanceVal].forEach(function(item) {
                 item.draw(camera);
             });
         }
+        */
+        this.lines.sort(function(a, b) {
+            return b.lineNo - a.lineNo;
+        });
+        this.lines.forEach(function(line) {
+            line.draw(camera);
+        }, this);
+        this.lines.forEach(function(line) {
+            if (line.temporary) {
+                var index = this.lines.indexOf(line);
+                this.lines.splice(index, 1);
+            }   
+        }, this);
     }
 
 
@@ -9136,6 +9139,7 @@ Line.prototype = {
         this.scaleFactor = 1 / this.diffDistance;
         this.toDraw = [];
         this.temporary = options.temporary || false;
+        this.parentHeight = options.parentHeight || 0;
     },
 
     clearToDraw: function() {
@@ -9155,26 +9159,72 @@ Line.prototype = {
     },
 
     update: function(dt, camera) {
-        this.line = this.road.lineProperties[this.lineNo];
         this.distance = camera.distance + this.diffDistance;
         this.altitude = this.road.getAltitudeAt(this.distance);
-        this.height = 300 - this.lineNo + Math.floor((this.altitude - camera.height - this.road.getAltitudeAt(camera.distance)) / this.diffDistance);
+        this.height = camera.horizon - this.lineNo + Math.floor((this.altitude - camera.height - this.road.getAltitudeAt(camera.distance)) / this.diffDistance);
         // this.heightCam = this.height -= camera.height / this.diffDistance;
         this.width = this.road.getWidthAt(this.distance) * 40 / this.diffDistance;
         this.angle = this.road.getAngleAt(this.distance, camera.distance);
         this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo)) / this.diffDistance) + (this.road.cameraOffset);
 
         // NextLine properties
-        this.nextLine = this.road.lineProperties[this.lineNo - 1];
-        if (this.nextLine) {
-            this.nextDistance = camera.distance + this.nextDiffDistance;
-            this.nextAltitude = this.road.getAltitudeAt(this.nextDistance);
-            this.nextHeight = 300 - (this.lineNo - 1) + Math.floor((this.nextAltitude - camera.height - this.road.getAltitudeAt(camera.distance)) / this.nextLine.diffDistance);
-        } else {
-            this.nextDistance = 0;
-            this.nextAltitude = 0;
-            this.nextHeight = 0;
+        // if (!this.temporary) {
+            //this.nextLine = this.road.lineProperties[this.lineNo - 1];
+            //if (this.nextLine) {
+                this.nextDistance = camera.distance + this.nextDiffDistance;
+                this.nextAltitude = this.road.getAltitudeAt(this.nextDistance);
+                this.nextHeight = camera.horizon - (this.lineNo - 1) + Math.floor((this.nextAltitude - camera.height - this.road.getAltitudeAt(camera.distance)) / this.nextDiffDistance);
+            //} else {
+                // this.nextDistance = 0;
+                // this.nextAltitude = 0;
+                // this.nextHeight = 0;
+            //}
+        if (this.temporary) {
+            this.height = this.parentHeight;
         }
+        
+        // console.log(this.height - this.nextHeight);
+        
+        if (this.height - this.nextHeight < -1 && this.lineNo > 1 && !this.temporary) {
+            // We have a gap between lines - fill with sublines
+            var numSteps = this.nextHeight - this.height;
+            var deltaDistance = this.nextDistance - this.distance;
+            var increment = 1 / numSteps;
+            // console.log(numSteps);
+            // console.log(increment);
+            // console.log(numSteps);
+            _.range(numSteps).forEach(function(stepNum) {
+                
+                var lineNo = this.lineNo - ((stepNum + 1) * increment);
+
+                var tempLine = new Line({
+                    road: this.road,
+                    lineNo: this.lineNo - ((stepNum + 1) * increment),
+                    parentHeight: this.height + stepNum + 1,
+                    temporary: true
+                });
+                tempLine.update(dt, camera);
+
+                // console.log(stepNum);
+
+                this.road.lines.push(tempLine);
+                
+                // var thisDiffDistance = 100 / (201 - (this.lineNo - (increment * stepNum)));
+                // var thisDistance = camera.distance + thisDiffDistance;
+                // var sliceImage = this.getLineSlice(thisDistance);
+                // var thisHeight = this.height + stepNum;
+                // var thisWidth = this.road.getWidthAt(thisDistance) * 40 / thisDiffDistance
+                // var sliceLength = thisDiffDistance - this.diffDistance;
+                // this.offset += (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT) / thisDiffDistance;
+                // this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
+                // var destRect = new gamejs.Rect([(this.road.displayWidth/2) - thisWidth - this.offset
+                    // + (100 / thisDiffDistance), thisHeight], [thisWidth * 2, 1]);
+                // camera.view.blit(sliceImage, destRect);
+                
+            }, this);
+        }
+        
+        // debugger
     },
 
     draw: function(camera) {
@@ -9187,6 +9237,8 @@ Line.prototype = {
         // Check roadObjects
         if (this.height > 320) {
             return;
+        } else if (this.height < 0) {
+            return;
         }
         this.road.lines.forEach(function(line) {
             if (line.lineNo < this.lineNo && line.height >= this.height){
@@ -9195,17 +9247,19 @@ Line.prototype = {
             }
         }, this);
 
+        if (!this.temporary) {
 
-        this.road.roadObjects.forEach(function(ro) {
-            if (ro.distance >= this.nextDistance && ro.distance <= this.distance) {
-                    this.toDraw.push(ro);
-                }
-        }, this);
-        // Now we draw
-        // var stripe = Math.floor(Math.cos(distance * 3));
-        // Draw the grass
-        var grassRect = new gamejs.Rect([0, this.height], [this.road.displayWidth, 300])
-        gamejs.draw.rect(camera.view, "rgb(0,200,0)", grassRect);
+            this.road.roadObjects.forEach(function(ro) {
+                if (ro.distance >= this.nextDistance && ro.distance <= this.distance) {
+                        this.toDraw.push(ro);
+                    }
+            }, this);
+            // Now we draw
+            // var stripe = Math.floor(Math.cos(distance * 3));
+            // Draw the grass
+            var grassRect = new gamejs.Rect([0, this.height], [this.road.displayWidth, 300])
+            gamejs.draw.rect(camera.view, "rgb(0,200,0)", grassRect);
+        }
         // Draw the road
         if (this.distance) {
             var sliceImage = this.getLineSlice(this.distance);
@@ -9214,7 +9268,9 @@ Line.prototype = {
             camera.view.blit(sliceImage, destRect);
 
             // Do we have a large alt gap between this line and next?
+            /*
             if (this.height < this.nextHeight + 1 && this.lineNo > 1) {
+                
                 var numSteps = this.nextHeight - this.height;
                 var deltaDistance = this.nextDistance - this.distance;
                 var increment = 1 / numSteps;
@@ -9225,19 +9281,24 @@ Line.prototype = {
                     var thisHeight = this.height + stepNum;
                     var thisWidth = this.road.getWidthAt(thisDistance) * 40 / thisDiffDistance
                     var sliceLength = thisDiffDistance - this.diffDistance;
-                    this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
+                    // this.offset += (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT) / thisDiffDistance;
+                    // this.offset = ((camera.center + this.road.getAccumulatedOffset(this.lineNo) - (Math.tan(this.road.getAngleAt(thisDistance)) * sliceLength * ANGLE_SCALE_CONSTANT)) / thisDiffDistance) + (this.road.cameraOffset);
                     var destRect = new gamejs.Rect([(this.road.displayWidth/2) - thisWidth - this.offset
                         + (100 / thisDiffDistance), thisHeight], [thisWidth * 2, 1]);
                     camera.view.blit(sliceImage, destRect);
                 }, this);
+                
             }
+            */
         }
 
-        this.toDraw.forEach(function(item) {
-            item.draw(camera.view, this.offset, this.height, camera.distance);
-        }, this);
+        if (!this.temporary) {
+            this.toDraw.forEach(function(item) {
+                item.draw(camera.view, this.offset, this.height, camera.distance);
+            }, this);
 
-        this.clearToDraw();
+            this.clearToDraw();
+        }
     }
 };
 
@@ -9313,6 +9374,7 @@ var RoadScene = exports.RoadScene = Scene.extend({
     update: function(dt) {
         this.road.update(dt, this.camera);
         this.camera.setHeightOffset(this.road.getAltitudeAt(this.camera.distance));
+        this.camera.setHorizon(300 - (this.road.getAltitudeRateAt(this.camera.distance) * 30));
         this.camera.update(dt);
         //this.camera.setAngle(this.road.getAngleAt(this.camera.distance));
         this.road.setDistance(this.distance);
@@ -9339,6 +9401,8 @@ _.extend(Camera.prototype, {
         this.height = options.height || 0;
         this.heightOffset = 0;
         this.tilt = 0;
+        this.horizon = 300;
+        this.horizonActual = 300;
         this.center = options.center || 0;
         this.angle = options.angle || 0;
         this.speed = options.speed || {x: 0, y: 0, z: 0};
@@ -9363,6 +9427,10 @@ _.extend(Camera.prototype, {
 
     setHeightOffset: function(heightOffset) {
         this.heightOffset = heightOffset;
+    },
+
+    setHorizon: function(horizon) {
+        this.goToHorizon = horizon;
     },
 
     setTilt: function(tilt) {
@@ -9401,6 +9469,11 @@ _.extend(Camera.prototype, {
         this.setCenter(this.center + this.speed.x);
         this.setHeight(this.height + this.speed.y);
         this.setDistance(this.distance + this.speed.z);
+
+        if (this.goToHorizon != this.horizonActual) {
+            this.horizonActual += (this.goToHorizon - this.horizonActual) / 5;
+        }
+        this.horizon = Math.floor(this.horizonActual);
     },
 
     draw: function(display) {
