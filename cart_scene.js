@@ -30,6 +30,8 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.mapHeight = 220;
         this.theme = options.theme || 'woods';
         this.turnList = [];
+        this.musicIsPlaying = false;
+        this.music = new Audio(options.music);
 
         // MAP MODE VARS
         this.p1Ready = false;
@@ -117,6 +119,12 @@ var CartScene = exports.CartScene = RoadScene.extend({
 
         this.road.addHill(distance, 5, 30);
         this.road.addTurn(distance + 1, 6, multiplier * 70);
+    },
+    
+    playMusic: function() {
+        this.music.play();
+        this.musicIsPlaying = true;
+        this.music.loop = true;
     },
 
     update: function(dt, camera) {

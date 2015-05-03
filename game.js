@@ -36,7 +36,8 @@ var Game = exports.Game = function () {
             texturePath: conf.Images.test_texture,
             roadSpec: roadSpec
         }),
-        image_path: conf.Images.background
+        image_path: conf.Images.background,
+        music: './assets/Happysong.ogg'
     });
 
     this.initialize();
@@ -149,4 +150,7 @@ Game.prototype.update = function(dt) {
     if (dt > 1000 / 3) dt = 1000 / 3;
     this.currentScene.update(dt);
     document.getElementById('fps').innerHTML = Math.floor(1 / (dt / 1000));
+    if (this.currentScene.music && this.currentScene.musicIsPlaying == false){
+        this.currentScene.playMusic();
+    }
 };
