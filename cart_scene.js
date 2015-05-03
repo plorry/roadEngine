@@ -47,8 +47,8 @@ var themeSets = {
         {image: 'lavaTree01', height: 400, width: 400, collisionWidth: 100},
         {image: 'lavaTree02', height: 200, width: 200, collisionWidth: 50},
         {image: 'lavaTree03', height: 400, width: 400, collisionWidth: 100},
-        {image: 'lava01', height: 75, width: 400, collisionWidth: 400},
-        {image: 'lava02', height: 75, width: 400, collisionWidth: 400},
+        {image: 'lava01', height: 75, width: 300, collisionWidth: 300},
+        {image: 'lava02', height: 75, width: 300, collisionWidth: 300},
     ]
 };
 
