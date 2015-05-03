@@ -53,7 +53,33 @@ var Images = exports.Images = {
     lava02: './assets/lava02.png',
     lavaTree01: './assets/lavatree01.png',
     lavaTree02: './assets/lavatree02.png',
-    lavaTree03: './assets/lavatree03.png'
+    lavaTree03: './assets/lavatree03.png',
+    // CUTSCENES
+    cutscene01: './assets/cutscenes/intro-01.png',
+    cutscene02: './assets/cutscenes/intro-02-layer-01.png',
+    piece02: './assets/cutscenes/intro-02-layer-02.png',
+    cutscene03: './assets/cutscenes/intro-03-layer-01.png',
+    piece03_1: './assets/cutscenes/intro-03-layer-02.png',
+    piece03_2: './assets/cutscenes/intro-03-layer-03.png',
+    cutscene04: './assets/cutscenes/intro-04.png',
+    cutscene05: './assets/cutscenes/intro-05-layer-01.png',
+    piece05_1: './assets/cutscenes/intro-05-layer-02.png',
+    piece05_2: './assets/cutscenes/intro-05-layer-03.png',
+    piece05_3: './assets/cutscenes/intro-05-layer-04.png',
+    piece05_4: './assets/cutscenes/intro-05-layer-05.png',
+    cutscene06: './assets/cutscenes/intro-06-layer-01.png',
+    piece06_1: './assets/cutscenes/intro-06-layer-02.png',
+    piece06_2: './assets/cutscenes/intro-06-layer-03.png',
+    piece06_3: './assets/cutscenes/intro-06-layer-04.png',
+    cutscene07: './assets/cutscenes/intro-07-layer-01.png',
+    piece07_1: './assets/cutscenes/intro-07-layer-02.png',
+    piece07_2: './assets/cutscenes/intro-07-layer-03.png',
+    piece07_3: './assets/cutscenes/intro-07-layer-04.png',
+    cutscene08: './assets/cutscenes/intro-08-layer-01.png',
+    piece08_1: './assets/cutscenes/intro-08-layer-02.png',
+    piece08_2: './assets/cutscenes/intro-08-layer-03.png',
+    piece08_3: './assets/cutscenes/intro-08-layer-04.png',
+    titlescreen: './assets/cutscenes/titlescreen.png'
 };
 
 var sounds = exports.sounds = {

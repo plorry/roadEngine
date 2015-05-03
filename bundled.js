@@ -70,8 +70,10 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.mapHeight = 220;
         this.theme = options.theme || 'woods';
         this.turnList = [];
+        this.barricadeTimer = 0;
         this.musicIsPlaying = false;
         this.music = new Audio(options.music);
+        this.loseMusic = new Audio('./assets/Youlose.ogg');
 
         this.particles = [];
         this.levelClear = false;
@@ -139,7 +141,6 @@ var CartScene = exports.CartScene = RoadScene.extend({
             scene: this
         });
 
-        this.addBarricade();
         this.showMap();
     },
 
@@ -247,6 +248,15 @@ var CartScene = exports.CartScene = RoadScene.extend({
             });
         }
 
+        // BARRICADE TIMER
+        if (this.d.control) {
+            this.barricadeTimer += dt;
+        }
+        if (this.barricadeTimer > 40000 / (this.difficulty[this.phase])) {
+            this.addBarricade();
+            this.barricadeTimer = 0;
+        }
+
         if (Object.keys(this.road.upcomingTurns).length == 0 && !this.map) {
             // Cleared all the turns - go to map!
             this.phase++;
@@ -294,6 +304,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
 
         // PLAYERS HAVE LOST
         if (this.d.isCrashing) {
+            this.music = this.loseMusic;
             this.loseCounter += dt;
             this.enemies.forEach(function(enemy) {
                 enemy.holdBack();
@@ -481,7 +492,7 @@ _.extend(BullyGenerator.prototype, {
         }
     }
 });
-},{"./conf":2,"./driver":3,"./road":51,"./roadscene":52,"gramework":6,"underscore":50}],2:[function(require,module,exports){
+},{"./conf":2,"./driver":4,"./road":52,"./roadscene":53,"gramework":7,"underscore":51}],2:[function(require,module,exports){
 var Images = exports.Images = {
     bike_lane: './assets/bike_lane.png',
     background: './assets/background.png',
@@ -537,7 +548,33 @@ var Images = exports.Images = {
     lava02: './assets/lava02.png',
     lavaTree01: './assets/lavatree01.png',
     lavaTree02: './assets/lavatree02.png',
-    lavaTree03: './assets/lavatree03.png'
+    lavaTree03: './assets/lavatree03.png',
+    // CUTSCENES
+    cutscene01: './assets/cutscenes/intro-01.png',
+    cutscene02: './assets/cutscenes/intro-02-layer-01.png',
+    piece02: './assets/cutscenes/intro-02-layer-02.png',
+    cutscene03: './assets/cutscenes/intro-03-layer-01.png',
+    piece03_1: './assets/cutscenes/intro-03-layer-02.png',
+    piece03_2: './assets/cutscenes/intro-03-layer-03.png',
+    cutscene04: './assets/cutscenes/intro-04.png',
+    cutscene05: './assets/cutscenes/intro-05-layer-01.png',
+    piece05_1: './assets/cutscenes/intro-05-layer-02.png',
+    piece05_2: './assets/cutscenes/intro-05-layer-03.png',
+    piece05_3: './assets/cutscenes/intro-05-layer-04.png',
+    piece05_4: './assets/cutscenes/intro-05-layer-05.png',
+    cutscene06: './assets/cutscenes/intro-06-layer-01.png',
+    piece06_1: './assets/cutscenes/intro-06-layer-02.png',
+    piece06_2: './assets/cutscenes/intro-06-layer-03.png',
+    piece06_3: './assets/cutscenes/intro-06-layer-04.png',
+    cutscene07: './assets/cutscenes/intro-07-layer-01.png',
+    piece07_1: './assets/cutscenes/intro-07-layer-02.png',
+    piece07_2: './assets/cutscenes/intro-07-layer-03.png',
+    piece07_3: './assets/cutscenes/intro-07-layer-04.png',
+    cutscene08: './assets/cutscenes/intro-08-layer-01.png',
+    piece08_1: './assets/cutscenes/intro-08-layer-02.png',
+    piece08_2: './assets/cutscenes/intro-08-layer-03.png',
+    piece08_3: './assets/cutscenes/intro-08-layer-04.png',
+    titlescreen: './assets/cutscenes/titlescreen.png'
 };
 
 var sounds = exports.sounds = {
@@ -563,6 +600,57 @@ var globals = exports.globals = {
     fps: 30
 };
 },{}],3:[function(require,module,exports){
+var Scene = require('gramework').Scene,
+    gamejs = require('gramework').gamejs,
+    conf = require('./conf'),
+    _ = require('underscore');
+
+
+var CutScene = exports.CutScene = Scene.extend({
+    initialize: function(options) {
+        this.image = gamejs.image.load(options.image);
+        if (options.music) {
+            this.music = new Audio(options.music);
+        } else {
+            this.music = 'continue';
+        }
+        this.pieces = options.pieces || [];
+        this.images = {};
+        this.elapsed = 0;
+        this.cleared = false;
+        this.duration = options.duration * 1000 || 3000;
+        this.pieces.forEach(function(piece) {
+            this.images[piece.image] = gamejs.image.load(conf.Images[piece.image]);
+        }, this);
+    },
+
+    update: function(dt) {
+        this.elapsed += dt;
+        if (this.elapsed > this.duration) {
+            this.cleared = true;
+        }
+    },
+
+    draw: function(surface) {
+        surface.blit(this.image, surface.rect);
+        this.pieces.forEach(function(piece) {
+            if (piece.time) {
+                if (this.elapsed > piece.time[0] * 1000 && this.elapsed < piece.time[1] * 1000) {
+                    surface.blit(this.images[piece.image], surface.rect);
+                }
+            } else if (piece.move){
+                var xOffset = Math.floor(piece.move[0] * (this.elapsed / this.duration));
+                var yOffset = Math.floor(piece.move[1] * (this.elapsed / this.duration));
+                surface.blit(this.images[piece.image], surface.rect.move(xOffset, yOffset));
+            } else {
+                surface.blit(this.images[piece.image], surface.rect);
+            }
+        }, this);
+    }
+
+
+});
+},{"./conf":2,"gramework":7,"underscore":51}],4:[function(require,module,exports){
 var animate = require('gramework').animate,
     _ = require('underscore'),
     RoadObject = require('./road').RoadObject,
@@ -578,6 +666,8 @@ var Driver = exports.Driver = RoadObject.extend({
         Driver.super_.prototype.initialize.apply(this, arguments);
         this.scene = options.scene;
         this.type = 'driver';
+        this.leftWoosh = new Audio('./assets/Woosh.ogg');
+        this.rightWoosh = new Audio('./assets/Woosh.ogg');
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 80, 64);
         this.loseSpriteSheet = new animate.SpriteSheet(gamejs.image.load(conf.Images.lose_01), 144, 96);
         var anim_angles = {};
@@ -628,19 +718,33 @@ var Driver = exports.Driver = RoadObject.extend({
     },
 
     left_boost_on: function() {
+        if (this.control) {
+            if (!this.left_boost) {
+                this.leftWoosh.play();
+            }
+        }
         this.left_boost = true;
     },
 
     right_boost_on: function() {
+        if (this.control) {
+            if (!this.right_boost) {    
+                this.rightWoosh.play();
+            }
+        }
         this.right_boost = true;
     },
 
     left_boost_off: function() {
         this.left_boost = false;
+        this.leftWoosh.pause();
+        this.leftWoosh.currentTime = 0;
     },
 
     right_boost_off: function() {
         this.right_boost = false;
+        this.rightWoosh.pause();
+        this.rightWoosh.currentTime = 0;
     },
 
     loseControl: function() {
@@ -679,6 +783,9 @@ var Driver = exports.Driver = RoadObject.extend({
 
             if (roadObject.type == 'enemy') {
                 if (this.inMyBox(roadObject)) {
+                    if (!this.isCrashing) {
+                        roadObject.hitSound.play();
+                    }
                     if (this.speed < 0.05) {
                         this.stop();
                         this.crash();
@@ -809,6 +916,7 @@ var Enemy = exports.Enemy = Car.extend({
         this.destinationPosition = 0;
         this.minSpeed = 0.13;
         this.holdingBack = true;
+        this.hitSound = new Audio('./assets/Hit.ogg');
         this.randomSpeedCounter = 0;
         this.randomSpeed = 0;
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 40, 24);
@@ -917,7 +1025,7 @@ var Barricade = exports.Barricade = RoadObject.extend({
         Barricade.super_.prototype.update.apply(this, arguments);
     }
 });
-},{"./conf":2,"./road":51,"gramework":6,"underscore":50}],4:[function(require,module,exports){
+},{"./conf":2,"./road":52,"gramework":7,"underscore":51}],5:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     conf = require('./conf'),
     CartScene = require('./cart_scene').CartScene,
@@ -925,6 +1033,7 @@ var gamejs = require('gramework').gamejs,
     animate = require('gramework').animate,
     Road = require('./road').Road,
     Driver = require('./driver').Driver,
+    CutScene = require('./cutscene').CutScene,
     _ = require('underscore');
 
 // Container for the entire game.
@@ -948,6 +1057,88 @@ var Game = exports.Game = function () {
     this.paused = false;
     this.music;
     this.musicPlaying = false;
+
+    this.cutscene01 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        music: './assets/Introconcise.ogg',
+        image: conf.Images.cutscene01
+    });
+
+    this.cutscene02 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        pieces: [
+            {image: 'piece02', time: [2, 4]}
+        ],
+        duration: 6,
+        image: conf.Images.cutscene02
+    });
+
+    this.cutscene03 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        pieces: [
+            {image: 'piece03_1', move: {x: [0,200], y: [0]}},
+            {image: 'piece03_2'}
+        ],
+        duration: 6,
+        image: conf.Images.cutscene03
+    });
+
+    this.cutscene04 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        pieces: [
+        ],
+        duration: 6,
+        image: conf.Images.cutscene04
+    });
+
+    this.cutscene05 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        pieces: [
+            {image: 'piece05_1', time: [1, 3]},
+            {image: 'piece05_2', time: [4, 6]},
+            {image: 'piece05_3', time: [7, 9]},
+            {image: 'piece05_4', time: [10, 12]}
+        ],
+        duration: 13,
+        image: conf.Images.cutscene05
+    });
+
+    this.cutscene06 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        pieces: [
+            {image: 'piece06_1', move: [0, 0]},
+            {image: 'piece06_2', time: [4, 6]},
+            {image: 'piece06_3', time: [4, 6]}
+        ],
+        duration: 7,
+        image: conf.Images.cutscene06
+    });
+
+    this.cutscene05 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        pieces: [
+            {image: 'piece05_1', time: [1, 3]},
+            {image: 'piece05_2', time: [4, 6]},
+            {image: 'piece05_3', time: [7, 9]},
+            {image: 'piece05_4', time: [10, 12]}
+        ],
+        duration: 13,
+        image: conf.Images.cutscene05
+    });
 
     this.level01 = new CartScene({
         width:320,
@@ -993,6 +1184,11 @@ var Game = exports.Game = function () {
 
     this.level = 0;
     this.levels = [
+        this.cutscene01,
+        this.cutscene02,
+        this.cutscene03,
+        this.cutscene04,
+        this.cutscene05,
         this.level01,
         this.level02,
         this.level03
@@ -1062,7 +1258,7 @@ Game.prototype.initialize = function() {
     };
 
     this.setScene(this.level01);
-
+    this.playMusic();
 };
 
 Game.prototype.draw = function(surface) {
@@ -1108,6 +1304,7 @@ Game.prototype.playMusic = function() {
     if (this.music) {
         this.music.play();
         this.musicPlaying = true;
+        this.music.loop = true;
     }
 };
 
@@ -1126,9 +1323,15 @@ Game.prototype.update = function(dt) {
     if (dt > 1000 / 3) dt = 1000 / 3;
     this.currentScene.update(dt);
     document.getElementById('fps').innerHTML = Math.floor(1 / (dt / 1000));
-    if (this.music && this.musicPlaying == false){
+    if (this.music != this.currentScene.music) {
+        this.stopMusic();
+        this.setMusic(this.currentScene.music);
         this.playMusic();
     }
+    // if (this.music && this.musicPlaying == false){
+        // this.stopMusic();
+        // this.playMusic();
+    // }
 
     if (this.currentScene.lost) {
         this.stopMusic();
@@ -1138,11 +1341,16 @@ Game.prototype.update = function(dt) {
     if (this.currentScene.cleared) {
         this.level++;
         this.setScene(this.levels[this.level]);
-        this.currentScene.restart();
+        if (this.currentScene.restart) {
+            this.currentScene.restart();
+        }
+        if (this.currentScene.music != 'continue') {
+            this.stopMusic();
+        }
     }
 };
 
-},{"./cart_scene":1,"./conf":2,"./driver":3,"./road":51,"gramework":6,"underscore":50}],5:[function(require,module,exports){
+},{"./cart_scene":1,"./conf":2,"./cutscene":3,"./driver":4,"./road":52,"gramework":7,"underscore":51}],6:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     Game = require('./game').Game,
     Dispatcher = require('gramework').Dispatcher,
@@ -1176,7 +1384,7 @@ var images = Object.keys(conf.Images).map(function(img) {
 gramework.init();
 gamejs.preload(images);
 gamejs.ready(main);
-},{"./conf":2,"./game":4,"gramework":6}],6:[function(require,module,exports){
+},{"./conf":2,"./game":5,"gramework":7}],7:[function(require,module,exports){
 var gamejs = require('gamejs'),
     inherits = require('super');
 
@@ -1214,7 +1422,7 @@ module.exports = {
 //TODO: Kill this in favour of Entity
 //exports.actors = require('./gramework/actors');
 
-},{"./gramework/animate":7,"./gramework/camera":8,"./gramework/dispatcher":9,"./gramework/entity":10,"./gramework/image":11,"./gramework/input":12,"./gramework/layers":13,"./gramework/particles":14,"./gramework/scenes":15,"./gramework/state":16,"./gramework/tilemap":17,"./gramework/uielements":18,"./gramework/vectors":19,"gamejs":20,"super":48}],7:[function(require,module,exports){
+},{"./gramework/animate":8,"./gramework/camera":9,"./gramework/dispatcher":10,"./gramework/entity":11,"./gramework/image":12,"./gramework/input":13,"./gramework/layers":14,"./gramework/particles":15,"./gramework/scenes":16,"./gramework/state":17,"./gramework/tilemap":18,"./gramework/uielements":19,"./gramework/vectors":20,"gamejs":21,"super":49}],8:[function(require,module,exports){
 var gamejs = require('gamejs'),
     inherits = require('super'),
     _ = require('underscore');
@@ -1336,7 +1544,7 @@ Animation.prototype.isFinished = function() {
     return this._isFinished;
 };
 
-},{"gamejs":20,"super":48,"underscore":49}],8:[function(require,module,exports){
+},{"gamejs":21,"super":49,"underscore":50}],9:[function(require,module,exports){
 /*
  * Create a camera around a display.
  *
@@ -1509,7 +1717,7 @@ _.extend(Camera.prototype, {
     }
 });
 
-},{"gamejs":20,"underscore":49}],9:[function(require,module,exports){
+},{"gamejs":21,"underscore":50}],10:[function(require,module,exports){
 /*global document*/
 var _ = require('underscore'),
     inherits = require('super'),
@@ -1622,7 +1830,7 @@ _.extend(Dispatcher.prototype, {
     }
 });
 
-},{"./state":16,"super":48,"underscore":49}],10:[function(require,module,exports){
+},{"./state":17,"super":49,"underscore":50}],11:[function(require,module,exports){
 // A stripped down, simpler Actors module.
 var gamejs = require('gamejs'),
     inherits = require('super'),
@@ -1679,14 +1887,14 @@ Entity.prototype.setPos = function(x, y) {
     this.rect.y = y;
 };
 
-},{"gamejs":20,"super":48}],11:[function(require,module,exports){
+},{"gamejs":21,"super":49}],12:[function(require,module,exports){
 var gamejs = require('gamejs');
 
 var imgfy = exports.imgfy = function(path) {
     return gamejs.image.load(path);
 };
 
-},{"gamejs":20}],12:[function(require,module,exports){
+},{"gamejs":21}],13:[function(require,module,exports){
 var gamejs = require('gamejs'),
     inherits = require('super'),
     Vec2d = require('./vectors').Vec2d,
@@ -1785,7 +1993,7 @@ GameController.prototype.movementVector = function() {
     return vel.normalized();
 };
 
-},{"./vectors":19,"gamejs":20,"super":48,"underscore":49}],13:[function(require,module,exports){
+},{"./vectors":20,"gamejs":21,"super":49,"underscore":50}],14:[function(require,module,exports){
 var imgfy = require('./image').imgfy;
 
 // Use for repeating Backgrounds on a screen, adjust speed
@@ -1819,7 +2027,7 @@ Scrollable.prototype = {
     }
 };
 
-},{"./image":11}],14:[function(require,module,exports){
+},{"./image":12}],15:[function(require,module,exports){
 var gamejs = require('gamejs');
 
 var Particle = exports.Particle = function(position, options) {
@@ -1910,7 +2118,7 @@ Emitter.prototype.draw = function(surface) {
     }, this);
 };
 
-},{"gamejs":20}],15:[function(require,module,exports){
+},{"gamejs":21}],16:[function(require,module,exports){
 var gamejs = require('gamejs'),
     inherits = require('super'),
     Camera = require('./camera'),
@@ -2028,7 +2236,7 @@ _.extend(Scene.prototype, {
     }
 });
 
-},{"./camera":8,"gamejs":20,"super":48,"underscore":49}],16:[function(require,module,exports){
+},{"./camera":9,"gamejs":21,"super":49,"underscore":50}],17:[function(require,module,exports){
 var gamejs = require('gamejs'),
     inherits = require('super');
 
@@ -2091,7 +2299,7 @@ module.exports = {
     FadeTransition: FadeTransition
 };
 
-},{"gamejs":20,"super":48}],17:[function(require,module,exports){
+},{"gamejs":21,"super":49}],18:[function(require,module,exports){
 /*jshint es5:true */
 /*
  * Tilemap module.
@@ -2257,7 +2465,7 @@ module.exports = {
     TileMap: TileMap
 };
 
-},{"gamejs":20,"super":48,"underscore":49}],18:[function(require,module,exports){
+},{"gamejs":21,"super":49,"underscore":50}],19:[function(require,module,exports){
 /*jshint es5:true */
 /*
  * Interface Entity module.
@@ -2734,7 +2942,7 @@ SliderWidget.prototype.init = function(options){
 };
 */
 
-},{"./entity":10,"gamejs":20,"super":48,"underscore":49}],19:[function(require,module,exports){
+},{"./entity":11,"gamejs":21,"super":49,"underscore":50}],20:[function(require,module,exports){
 /*jslint es5: true*/
 /*
  * Vector Utilities
@@ -2911,7 +3119,7 @@ Vec2d.prototype = {
 };
 
 
-},{"gamejs":20,"underscore":49}],20:[function(require,module,exports){
+},{"gamejs":21,"underscore":50}],21:[function(require,module,exports){
 var matrix = require('./gamejs/utils/matrix');
 var objects = require('./gamejs/utils/objects');
 var Callback = require('./gamejs/callback').Callback;
@@ -3897,7 +4105,7 @@ exports.onEvent = function(fn, scope) {
 exports.onTick = function(fn, scope) {
   exports.time._CALLBACK = new Callback(fn, scope);
 };
-},{"./gamejs/callback":21,"./gamejs/display":22,"./gamejs/draw":23,"./gamejs/event":24,"./gamejs/font":25,"./gamejs/http":26,"./gamejs/image":27,"./gamejs/mask":28,"./gamejs/mixer":29,"./gamejs/noise":30,"./gamejs/pathfinding/astar":31,"./gamejs/sprite":32,"./gamejs/surfacearray":33,"./gamejs/time":34,"./gamejs/tmx":35,"./gamejs/transform":36,"./gamejs/utils/arrays":37,"./gamejs/utils/base64":38,"./gamejs/utils/math":40,"./gamejs/utils/matrix":41,"./gamejs/utils/objects":42,"./gamejs/utils/prng":43,"./gamejs/utils/uri":44,"./gamejs/utils/vectors":45,"./gamejs/worker":46,"./gamejs/xml":47}],21:[function(require,module,exports){
+},{"./gamejs/callback":22,"./gamejs/display":23,"./gamejs/draw":24,"./gamejs/event":25,"./gamejs/font":26,"./gamejs/http":27,"./gamejs/image":28,"./gamejs/mask":29,"./gamejs/mixer":30,"./gamejs/noise":31,"./gamejs/pathfinding/astar":32,"./gamejs/sprite":33,"./gamejs/surfacearray":34,"./gamejs/time":35,"./gamejs/tmx":36,"./gamejs/transform":37,"./gamejs/utils/arrays":38,"./gamejs/utils/base64":39,"./gamejs/utils/math":41,"./gamejs/utils/matrix":42,"./gamejs/utils/objects":43,"./gamejs/utils/prng":44,"./gamejs/utils/uri":45,"./gamejs/utils/vectors":46,"./gamejs/worker":47,"./gamejs/xml":48}],22:[function(require,module,exports){
 /**
  * Manage a callback with scope
  */
@@ -3911,7 +4119,7 @@ var Callback = exports.Callback = function(fn, scope) {
 Callback.prototype.trigger = function() {
 	this.fn.apply(this.fnScope, arguments);
 };
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var Surface = require('../gamejs').Surface;
 
 /**
@@ -4168,7 +4376,7 @@ var getSurface = exports.getSurface = function() {
    return SURFACE;
 };
 
-},{"../gamejs":20,"./event":24}],23:[function(require,module,exports){
+},{"../gamejs":21,"./event":25}],24:[function(require,module,exports){
 /**
  * @fileoverview Utilities for drawing geometrical objects to Surfaces. If you want to put images on
  * the screen see gamejs/image.
@@ -4420,7 +4628,7 @@ exports.bezierCurve = function(surface, color, startPos, endPos, ct1Pos, ct2Pos,
 
    ctx.restore();
 };
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var display = require('./display');
 var Callback = require('./callback').Callback;
 
@@ -4689,7 +4897,7 @@ exports.init = function() {
 
 };
 
-},{"./callback":21,"./display":22}],25:[function(require,module,exports){
+},{"./callback":22,"./display":23}],26:[function(require,module,exports){
 var Surface = require('../gamejs').Surface;
 var objects = require('./utils/objects');
 
@@ -4780,7 +4988,7 @@ objects.accessors(Font.prototype, {
 
 });
 
-},{"../gamejs":20,"./utils/objects":42}],26:[function(require,module,exports){
+},{"../gamejs":21,"./utils/objects":43}],27:[function(require,module,exports){
 /**
  * @fileoverview Make synchronous http requests to your game's serverside component.
  *
@@ -4898,7 +5106,7 @@ exports.save = function(url, data, type) {
    return stringify(post(ajaxBaseHref() + url, {payload: data}, type));
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var gamejs = require('../gamejs');
 
 /**
@@ -5031,7 +5239,7 @@ var addToCache = function(img) {
    return;
 };
 
-},{"../gamejs":20}],28:[function(require,module,exports){
+},{"../gamejs":21}],29:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var objects = require('./utils/objects');
 
@@ -5283,7 +5491,7 @@ objects.accessors(Mask.prototype, {
    }
 });
 
-},{"../gamejs":20,"./utils/objects":42}],29:[function(require,module,exports){
+},{"../gamejs":21,"./utils/objects":43}],30:[function(require,module,exports){
 var gamejs = require('../gamejs');
 
 /**
@@ -5478,7 +5686,7 @@ exports.Sound = function Sound(uriOrAudio) {
    return this;
 };
 
-},{"../gamejs":20}],30:[function(require,module,exports){
+},{"../gamejs":21}],31:[function(require,module,exports){
 /**
  * @fileoverview
  * A noise generator comparable to Perlin noise, which is useful
@@ -5704,7 +5912,7 @@ Simplex.prototype.get3d = function(xin, yin, zin) {
   return 32.0*(n0 + n1 + n2 + n3);
 };
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 /**
  * @fileoverview
  * AStar Path finding algorithm
@@ -5862,7 +6070,7 @@ Map.prototype.actualDistance = function(pointA, pointB) {
    return 1;
 };
 
-},{"../utils/binaryheap":39}],32:[function(require,module,exports){
+},{"../utils/binaryheap":40}],33:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var arrays = require('./utils/arrays');
 var $o = require('./utils/objects');
@@ -6289,7 +6497,7 @@ exports.collideCircle = function(spriteA, spriteB) {
    return $v.distance(spriteA.rect.center, spriteB.rect.center) <= rA + rB;
 };
 
-},{"../gamejs":20,"./utils/arrays":37,"./utils/objects":42,"./utils/vectors":45}],33:[function(require,module,exports){
+},{"../gamejs":21,"./utils/arrays":38,"./utils/objects":43,"./utils/vectors":46}],34:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var accessors = require('./utils/objects').accessors;
 /**
@@ -6421,7 +6629,7 @@ var SurfaceArray = exports.SurfaceArray = function(surfaceOrDimensions) {
    return this;
 };
 
-},{"../gamejs":20,"./utils/objects":42}],34:[function(require,module,exports){
+},{"../gamejs":21,"./utils/objects":43}],35:[function(require,module,exports){
 /**
  * @fileoverview
  * Only used by GameJs internally to provide a game loop.
@@ -6471,7 +6679,7 @@ var perInterval = function() {
    return;
 };
 
-},{"./callback":21}],35:[function(require,module,exports){
+},{"./callback":22}],36:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var objects = require('./utils/objects');
 var xml = require('./xml');
@@ -6771,7 +6979,7 @@ var setProperties = function(object, node) {
    return object;
 };
 
-},{"../gamejs":20,"./utils/base64":38,"./utils/objects":42,"./utils/uri":44,"./xml":47}],36:[function(require,module,exports){
+},{"../gamejs":21,"./utils/base64":39,"./utils/objects":43,"./utils/uri":45,"./xml":48}],37:[function(require,module,exports){
 var Surface = require('../gamejs').Surface;
 var matrix = require('./utils/matrix');
 var math = require('./utils/math');
@@ -6876,7 +7084,7 @@ exports.flip = function(surface, flipHorizontal, flipVertical) {
    return newSurface;
 };
 
-},{"../gamejs":20,"./utils/math":40,"./utils/matrix":41,"./utils/vectors":45}],37:[function(require,module,exports){
+},{"../gamejs":21,"./utils/math":41,"./utils/matrix":42,"./utils/vectors":46}],38:[function(require,module,exports){
 /**
  * @fileoverview Utility functions for working with Obiects
  * @param {Object} item
@@ -6907,7 +7115,7 @@ exports.shuffle = function(array) {
     return array;
 };
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 /**
  * @fileoverview
  * Base64 encode / decode
@@ -6968,7 +7176,7 @@ exports.decodeAsArray = function(input, bytes) {
    return array;
 }
 ;
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /**
  * Binary Heap
  *
@@ -7124,7 +7332,7 @@ BinaryHeap.prototype.bubbleUp = function(idx) {
    return;
 };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /**
  *
  * absolute angle to relative angle, in degrees
@@ -7193,7 +7401,7 @@ exports.centroid = function() {
    ];
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /**
  * @fileoverview Matrix manipulation, used by GameJs itself. You
  * probably do not need this unless you manipulate a Context's transformation
@@ -7285,7 +7493,7 @@ var scale = exports.scale = function(m1, svec) {
    return multiply(m1, [sx, 0, 0, sy, 0, 0]);
 };
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /**
  * @fileoverview Utility functions for working with Objects
  */
@@ -7388,7 +7596,7 @@ exports.accessors = function(object, props) {
    return;
 };
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 /**
  * @fileoverview A seedable random-number generator.
  *
@@ -7539,7 +7747,7 @@ exports.random = function() {
 exports.init = function(seed) {
   alea = new Alea(seed);
 };
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /**
  * @fileoverview Utilies for URI handling.
  *
@@ -7657,7 +7865,7 @@ var removeDotSegments = function(path) {
    return out.join('/');
 };
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 var math=require('./math');
 
 /**
@@ -7783,7 +7991,7 @@ exports.truncate = function(v, maxLength) {
    return v;
 };
 
-},{"./math":40}],46:[function(require,module,exports){
+},{"./math":41}],47:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var uri = require('./utils/uri');
 var Callback = require('./callback').Callback;
@@ -8008,7 +8216,7 @@ function guid(moduleId) {
    };
    return moduleId + '@' + (S4()+S4());
 }
-},{"../gamejs":20,"./callback":21,"./utils/uri":44}],47:[function(require,module,exports){
+},{"../gamejs":21,"./callback":22,"./utils/uri":45}],48:[function(require,module,exports){
 /**
  * @fileoverview
  *
@@ -8143,7 +8351,7 @@ Document.fromURL = function(url) {
    return new Document(response.responseXML);
 };
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 /**
  * slice
  */
@@ -8269,7 +8477,7 @@ exports.merge = function (arr) {
   return main;
 };
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 //     Underscore.js 1.5.2
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -9547,9 +9755,9 @@ exports.merge = function (arr) {
 
 }).call(this);
 
-},{}],50:[function(require,module,exports){
-module.exports=require(49)
 },{}],51:[function(require,module,exports){
+module.exports=require(50)
+},{}],52:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     Entity = require('gramework').Entity,
     _ = require('underscore'),
@@ -10139,7 +10347,7 @@ var Car = exports.Car = RoadObject.extend({
         this.accel = 0.001;
     }
 });
-},{"./conf":2,"gramework":6,"underscore":50}],52:[function(require,module,exports){
+},{"./conf":2,"gramework":7,"underscore":51}],53:[function(require,module,exports){
 var Scene = require('gramework').Scene,
     gamejs = require('gramework').gamejs,
     _ = require('underscore');
@@ -10304,4 +10512,4 @@ _.extend(Camera.prototype, {
         display.blit(this.outView, display.rect);
     }
 });
-},{"gramework":6,"underscore":50}]},{},[5])
+},{"gramework":7,"underscore":51}]},{},[6])

@@ -69,8 +69,10 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.mapHeight = 220;
         this.theme = options.theme || 'woods';
         this.turnList = [];
+        this.barricadeTimer = 0;
         this.musicIsPlaying = false;
         this.music = new Audio(options.music);
+        this.loseMusic = new Audio('./assets/Youlose.ogg');
 
         this.particles = [];
         this.levelClear = false;
@@ -138,7 +140,6 @@ var CartScene = exports.CartScene = RoadScene.extend({
             scene: this
         });
 
-        this.addBarricade();
         this.showMap();
     },
 
@@ -246,6 +247,15 @@ var CartScene = exports.CartScene = RoadScene.extend({
             });
         }
 
+        // BARRICADE TIMER
+        if (this.d.control) {
+            this.barricadeTimer += dt;
+        }
+        if (this.barricadeTimer > 40000 / (this.difficulty[this.phase])) {
+            this.addBarricade();
+            this.barricadeTimer = 0;
+        }
+
         if (Object.keys(this.road.upcomingTurns).length == 0 && !this.map) {
             // Cleared all the turns - go to map!
             this.phase++;
@@ -293,6 +303,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
 
         // PLAYERS HAVE LOST
         if (this.d.isCrashing) {
+            this.music = this.loseMusic;
             this.loseCounter += dt;
             this.enemies.forEach(function(enemy) {
                 enemy.holdBack();

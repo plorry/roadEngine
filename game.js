@@ -5,6 +5,7 @@ var gamejs = require('gramework').gamejs,
     animate = require('gramework').animate,
     Road = require('./road').Road,
     Driver = require('./driver').Driver,
+    CutScene = require('./cutscene').CutScene,
     _ = require('underscore');
 
 // Container for the entire game.
@@ -28,6 +29,88 @@ var Game = exports.Game = function () {
     this.paused = false;
     this.music;
     this.musicPlaying = false;
+
+    this.cutscene01 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        music: './assets/Introconcise.ogg',
+        image: conf.Images.cutscene01
+    });
+
+    this.cutscene02 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        pieces: [
+            {image: 'piece02', time: [2, 4]}
+        ],
+        duration: 6,
+        image: conf.Images.cutscene02
+    });
+
+    this.cutscene03 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        pieces: [
+            {image: 'piece03_1', move: {x: [0,200], y: [0]}},
+            {image: 'piece03_2'}
+        ],
+        duration: 6,
+        image: conf.Images.cutscene03
+    });
+
+    this.cutscene04 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        pieces: [
+        ],
+        duration: 6,
+        image: conf.Images.cutscene04
+    });
+
+    this.cutscene05 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        pieces: [
+            {image: 'piece05_1', time: [1, 3]},
+            {image: 'piece05_2', time: [4, 6]},
+            {image: 'piece05_3', time: [7, 9]},
+            {image: 'piece05_4', time: [10, 12]}
+        ],
+        duration: 13,
+        image: conf.Images.cutscene05
+    });
+
+    this.cutscene06 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        pieces: [
+            {image: 'piece06_1', move: [0, 0]},
+            {image: 'piece06_2', time: [4, 6]},
+            {image: 'piece06_3', time: [4, 6]}
+        ],
+        duration: 7,
+        image: conf.Images.cutscene06
+    });
+
+    this.cutscene05 = new CutScene({
+        width: 320,
+        height: 220,
+        pixelScale: 2,
+        pieces: [
+            {image: 'piece05_1', time: [1, 3]},
+            {image: 'piece05_2', time: [4, 6]},
+            {image: 'piece05_3', time: [7, 9]},
+            {image: 'piece05_4', time: [10, 12]}
+        ],
+        duration: 13,
+        image: conf.Images.cutscene05
+    });
 
     this.level01 = new CartScene({
         width:320,
@@ -73,6 +156,11 @@ var Game = exports.Game = function () {
 
     this.level = 0;
     this.levels = [
+        this.cutscene01,
+        this.cutscene02,
+        this.cutscene03,
+        this.cutscene04,
+        this.cutscene05,
         this.level01,
         this.level02,
         this.level03
@@ -142,7 +230,7 @@ Game.prototype.initialize = function() {
     };
 
     this.setScene(this.level01);
-
+    this.playMusic();
 };
 
 Game.prototype.draw = function(surface) {
@@ -188,6 +276,7 @@ Game.prototype.playMusic = function() {
     if (this.music) {
         this.music.play();
         this.musicPlaying = true;
+        this.music.loop = true;
     }
 };
 
@@ -206,9 +295,15 @@ Game.prototype.update = function(dt) {
     if (dt > 1000 / 3) dt = 1000 / 3;
     this.currentScene.update(dt);
     document.getElementById('fps').innerHTML = Math.floor(1 / (dt / 1000));
-    if (this.music && this.musicPlaying == false){
+    if (this.music != this.currentScene.music) {
+        this.stopMusic();
+        this.setMusic(this.currentScene.music);
         this.playMusic();
     }
+    // if (this.music && this.musicPlaying == false){
+        // this.stopMusic();
+        // this.playMusic();
+    // }
 
     if (this.currentScene.lost) {
         this.stopMusic();
@@ -218,6 +313,11 @@ Game.prototype.update = function(dt) {
     if (this.currentScene.cleared) {
         this.level++;
         this.setScene(this.levels[this.level]);
-        this.currentScene.restart();
+        if (this.currentScene.restart) {
+            this.currentScene.restart();
+        }
+        if (this.currentScene.music != 'continue') {
+            this.stopMusic();
+        }
     }
 };

@@ -13,6 +13,8 @@ var Driver = exports.Driver = RoadObject.extend({
         Driver.super_.prototype.initialize.apply(this, arguments);
         this.scene = options.scene;
         this.type = 'driver';
+        this.leftWoosh = new Audio('./assets/Woosh.ogg');
+        this.rightWoosh = new Audio('./assets/Woosh.ogg');
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 80, 64);
         this.loseSpriteSheet = new animate.SpriteSheet(gamejs.image.load(conf.Images.lose_01), 144, 96);
         var anim_angles = {};
@@ -63,19 +65,33 @@ var Driver = exports.Driver = RoadObject.extend({
     },
 
     left_boost_on: function() {
+        if (this.control) {
+            if (!this.left_boost) {
+                this.leftWoosh.play();
+            }
+        }
         this.left_boost = true;
     },
 
     right_boost_on: function() {
+        if (this.control) {
+            if (!this.right_boost) {    
+                this.rightWoosh.play();
+            }
+        }
         this.right_boost = true;
     },
 
     left_boost_off: function() {
         this.left_boost = false;
+        this.leftWoosh.pause();
+        this.leftWoosh.currentTime = 0;
     },
 
     right_boost_off: function() {
         this.right_boost = false;
+        this.rightWoosh.pause();
+        this.rightWoosh.currentTime = 0;
     },
 
     loseControl: function() {
@@ -114,6 +130,9 @@ var Driver = exports.Driver = RoadObject.extend({
 
             if (roadObject.type == 'enemy') {
                 if (this.inMyBox(roadObject)) {
+                    if (!this.isCrashing) {
+                        roadObject.hitSound.play();
+                    }
                     if (this.speed < 0.05) {
                         this.stop();
                         this.crash();
@@ -244,6 +263,7 @@ var Enemy = exports.Enemy = Car.extend({
         this.destinationPosition = 0;
         this.minSpeed = 0.13;
         this.holdingBack = true;
+        this.hitSound = new Audio('./assets/Hit.ogg');
         this.randomSpeedCounter = 0;
         this.randomSpeed = 0;
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 40, 24);
