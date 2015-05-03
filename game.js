@@ -26,6 +26,8 @@ var Game = exports.Game = function () {
     this.cont = new GameController();
 
     this.paused = false;
+    this.music;
+    this.musicPlaying = false;
 
     this.level01 = new CartScene({
         width:320,
@@ -172,18 +174,37 @@ Game.prototype.event = function(ev) {
 
 Game.prototype.setScene = function(scene) {
     this.currentScene = scene;
+    this.setMusic(this.currentScene.music);
 };
 
+Game.prototype.playMusic = function() {
+    if (this.music) {
+        this.music.play();
+        this.musicPlaying = true;
+    }
+};
+
+Game.prototype.setMusic = function(music) {
+    this.music = music;
+};
+
+Game.prototype.stopMusic = function() {
+    if (this.music) {
+        this.music.pause();
+        this.musicPlaying = false;
+    }
+};
 
 Game.prototype.update = function(dt) {
     if (dt > 1000 / 3) dt = 1000 / 3;
     this.currentScene.update(dt);
     document.getElementById('fps').innerHTML = Math.floor(1 / (dt / 1000));
-    if (this.currentScene.music && this.currentScene.musicIsPlaying == false){
-        this.currentScene.playMusic();
+    if (this.music && this.musicPlaying == false){
+        this.playMusic();
     }
 
     if (this.currentScene.lost) {
+        this.stopMusic();
         this.currentScene.restart();
     }
 };

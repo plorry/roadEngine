@@ -192,6 +192,11 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.music.loop = true;
     },
 
+    stopMusic: function() {
+        this.music.stop();
+        this.musicIsPlaying = false;    
+    },
+
     update: function(dt, camera) {
         CartScene.super_.prototype.update.apply(this, arguments);
 
