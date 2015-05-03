@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var animate = require('gramework').animate,
     RoadScene = require('./roadscene').RoadScene,
     gamejs = require('gramework').gamejs,
@@ -11,11 +11,45 @@ var animate = require('gramework').animate,
 
 var themeSets = {
     'woods': [
+        {image: 'bigRock', height: 200, width: 200, collisionWidth: 200},
+        {image: 'rocks', height: 300, width: 300, collisionWidth: 250},
+        {image: 'tree02', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree03', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree04', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree05', height: 400, width: 400, collisionWidth: 100},
+        {image: 'water', height: 75, width: 300, collisionWidth: 200},
+        {image: 'tree06', height: 400, width: 400, collisionWidth: 100}
+    ],
+    'town': [
+        {image: 'house01', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house02', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house03', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house04', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house05', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house06', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house07', height: 250, width: 250, collisionWidth: 250},
         {image: 'tree02', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree03', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree04', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree05', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree06', height: 400, width: 400, collisionWidth: 100}
+    ],
+    'spooky': [
+        {image: 'ghostHouse03', height: 250, width: 250, collisionWidth: 250},
+        {image: 'ghostHouse05', height: 250, width: 250, collisionWidth: 250},
+        {image: 'ghostTree01', height: 400, width: 400, collisionWidth: 100},
+        {image: 'ghostTree02', height: 400, width: 400, collisionWidth: 100},
+        {image: 'ghostTree03', height: 400, width: 400, collisionWidth: 100}
+    ],
+    'lava': [
+        {image: 'volcano01', height: 250, width: 250, collisionWidth: 250},
+        {image: 'volcano02', height: 250, width: 250, collisionWidth: 250},
+        {image: 'volcano03', height: 250, width: 250, collisionWidth: 250},
+        {image: 'lavaTree01', height: 400, width: 400, collisionWidth: 100},
+        {image: 'lavaTree02', height: 200, width: 200, collisionWidth: 50},
+        {image: 'lavaTree03', height: 400, width: 400, collisionWidth: 100},
+        {image: 'lava01', height: 75, width: 400, collisionWidth: 400},
+        {image: 'lava02', height: 75, width: 400, collisionWidth: 400},
     ]
 };
 
@@ -26,7 +60,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.map = false;
         this.mapImage = gamejs.image.load(conf.Images.mapOverlay);
         this.mapHeight = 220;
-        this.theme = options.theme || 'woods';
+        this.theme = options.theme || 'lava';
         this.turnList = [];
 
         // MAP MODE VARS
@@ -320,7 +354,7 @@ _.extend(BullyGenerator.prototype, {
         }
     }
 });
-},{"./conf":2,"./driver":3,"./road":51,"./roadscene":52,"gramework":6,"underscore":50}],2:[function(require,module,exports){
+},{"./conf":2,"./driver":3,"./road":50,"./roadscene":51,"gramework":34,"underscore":49}],2:[function(require,module,exports){
 var Images = exports.Images = {
     bike_lane: './assets/bike_lane.png',
     background: './assets/background.png',
@@ -351,12 +385,30 @@ var Images = exports.Images = {
     tree06: './assets/tree06.png',
     shrub02: './assets/shrub02.png',
     shrub03: './assets/shrub03.png',
+    water: './assets/water.png',
     // Ghost Theme
     ghostHouse03: './assets/ghosthouse03.png',
     ghostHouse05: './assets/ghosthouse05.png',
     ghostTree01: './assets/ghosttree01.png',
     ghostTree02: './assets/ghosttree02.png',
     ghostTree03: './assets/ghosttree03.png',
+    // Town Theme
+    house01: './assets/house01.png',
+    house02: './assets/house02.png',
+    house03: './assets/house03.png',
+    house04: './assets/house04.png',
+    house05: './assets/house05.png',
+    house06: './assets/house06.png',
+    house07: './assets/house07.png',
+    // Lava Theme
+    volcano01: './assets/volcano01.png',
+    volcano02: './assets/volcano02.png',
+    volcano03: './assets/volcano03.png',
+    lava01: './assets/lava01.png',
+    lava02: './assets/lava02.png',
+    lavaTree01: './assets/lavatree01.png',
+    lavaTree02: './assets/lavatree02.png',
+    lavaTree03: './assets/lavatree03.png'
 };
 
 var globals = exports.globals = {
@@ -588,7 +640,7 @@ var Enemy = exports.Enemy = Car.extend({
     }
 });
 
-},{"./conf":2,"./road":51,"gramework":6,"underscore":50}],4:[function(require,module,exports){
+},{"./conf":2,"./road":50,"gramework":34,"underscore":49}],4:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     conf = require('./conf'),
     CartScene = require('./cart_scene').CartScene,
@@ -741,7 +793,7 @@ Game.prototype.update = function(dt) {
     document.getElementById('fps').innerHTML = Math.floor(1 / (dt / 1000));
 };
 
-},{"./cart_scene":1,"./conf":2,"./driver":3,"./road":51,"gramework":6,"underscore":50}],5:[function(require,module,exports){
+},{"./cart_scene":1,"./conf":2,"./driver":3,"./road":50,"gramework":34,"underscore":49}],5:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     Game = require('./game').Game,
     Dispatcher = require('gramework').Dispatcher,
@@ -775,1742 +827,7 @@ var images = Object.keys(conf.Images).map(function(img) {
 gramework.init();
 gamejs.preload(images);
 gamejs.ready(main);
-},{"./conf":2,"./game":4,"gramework":6}],6:[function(require,module,exports){
-var gamejs = require('gamejs'),
-    inherits = require('super');
-
-var textures = exports.textures = {
-    //TODO: Replace this hard-coded path
-};
-
-var texturePaths = Object.keys(textures).map(function(img) {
-    return textures[img];
-});
-
-var init = function() {
-    gamejs.preload(texturePaths);
-};
-
-module.exports = {
-    Dispatcher: require('./gramework/dispatcher'),
-    Entity: require('./gramework/entity'),
-    Camera: require('./gramework/camera'),
-    Scene: require('./gramework/scenes').Scene,
-    animate: require('./gramework/animate'),
-    state: require('./gramework/state'),
-    image: require('./gramework/image'),
-    input: require('./gramework/input'),
-    layers: require('./gramework/layers'),
-    particles:  require('./gramework/particles'),
-    tilemap: require('./gramework/tilemap'),
-    vectors: require('./gramework/vectors'),
-    uielements: require('./gramework/uielements'), 
-    gamejs: gamejs,
-    inherits: inherits,
-    init: init
-};
-
-//TODO: Kill this in favour of Entity
-//exports.actors = require('./gramework/actors');
-
-},{"./gramework/animate":7,"./gramework/camera":8,"./gramework/dispatcher":9,"./gramework/entity":10,"./gramework/image":11,"./gramework/input":12,"./gramework/layers":13,"./gramework/particles":14,"./gramework/scenes":15,"./gramework/state":16,"./gramework/tilemap":17,"./gramework/uielements":18,"./gramework/vectors":19,"gamejs":20,"super":48}],7:[function(require,module,exports){
-var gamejs = require('gamejs'),
-    inherits = require('super'),
-    _ = require('underscore');
-
-/*
- * Prepare a usable image for for a Sprite
- */
-var SpriteSheet = exports.SpriteSheet = function(image, w, h) {
-    this.width = w;
-    this.height = h;
-
-    this.image = image;
-
-    //this.image._context.imageSmoothingEnabled = false;
-    this.surfaceCache = [];
-
-
-    var imgSize = new gamejs.Rect([0,0],[this.width,this.height]);
-
-    // Extract the cells from the spritesheet image.
-    for (var i = 0; i < this.image.rect.height; i += this.height) {
-        for (var j = 0; j < this.image.rect.width; j += this.width) {
-            var surface = new gamejs.Surface([this.width, this.height]);
-            var rect = new gamejs.Rect(j, i, this.width, this.height);
-            //surface._context.imageSmoothingEnabled = false;
-            surface.blit(this.image, imgSize, rect);
-            this.surfaceCache.push(surface);
-        }
-    }
-
-    this.initialize.apply(this, arguments);
-};
-
-SpriteSheet.extend = inherits.extend;
-
-// An empty function by default. Override it with your own initialization logic.
-SpriteSheet.prototype.initialize = function(options) {};
-
-_.extend(SpriteSheet.prototype, {
-    get: function(index) {
-        return this.surfaceCache[index];
-    }
-});
-
-var Animation = exports.Animation = function(spriteSheet, initial, spec) {
-    this.spec = spec;
-
-    this.currentFrame = null;
-    this.currentFrameDuration = 0;
-    this.currentAnimation = null;
-    this._isFinished = false;
-
-    this.spriteSheet = spriteSheet;
-
-    this.image = spriteSheet.get(0);
-    this.start(initial);
-
-    this.initialize.apply(this, arguments);
-};
-
-Animation.extend = inherits.extend;
-
-// An empty function by default. Override it with your own initialization logic.
-Animation.prototype.initialize = function(options) {};
-
-Animation.prototype.setFrame = function(frame) {
-    this.frameIndex = frame;
-};
-
-Animation.prototype.start = function(name) {
-    this._isFinished = false;
-    this.setState(name);
-    this.update(0);
-    return;
-};
-
-Animation.prototype.setState = function(name) {
-    if (this.currentAnimation === name) {
-        return;
-    }
-
-    this.currentAnimation = name;
-    this.currentFrame = this.spec[name].frames[0];
-    this.frameIndex = 0;
-    this.currentFrameDuration = 0;
-    this.frameDuration = 1000 / this.spec[name].rate;
-};
-
-Animation.prototype.update = function(msDuration) {
-    if (this.currentAnimation === undefined) {
-        throw new Error('No animation started.');
-    }
-
-    this.currentFrameDuration += msDuration;
-    if (this.currentFrameDuration >= this.frameDuration){
-        var frames = this.spec[this.currentAnimation].frames;
-
-        if (!this.isFinished()) {
-            this.currentFrame = frames[this.frameIndex++];
-        }
-        //console.log(this.currentFrame);
-        this.currentFrameDuration = 0;
-
-        var length = this.spec[this.currentAnimation].frames.length - 1;
-        if (this.frameIndex > length) {
-            if (this.spec[this.currentAnimation].loop) {
-                this.frameIndex = 0;
-            } else {
-                this._isFinished = true;
-            }
-        }
-    }
-
-    this.image = this.spriteSheet.get(this.currentFrame);
-    return this.image;
-};
-
-Animation.prototype.isFinished = function() {
-    return this._isFinished;
-};
-
-},{"gamejs":20,"super":48,"underscore":49}],8:[function(require,module,exports){
-/*
- * Create a camera around a display.
- *
- * Create a constrainted view around a specific region, and/or 
- * follow specific positions on the map.
- *
- * Example usage:
- *
- *  var gamejs = require('gamejs')
- *      , Camera = require('gramework/camera');
- *
- *  var surfaceWidth = 640
- *      , surfaceHeight = 480;
- *
- *  var display = gamejs.display.setMode([surfaceWidth, surfaceHeight]);
- *  var surface = new gamejs.Surface([surfaceWidth, surfaceHeight]);
- *  var camera = new Camera(surface, {
- *      width: surfaceWidth / 2,
- *      height: surfaceHeight / 2
- *  })
- *
- *  And, on tick:
- *
- *  var tick = function(msDuration) {
- *      camera.update(msDuration);
- *
- *      // Draw all your actors, backgrounds, etc on primary surface.
- *      display.clear()
- *      surface.blit(aBackground);
- *      actors.draw(surface);
- *
- *      // Then, given the camera has the surface which you've blitted
- *      // everything onto, it will create a constrained view of the surface, which
- *      // you can blit back onto the screen. Performance should be ideal.
- *      var view = camera.draw();
- *      display.blit(view);
- *  };
- */
-
-var gamejs = require('gamejs'),
-    _ = require('underscore');
-
-/* Camera initialization.
- *
- * `surface`, an instance of gamejs.Surface.
- * `options`, a hash containing optional keys for `width` and `height`
- *      of the camera. As well as a `zoom` level (default: 1).
- *
- *
- */
-
-var Camera = module.exports = function(sceneExtents, options) {
-    this.initialize(sceneExtents, options);
-};
-
-_.extend(Camera.prototype, {
-    initialize: function(sceneExtents, options) {
-        this.width = options.width || 400;
-        this.height = options.height || 300;
-        this.zoom = options.zoom || 1;
-        this.rect = new gamejs.Rect([0,0], [this.width, this.height]);
-
-        this.sceneExtents = sceneExtents;
-
-        this.center = null;
-        this.dest = null;
-        this.xSpeed = 0;
-        this.ySpeed = 0;
-        this.zoom_multiplier = 1;
-        this.targetZoom = null;
-        this.sharp = options.sharp || true;
-
-        // Our constrainted camera view
-        this.view = new gamejs.Surface(this.rect);
-        return this;
-    },
-
-    update: function(dt) {
-        // Pan to dest
-        if (this.dest !== null) {
-            if (this.rect.center[0] < this.dest[0]) {this.rect.moveIp(this.xSpeed,0);}
-            if (this.rect.center[0] > this.dest[0]) {this.rect.moveIp(this.xSpeed,0);}
-            if (this.rect.center[1] < this.dest[1]) {this.rect.moveIp(0,this.ySpeed);}
-            if (this.rect.center[1] > this.dest[1]) {this.rect.moveIp(0,this.ySpeed);}
-
-            this.xSpeed = (this.dest[0] - this.rect.center[0]) / 10;
-            this.ySpeed = (this.dest[1] - this.rect.center[1]) / 10;
-
-            if (this.dest == this.rect.center) {
-                this.dest = null;
-                this.xSpeed = 0;
-                this.ySpeed = 0;
-            }
-        }
-        if (this.center !==null) {
-            this.dest = this.center.center();
-        }
-
-        if (this.targetZoom !== null) {
-            if (this.targetZoom > this.zoom) {
-                this.zoom_multiplier = 1 + ((this.targetZoom - this.zoom) * 0.1);
-            }
-            if (this.targetZoom < this.zoom) {
-                this.zoom_multiplier = 1 + ((this.targetZoom - this.zoom) * 0.1);
-            }
-            if (this.targetZoom == this.zoom) {
-                this.targetZoom = null;
-                this.zoom_multiplier = 1;
-            }
-        }
-
-        if (this.rect.width <= this.sceneExtents.width && this.rect.height <= this.sceneExtents.height) {
-            this.zoom = this.zoom * this.zoom_multiplier;
-        }
-        this.rect.width = this.width / this.zoom;
-        this.rect.height = this.height / this.zoom;
-
-        if (this.sharp) {
-            this.rect.left = Math.round(this.rect.left);
-            this.rect.top = Math.round(this.rect.top);
-        }
-
-        // The camera's extent cannot be bigger than the current surface's size
-        if (this.rect.width > this.sceneExtents.width) {
-            this.rect.width = this.sceneExtents.width;
-        }
-
-        if (this.rect.height > this.sceneExtents.height) {
-            this.rect.height = this.sceneExtents.height;
-        }
-
-        // The camera cannot pan beyond the extents of the scene
-        if (this.rect.top < 0) {
-            this.rect.top = 0;
-        }
-        if (this.rect.left < 0) {
-            this.rect.left = 0;
-        }
-        if (this.rect.bottom > this.sceneExtents.height) {
-            this.rect.bottom = this.sceneExtents.height;
-        }
-        if (this.rect.right > this.sceneExtents.width) {
-            this.rect.right = this.sceneExtents.width;
-        }
-    },
-
-    draw: function(source, destination) {
-        destination.blit(source, destination.rect, this.rect);
-    },
-
-    panTo: function(pos) {
-        this.dest = pos;
-        return;
-    },
-
-    follow: function(rect) {
-        this.center = rect;
-        return;
-    },
-
-    unfollow: function() {
-        this.center = null;
-        return;
-    },
-
-    // TODO: What does this accept exactly?
-    zoomTo: function(zoom) {
-        this.targetZoom = zoom;
-        return;
-    }
-});
-
-},{"gamejs":20,"underscore":49}],9:[function(require,module,exports){
-/*global document*/
-var _ = require('underscore'),
-    inherits = require('super'),
-    Transition = require('./state').Transition;
-
-function DispatcherException(message) {
-    this.message = message;
-    this.name = "DispatcherException";
-}
-
-var Dispatcher = module.exports = function(gamejs, options) {
-    options = (options || {});
-
-    this.stack = [];
-    this.defaultTransition = (typeof options.defaultTransition === "undefined" ? Transition : options.defaultTransition);
-
-    if (options.initial) {
-        this.push(options.initial);
-    }
-
-    options.canvas = (options.canvas || {});
-    var canvas;
-    if (options.canvas.id) {
-        canvas = document.getElementById(options.canvas.id);
-    } else {
-        canvas = document.getElementById("gjs-canvas");
-    }
-
-    if (typeof canvas === "undefined") {
-        throw new DispatcherException(
-            "No canvas element could be found in the document.");
-    }
-
-    var surfaceFlag = options.canvas.flag || undefined;
-    this.mainSurface = this._setSurface(gamejs, canvas, surfaceFlag);
-
-    gamejs.onTick(this.onTick, this);
-    gamejs.onEvent(this.onEvent, this);
-
-    this.initialize.apply(this, arguments);
-};
-
-Dispatcher.extend = inherits.extend;
-_.extend(Dispatcher.prototype, {
-    // Internal function to set surface from canvas. Overrided in tests until we
-    // can better figure out how to mock a *real* canvas.
-    _setSurface: function(gamejs, canvas, surfaceFlag) {
-        var surface = gamejs.display.setMode(
-        [canvas.width, canvas.height], surfaceFlag);
-        return surface;
-    },
-
-    // An empty function by default. Override it with your own initialization logic
-    initialize: function(options) { },
-
-    onTick: function(dt) {
-        this.update(dt);
-        this.draw(this.mainSurface);
-    },
-
-    onEvent: function(ev) {
-        this.event(ev);
-    },
-
-    reset: function(initial) {
-        this.stack = [];
-        this.push(initial);
-    },
-
-    push: function(state, transition) {
-        if (transition !== null) {
-            transition = (transition || this.defaultTransition);
-        }
-
-        if (transition) {
-            var ts = new transition(this.top(), state);
-            ts.dispatcher = this;
-            this.stack.push(ts);
-        } else {
-            state.dispatcher = this;
-            this.stack.push(state);
-        }
-
-    },
-
-    top: function() {
-        return this.stack[this.stack.length - 1];
-    },
-
-    parent: function() {
-        return this.stack[this.stack.length - 2];
-    },
-
-    send: function(eventType) {
-        var current = this.top();
-        if (typeof current[eventType] === "undefined") return;
-        current[eventType].apply(current, Array.prototype.slice.call(arguments, 1));
-    },
-
-    update: function(dt) {
-        this.send("update", dt);
-    },
-
-    event: function(ev) {
-        this.send("event", ev);
-    },
-
-    draw: function(surface) {
-        this.send("draw", surface);
-    }
-});
-
-},{"./state":16,"super":48,"underscore":49}],10:[function(require,module,exports){
-// A stripped down, simpler Actors module.
-var gamejs = require('gamejs'),
-    inherits = require('super'),
-    Sprite = gamejs.sprite.Sprite;
-
-/*
- * Required:
- * y: Starting y coordinate
- * x: Starting x coordinate
- * width: Width of sprite rectangle.
- * height: Height of sprite rectangle.
- */
-var Entity = module.exports = function(options) {
-    Sprite.apply(this, arguments);
-
-    this.w = options.width;
-    this.h = options.height;
-
-    this.rect = new gamejs.Rect([
-        options.x,
-        options.y
-    ], [this.w, this.h]);
-
-    this.initialize.apply(this, arguments);
-};
-
-Entity.extend = inherits.extend;
-inherits(Entity, Sprite);
-
-// An empty function by default. Override it with your own initialization logic.
-Entity.prototype.initialize = function(options) {};
-
-Entity.prototype.move = function(x, y) {
-    this.lastX = this.rect.x;
-    this.lastY = this.rect.y;
-
-    this.rect.x += x;
-    this.rect.y += y;
-};
-
-Entity.prototype.topLeft = function() {
-    return [this.rect.x, this.rect.y];
-};
-
-Entity.prototype.center = function() {
-    return [
-        this.rect.x + this.w / 2,
-        this.rect.y + this.h / 2
-    ];
-};
-
-Entity.prototype.setPos = function(x, y) {
-    this.rect.x = x;
-    this.rect.y = y;
-};
-
-},{"gamejs":20,"super":48}],11:[function(require,module,exports){
-var gamejs = require('gamejs');
-
-var imgfy = exports.imgfy = function(path) {
-    return gamejs.image.load(path);
-};
-
-},{"gamejs":20}],12:[function(require,module,exports){
-var gamejs = require('gamejs'),
-    inherits = require('super'),
-    Vec2d = require('./vectors').Vec2d,
-    _ = require('underscore');
-
-// A class to allow the player to control their character.
-var GameController = exports.GameController = function(options) {
-    this.keyDown = null;
-    this.keyUp = null;
-
-    // User can pass an object of controls. The default is
-    // simple four directional with the arrow keys.
-    this.controls = {
-        left: gamejs.event.K_LEFT,
-        right: gamejs.event.K_RIGHT,
-        up: gamejs.event.K_UP,
-        down: gamejs.event.K_DOWN,
-        reset: gamejs.event.K_r,
-        action: gamejs.event.K_SPACE,
-        menu: gamejs.event.K_ENTER,
-        cancel: gamejs.event.K_ESC
-    };
-    _.extend(this.controls, options);
-    this.reverseControls = {};
-
-    for (var key in this.controls) {
-        this.reverseControls[this.controls[key]] = key;
-    }
-
-    this.initialize.apply(this, arguments);
-};
-
-GameController.extend = inherits.extend;
-
-// An empty function by default. Override it with your own initialization logic.
-GameController.prototype.initialize = function(options) {};
-
-GameController.prototype.handle = function(event) {
-    if (event.type === gamejs.event.MOUSE_MOTION) {
-        return {
-            action: "mouseMotion",
-            value: event.pos
-        };
-    }
-
-    if (_.indexOf(_.values(this.controls), event.key) == -1) {
-        return;
-    }
-
-    if (event.type === gamejs.event.KEY_DOWN) {
-        this.keyDown = event.key;
-        this.keyUp = null;
-        return {
-            action: "keyDown",
-            value: this.keyDown,
-            label: this.reverseControls[this.keyDown]
-        };
-    } else if (event.type === gamejs.event.KEY_UP) {
-        this.keyUp = event.key;
-        this.keyDown = null;
-        return {
-            action: "keyUp",
-            value: this.keyUp,
-            label: this.reverseControls[this.keyUp]
-        };
-    }
-};
-
-GameController.prototype.reset = function() {
-    if (this.keyDown === this.controls.reset) {
-        return true;
-    }
-    return false;
-};
-
-// Given our four directional input, define a vector that'll push us in the
-// right direction. 
-GameController.prototype.movementVector = function() {
-    var vel = new Vec2d(0, 0);
-
-    if (this.keyDown === this.controls.left) {
-        vel.setX(-1);
-    } else if (this.keyDown === this.controls.right) {
-        vel.setX(1);
-    } else {
-        vel.setX(0);
-    }
-
-    if (this.keyDown === this.controls.up) {
-        vel.setY(-1);
-    } else if (this.keyDown === this.controls.down) {
-        vel.setY(1);
-    } else {
-        vel.setY(0);
-    }
-    return vel.normalized();
-};
-
-},{"./vectors":19,"gamejs":20,"super":48,"underscore":49}],13:[function(require,module,exports){
-var imgfy = require('./image').imgfy;
-
-// Use for repeating Backgrounds on a screen, adjust speed
-// with multiple backgrounds to gain parallax scrolling effect.
-var Scrollable = exports.Scrollable = function(img, pos, options) {
-    this.img = imgfy(img);
-    this.pos = pos;
-    this.init(options);
-};
-
-Scrollable.prototype = {
-    init: function(options) {
-        options = (options || {});
-        this.speed = (options.speed || 0);
-        // Retain original speed.
-        this.originalSpeed = this.speed;
-    },
-
-    draw: function(display) {
-        display.blit(this.img, this.pos);
-    },
-
-    update: function(dt) {
-        if (this.speed > 0) {
-            this.pos[0] -= this.speed * 0.05;
-
-            if (this.pos[0] < -(this.img.rect.width)) {
-                this.pos[0] = 860;
-            }
-        }
-    }
-};
-
-},{"./image":11}],14:[function(require,module,exports){
-var gamejs = require('gamejs');
-
-var Particle = exports.Particle = function(position, options) {
-    this.x = position.x;
-    this.y = position.y;
-    this.size = options.size || [8,8];
-    this.life = options.life || 0;
-    this.elapsed = 0;
-    this.angle = options.angle * Math.PI / 180 || 0;
-    this.speed = options.speed || 1;
-    this.velocity = [
-        this.speed * Math.sin(this.angle),
-        -this.speed * Math.cos(this.angle)
-    ];
-    this.decel = options.decel || 0.05;
-    this.accel = options.accel || [0,0];
-    this.color = options.color || [0,0,0];
-    this.colorString = 'rgb(' + this.color.join(',') + ')';
-    // TODO: We shouldn't force preload these images as they are not necessary
-    // for every game. Instead, allow a Particle to have an image defined
-    // against it.
-    var imageFile = options.imageFile; // || gramework.textures.simpleParticleBlurred;
-    this.image = gamejs.image.load(imageFile);
-    this.rect = this.image.rect;
-};
-
-Particle.prototype.update = function(dt) {
-    this.elapsed += dt;
-    if (this.elapsed >= this.life) return false;
-
-    this.speed = [
-        this.speed[0] + this.accel[0],
-        this.speed[1] + this.accel[1]
-    ];
-
-    this.x += this.velocity[0];
-    this.y += this.velocity[1];
-
-    this.color[0] -= 3;
-    //this.color[3] = 1 - (this.elapsed / this.life);
-    this.image.setAlpha((this.elapsed / this.life));
-
-    this.colorString = 'rgb(' + this.color.join(',') + ')';
-    return true;
-};
-
-Particle.prototype.draw = function(surface) {
-    //gamejs.draw.circle(surface, this.colorString, [this.x, this.y], 1, 0);
-    var colorSurface = this.image.clone();
-    colorSurface.fill(this.colorString);
-    this.image.blit(colorSurface, [0,0], this.rect, 'source-atop');
-    surface.blit(this.image, [this.x, this.y], this.rect, 'lighter');
-};
-
-var Emitter = exports.Emitter = function(position, options) {
-    this.particles = [];
-    this.x = position.x;
-    this.y = position.y;
-    // rate in particles per second
-    this.rate = options.rate || 1;
-    this.elapsed = 0;
-    this.rendering = options.rendering || 'source-over';
-    this.shape = options.shape || 'point';
-    this.maxParticles = options.maxParticles || 1000;
-};
-
-Emitter.prototype.update = function(dt) {
-    this.elapsed += dt;
-    while (this.elapsed > 1000 / this.rate && this.particles.length < this.maxParticles) {
-        var p = new Particle({x: this.x, y: this.y}, {
-            life: 1000,
-            color: [255,50,50],
-            angle: Math.random() * 30 - 15
-        });
-        this.particles.push(p);
-        this.elapsed -= (1000 / this.rate);
-    }
-    this.particles.forEach(function(p, i){
-        var update = p.update(dt);
-        if (update === false)
-            this.particles.splice(i,1);
-    }, this);
-};
-
-Emitter.prototype.draw = function(surface) {
-    this.particles.forEach(function(p) {
-        p.draw(surface);
-    }, this);
-};
-
-},{"gamejs":20}],15:[function(require,module,exports){
-var gamejs = require('gamejs'),
-    inherits = require('super'),
-    Camera = require('./camera'),
-    _ = require('underscore');
-
-var Scene = exports.Scene = function(options) {
-    options = (options || {});
-
-    this._elapsed = 0;
-    this._width = options.width;
-    this._height = options.height;
-    this._pixelScale = options.pixelScale || 4;
-
-    // No options passed, but we can give sensible defaults by getting the game's
-    // main surface.
-    if (!this._width || !this._height) {
-        var size = gamejs.display.getSurface().getSize();
-        if (this._pixelScale && this._pixelScale !== 1) {
-            size = [Math.floor(size[0] / this._pixelScale), Math.floor(size[1] / this._pixelScale)];
-        }
-        this._width = (Math.floor(this._width / this._pixelScale) || size[0]);
-        this._height = (Math.floor(this._height / this._pixelScale) || size[1]);
-    }
-
-    // Actors will be deprecated in favour of entities.
-    this.actors = new gamejs.sprite.Group();
-    this.entities = new gamejs.sprite.Group();
-
-    this.layers = [];
-    this.elements = new gamejs.sprite.Group();
-    this.view = new gamejs.Surface([this._width, this._height]);
-
-    this.camera = new Camera(this.view.rect, {
-        width: this._width,
-        height: this._height
-    });
-
-    this.surface = new gamejs.Surface(this.camera.rect);
-
-    this.initialize.apply(this, arguments);
-};
-Scene.extend = inherits.extend;
-
-_.extend(Scene.prototype, {
-    // An empty function by default. Override it with your own initialization logic.
-    initialize: function(options) {
-    },
-
-    width: function() {
-        return this._width;
-    },
-
-    height: function() {
-        return this._height;
-    },
-
-    getElapsedTime: function() {
-        return this._elapsed;
-    },
-
-    pushEntity: function(entity) {
-        this.entities.add(entity);
-    },
-
-    pushElement: function(element) {
-        this.elements.add(element);
-    },
-
-    pushLayer: function(layer) {
-        this.layers.push(layer);
-    },
-
-    update: function(dt) {
-        
-        this.layers.forEach(function(layer) {
-            layer.update(dt);
-        }, this);
-        
-        this.entities.update(dt);
-        this.actors.update(dt);
-        this.elements.update(dt);
-        this.camera.update(dt);
-        this._elapsed += dt;
-    },
-
-    draw: function(display, options) {
-        // TODO: Offer same interface as Sprite groups. No need to iterate
-        options = (options || {});
-
-        var defaults = {
-            clear: true
-        };
-        _.extend(defaults, options);
-
-        if (defaults.clear === true) {
-            this.view.clear();
-            display.clear();
-        }
-
-        this.layers.forEach(function(layer) {
-            layer.draw(this.view, this.camera);
-        }, this);
-        this.actors.draw(this.view);
-        this.entities.draw(this.view);
-
-        if (this._pixelScale !== 1) {
-            this.camera.draw(this.view, this.surface);
-            this.elements.draw(this.surface);
-            display.blit(this.surface, display.rect);
-        } else {
-            this.camera.draw(this.view, display);
-            this.elements.draw(display);
-        }
-
-    }
-});
-
-},{"./camera":8,"gamejs":20,"super":48,"underscore":49}],16:[function(require,module,exports){
-var gamejs = require('gamejs'),
-    inherits = require('super');
-
-var Transition = function(before, after, options) {
-    options = (options || {});
-
-    this.before = before;
-    this.after = after;
-
-    if (!this.time) {
-        this.time = (options.time || 2.0);
-    }
-
-    if (!this.colour) {
-        this.colour = (options.colour || [255, 0, 255]);
-    }
-
-    this.p = 0;
-    this.initialize.apply(this, arguments);
-};
-
-Transition.prototype.initialize = function(before, after, options) {};
-Transition.prototype.draw = function(surface) {};
-Transition.prototype.update = function(dt) { this.dispatcher.push(this.after, null); };
-Transition.extend = inherits.extend;
-
-var FadeTransition = Transition.extend({
-    time: 2.0,
-    colour: [0, 0, 0]
-});
-
-FadeTransition.prototype.draw = function(surface) {
-    var alpha;
-    surface.clear();
-
-    // At the start of the transition, we go from a solid block to 0-alpha, and
-    // then we begin showing the new state going from 1-alpha to 0-alpha again.
-    if (this.p < (this.time / 2) && this.before) {
-        alpha = (this.time - this.p) * this.p;
-        this.before.draw(surface);
-    } else {
-        alpha = (this.time - this.p) / this.p;
-        this.after.draw(surface);
-    }
-
-    var rgbaString = ["rgba(", this.colour.join(",") + ",", alpha, ")"].join('');
-    surface.fill(rgbaString);
-};
-FadeTransition.prototype.update = function(dt) {
-    dt = (dt / 1000);
-
-    this.p += dt;
-    if (this.p >= this.time) {
-        this.dispatcher.push(this.after, null);
-    }
-};
-
-module.exports = {
-    Transition: Transition,
-    FadeTransition: FadeTransition
-};
-
-},{"gamejs":20,"super":48}],17:[function(require,module,exports){
-/*jshint es5:true */
-/*
- * Tilemap module.
- *
- */
-var gamejs = require('gamejs'),
-    inherits = require('super'),
-    Sprite = gamejs.sprite.Sprite,
-    extend = gamejs.utils.objects.extend,
-    _ = require('underscore'),
-    tmx = gamejs.tmx;
-
-var Tile = function(rect, properties, coords) {
-    gamejs.sprite.Sprite.apply(this, arguments);
-
-    this.rect = rect;
-    this.properties = properties;
-    this.coords = coords;
-
-    this.initialize.apply(this, arguments);
-};
-Tile.extend = inherits.extend;
-inherits(Tile, gamejs.sprite.Sprite);
-
-// An empty function by default. Override it with your own initialization logic.
-Tile.prototype.initialize = function(options) {}
-
-// Loads the Map at `url` and holds all layers.
-var TileMap = exports.TileMap = function(url, options) {
-    options = (options || {});
-
-    var tileModel = options.tileModel || Tile;
-    this.tiles = [];
-
-    var callbacks = options.callbacks || {};
-
-    this.getTile = function(x, y){
-        return this.tiles[x][y];
-    };
-
-    // Initialize.
-    var self = this;
-    var map = new tmx.Map(url);
-
-    this.getNeighbours = function(x, y) {
-        var neighbours = [];
-        if (x < map.width - 1) {
-            neighbours.push(this.getTile(x+1, y));
-        }
-        if (y < map.height - 1) {
-            neighbours.push(this.getTile(x, y+1));
-        }
-        if (x > 0) {
-            neighbours.push(this.getTile(x-1, y));
-        }
-        if (y > 0) {
-            neighbours.push(this.getTile(x, y-1));
-        }
-        return neighbours;
-    };
-
-    // Given the TMX Map we've loaded, go through each layer (via map.layers,
-    // provided by gamejs), and return a LayerView that we can deal with.
-    this.layerViews = map.layers.map(function(layer) {
-        return new LayerView(self, layer, {
-            tileWidth: map.tileWidth,
-            tileHeight: map.tileHeight,
-            width: map.width,
-            height: map.height,
-            tiles: map.tiles,
-            callbacks: callbacks,
-            tileModel: tileModel
-        });
-    });
-
-    this.initialize(options);
-
-    return this;
-};
-
-TileMap.extend = inherits.extend;
-
-TileMap.prototype.draw = function(display, camera) {
-            // If a layer has a z value != 0, it will be offset relative to the camera
-        // The offset creates a parallax effect
-        // As the z value -> infinity, the scrolling relative to the camera -> 0
-        // ie. a greater z value means the layer is further in the distance
-        this.layerViews.forEach(function(layerView) {
-            var z = layerView.zValue;
-            var offset = [
-                camera.rect.left * z / (z+1),
-                camera.rect.top * z / (z+1)
-            ];
-            layerView.draw(display, offset);
-        }, this);
-};
-
-var LayerView = function(map, layer, opts) {
-    if (layer.properties) {
-        this.zValue = layer.properties.z || 0;
-        this.doDraw = layer.properties.draw || true;
-        this.solid = layer.properties.solid || false;
-    } else {
-        this.zValue = 0;
-        this.doDraw = true;
-        this.solid = false;
-    }
-    this.tileModel = opts.tileModel || Tile;
-
-    console.log(opts);
-
-    this.draw = function(display, offset) {
-        if (this.doDraw === true) display.blit(this.surface, offset);
-    };
-
-    // Initialize.
-    this.surface = new gamejs.Surface(
-        opts.width * opts.tileWidth,
-        opts.height * opts.tileHeight
-    );
-    this.surface.setAlpha(layer.opacity);
-
-    // Note how below we look up the "gid" of the tile images in the TileSet 
-    // from the Map ('opt.tiles') to get the actual Surfaces.
-    layer.gids.forEach(function(row, i) {
-        row.forEach(function(gid, j) {
-            if (!map.tiles[j]) {
-                map.tiles[j] = [];
-            }
-            if (gid === 0) {
-                return;
-            }
-
-            var tileProperties = opts.tiles.getProperties(gid);
-            var tileSurface = opts.tiles.getSurface(gid);
-            if (tileSurface) {
-                var tilePos = [j * opts.tileWidth, i * opts.tileHeight];
-                var tileRect = new gamejs.Rect(
-                  tilePos,
-                  [opts.tileWidth, opts.tileHeight]
-                );
-                this.surface.blit(tileSurface, tileRect);
-                var coords = [j, i];
-                var tile = new this.tileModel(tileRect, tileProperties, coords);
-                map.tiles[j][i] = tile;
-
-                // Tile property callbacks.
-                Object.keys(tileProperties).forEach(function(prop) {
-                    Object.keys(opts.callbacks).forEach(function(fn) {
-                        if (prop === fn) opts.callbacks[fn](tileRect);
-                    });
-                });
-            } else {
-                gamejs.log('No GID ', gid, i, j, 'layer', i);
-            }
-        }, this);
-    }, this);
-    return this;
-};
-
-module.exports = {
-    Tile: Tile,
-    TileMap: TileMap
-};
-
-},{"gamejs":20,"super":48,"underscore":49}],18:[function(require,module,exports){
-/*jshint es5:true */
-/*
- * Interface Entity module.
- *
- */
-var gamejs = require('gamejs');
-var Entity = require('./entity'),
-    inherits = require('super'),
-    _ = require('underscore');
-
-var Element = function(options) {
-    Entity.apply(this, arguments);
-};
-
-_.extend(Element.prototype, Entity.prototype, {
-    initialize: function(options) {
-        // TODO: Allow borderWidth to accept array to differentiate between vertical width and horizontal width
-        this.borderWidth = options.borderWidth || 0;
-        this._show = options.show || false;
-
-        if (options.color) {
-            if (options.color.length === 3) {
-                this.color = 'rgb(' + options.color.join(',') + ')';
-            } else if (options.color.length === 4) {
-                this.color = 'rgba(' + options.color.join(',') + ')';
-            }
-        } else {
-            this.color = '#000';
-        }
-
-        if (options.borderColor) {
-            if (options.borderColor.length === 3) {
-                this.borderColor = 'rgb(' + options.borderColor.join(',') + ')';
-            } else if (options.borderColor.length === 4) {
-                this.borderColor = 'rgba(' + options.borderColor.join(',') + ')';
-            }
-        } else {
-            this.borderColor = '#000';
-        }
-
-        if (options.borderImage) {
-            this.borderImage = new BorderImage({
-                slice: options.borderImageSlice,
-                imgPath: options.borderImage,
-                repeat: options.borderImageRepeat,
-                width: this.w + this.borderWidth,
-                height: this.h + this.borderWidth,
-                x: this.rect.left - (this.borderWidth / 2),
-                y: this.rect.top - (this.borderWidth / 2),
-                //size: [width + 2 * this.borderWidth, height + 2 * this.borderWidth],
-                //position: [this.position[0] - this.borderWidth, this.position[1] - this.borderWidth],
-                borderWidth: this.borderWidth
-            });
-        }
-
-        if (options.image) {
-            this.image = gamejs.image.load(options.image);
-        }
-    },
-
-    update: function(dt) {
-
-    },
-
-    draw: function(surface) {
-        if (!this._show) {
-            return;
-        }
-        if (this.image) {
-            Entity.prototype.draw.apply(this, arguments);
-        } else {
-            gamejs.draw.rect(surface, this.color, this.rect);
-        }
-
-        if (this.borderImage) {
-            this.borderImage.draw(surface);
-        } else if (this.borderWidth > 0){
-            gamejs.draw.rect(
-                surface,
-                this.borderColor,
-                this.rect,
-                this.borderWidth
-            );
-        }
-
-    },
-
-    show: function() {
-        this._show = true;
-    },
-
-    hide: function() {
-        this._show = false;
-    },
-
-    setImage: function(image) {
-        // image must be a valid gamejs.Surface instance
-        this.image = image;
-    }
-});
-
-Element.extend = inherits.extend;
-
-var BorderImage = function(options) {
-    Entity.apply(this, arguments);
-};
-
-_.extend(BorderImage.prototype, Entity.prototype, {
-    initialize: function(options) {
-
-        if (typeof options.imgPath === "string") {
-            this.ninePatch = gamejs.image.load(options.imgPath);
-        } else {
-            this.ninePatch = options.imgPath;
-        }
-
-        if (Array.isArray(options.slice) && options.slice.length === 2) {
-            this.vSlice = options.slice[1];
-            this.hSlice = options.slice[0];
-        } else if (typeof options.slice === 'number') {
-            this.vSlice = this.hSlice = options.slice;
-        }
-        this.repeat = options.repeat || 'repeat';
-        this.position = options.position || [0,0];
-        this.borderWidth = options.borderWidth || 0;
-
-        /*
-        This is where the BorderImage object breaks apart the image file into nine sections and creates
-        the respective surfaces for the corners and sides. These will be drawn around the parent element
-        object at the time of rendering
-        */
-
-        var imgSize = this.ninePatch.getSize();
-        if (this.vSlice > imgSize[1]) throw new Error("vert slice greater than image height");
-        if (this.hSlice > imgSize[0]) throw new Error("horz slice greater than image width");
-
-        var columnHeight = imgSize[1] - (2 * this.vSlice);
-        var rowWidth = imgSize[0] - (2 * this.hSlice);
-        var cornerRect = new gamejs.Rect(0,0,this.borderWidth,this.borderWidth);
-        var columnRect = new gamejs.Rect(0,0,this.borderWidth,columnHeight);
-        var rowRect = new gamejs.Rect(0,0,rowWidth,this.borderWidth);
-
-        this.leftBorderFull = new gamejs.Surface(this.borderWidth, this.h - 2 * this.borderWidth);
-        this.rightBorderFull = new gamejs.Surface(this.borderWidth, this.h - 2 * this.borderWidth);
-        this.topBorderFull = new gamejs.Surface(this.w - 2 * this.borderWidth, this.borderWidth);
-        this.bottomBorderFull = new gamejs.Surface(this.w - 2 * this.borderWidth, this.borderWidth);
-
-        this.topLeft = new gamejs.Surface(this.borderWidth, this.borderWidth);
-        this.topRight = new gamejs.Surface(this.borderWidth, this.borderWidth);
-        this.bottomLeft = new gamejs.Surface(this.borderWidth, this.borderWidth);
-        this.bottomRight = new gamejs.Surface(this.borderWidth, this.borderWidth);
-
-        this.leftBorder = new gamejs.Surface(this.borderWidth, columnHeight);
-        this.rightBorder = new gamejs.Surface(this.borderWidth, columnHeight);
-        this.topBorder = new gamejs.Surface(rowWidth, this.borderWidth);
-        this.bottomBorder = new gamejs.Surface(rowWidth, this.borderWidth);
-
-        var topLeftRect = new gamejs.Rect(0,0,this.hSlice,this.vSlice);
-        var topRightRect = new gamejs.Rect(imgSize[0]-this.hSlice,0,this.hSlice,this.vSlice);
-        var bottomLeftRect = new gamejs.Rect(0, imgSize[1]-this.vSlice,this.hSlice,this.vSlice);
-        var bottomRightRect = new gamejs.Rect(imgSize[0]-this.hSlice,imgSize[1]-this.vSlice,this.hSlice,this.vSlice);
-
-        this.topLeft.blit(this.ninePatch, cornerRect, topLeftRect);
-        this.topRight.blit(this.ninePatch, cornerRect, topRightRect);
-        this.bottomLeft.blit(this.ninePatch, cornerRect, bottomLeftRect);
-        this.bottomRight.blit(this.ninePatch, cornerRect, bottomRightRect);
-
-        var leftRect = new gamejs.Rect(0,this.vSlice,this.hSlice,columnHeight);
-        var rightRect = new gamejs.Rect(imgSize[0]-this.hSlice,this.vSlice,this.hSlice,columnHeight);
-        var topRect = new gamejs.Rect(this.hSlice,0,rowWidth,this.vSlice);
-        var bottomRect = new gamejs.Rect(this.hSlice,imgSize[1]-this.vSlice,rowWidth,this.vSlice);
-
-        this.leftBorder.blit(this.ninePatch, columnRect, leftRect);
-        this.rightBorder.blit(this.ninePatch, columnRect, rightRect);
-        this.topBorder.blit(this.ninePatch, rowRect, topRect);
-        this.bottomBorder.blit(this.ninePatch, rowRect, bottomRect);
-
-        this.image = new gamejs.Surface(this.rect);
-
-        console.log(this.x + ' ' + this.y);
-
-        for (var i=0;i*this.leftBorder.getSize()[1] < this.h;i++) {
-            this.leftBorderFull.blit(this.leftBorder, [0,(i*this.leftBorder.getSize()[1])]);
-            this.rightBorderFull.blit(this.rightBorder, [0,(i*this.leftBorder.getSize()[1])]);
-        }
-
-        this.image.blit(this.leftBorderFull, [0, this.borderWidth]);
-        this.image.blit(this.rightBorderFull, [this.w-this.borderWidth, this.borderWidth]);
-
-        for (i=0;i*this.topBorder.getSize()[0] < this.w;i++) {
-            this.topBorderFull.blit(this.topBorder, [(i*this.topBorder.getSize()[0]),0]);
-            this.bottomBorderFull.blit(this.bottomBorder, [(i*this.topBorder.getSize()[0]),0]);
-        }
-
-        this.image.blit(this.topBorderFull, [this.borderWidth, 0]);
-        this.image.blit(this.bottomBorderFull, [this.borderWidth, this.h-this.borderWidth]);
-
-        this.image.blit(this.topLeft);
-        this.image.blit(this.topRight, [this.w-this.borderWidth,0]);
-        this.image.blit(this.bottomLeft, [0,this.h - this.borderWidth]);
-        this.image.blit(this.bottomRight, [this.w-this.borderWidth,this.h - this.borderWidth]);
-
-        console.log(this.image);
-    },
-
-    update: function() {
-
-    }
-});
-
-var GradientSurface = function(surface, options) {
-    var gradSurface = surface.clone();
-
-    var colors = options.colors || [[255, 255, 255]];
-    var steps = options.steps || 1;
-
-    var segHeight = gradSurface.height / this.steps;
-
-    if (colors.length === 1){
-        gradSurface.fill(colors[0]);
-        return gradSurface;
-    }
-    var subSteps = steps / (colors.length - 1);
-    colors.forEach(function(color, i) {
-        if (colors[i+1] === undefined){}
-        var nextColor = colors[i+1];
-        var rStep = (color[0] - nextColor[0]) / subSteps;
-        var gStep = (color[1] - nextColor[1]) / subSteps;
-        var bStep = (color[2] - nextColor[2]) / subSteps;
-
-        for (i=0; i < subSteps; i++) {
-            var subRect = new gamejs.Rect(
-                [0, Math.floor(segHeight * i)],
-                [gradSurface.width, Math.ceil(segHeight)]);
-            var thisColor = [
-                Math.floor(Math.abs(color[0] - (i * rStep))),
-                Math.floor(Math.abs(color[1] - (i * gStep))),
-                Math.floor(Math.abs(color[2] - (i * bStep)))
-            ];
-
-            thisColor = 'rgb(' + thisColor.join(',') + ')';
-            gamejs.draw.rect(gradSurface, thisColor, subRect, 0);
-        }
-    });
-
-    return gradSurface;
-};
-
-
-var TextBlock = Element.extend({
-    initialize: function(options) {
-        Element.prototype.initialize.apply(this, arguments);
-
-        this.font = new gamejs.font.Font(options.font);
-        this.text = options.text || '';
-        //this.fontSurface = this.font.render(this.text, "#fff");
-        this.image = new gamejs.Surface(this.rect);
-        //this.image.blit(this.fontSurface);
-
-        this.rolling = options.rolling || true;
-        this.lineHeight = options.lineHeight;
-
-        if (this.rolling) {
-            this.initText();
-        }
-    },
-
-    initText: function() {
-        this.charTimer = 0;
-        this.charDuration = 20;
-        this.lineSurfaces = [];
-        this.done = false;
-        this.doneDuration = 0;
-        this.slideTo = 0;
-        this.slide = 0;
-        this.currentLine = 0;
-        this.currentChar = 0;
-        this.words = this.text.split(" ");
-        this.lines = [];
-        var i = 0;
-        this.lines[i] = '';
-        //Text line wrapping
-        this.words.forEach(function(word) {
-            var testSurface = this.font.render(
-                this.lines[i] + word + ' ',
-                this.fontColor);
-            var testWidth = testSurface.getSize()[0];
-            if (testWidth > this.rect.width) {
-                //Too wide. Time to wrap
-                i++;
-                this.lines[i] = '';
-            }
-            this.lines[i] +=  word + ' ';
-        }, this);
-    },
-
-    update: function(dt) {
-        if (this.done || !this.rolling) {
-            this.doneDuration += dt;
-            return;
-        }
-        if (this.slide < this.slideTo) {
-            this.slide++;
-        } else {
-            this.charTimer += dt;
-            if (this.charTimer >= this.charDuration) {
-                this.currentChar++;
-                this.charTimer = 0;
-            }
-            if (this.currentChar > this.lines[this.currentLine].length) {
-                this.currentLine++;
-                this.currentChar = 0;
-                if (this.currentLine > 1) {
-                    this.slideUp(this.lineHeight);
-                }
-            }
-            if (this.currentLine >= this.lines.length) {
-                this.done = true;
-            } else {
-                if (this.currentChar > 0) {
-                    this.lineSurfaces[this.currentLine] = this.font.render(
-                        this.lines[this.currentLine].substring(0, this.currentChar),
-                        "#fff");
-                }
-            }
-        }
-    },
-
-    draw: function(surface) {
-        this.image.clear();
-        this.lineSurfaces.forEach(function(lineSurface, index, array){
-            this.image.blit(lineSurface, [0, (this.lineHeight * index) - this.slide]);
-        }, this);
-        Element.prototype.draw.apply(this, arguments);
-    },
-
-    setText: function(string) {
-        this.text = string;
-        this.initText();
-    },
-
-    slideUp: function(height) {
-        this.slideTo += height;
-    }
-});
-
-module.exports = {
-    Element: Element,
-    TextBlock: TextBlock
-};
-
-/*
-
-
-var Menu = exports.Menu = function(options){
-    this.items = [];
-    this.init(options);
-};
-
-Menu.prototype.init = function(options){
-    this.title = options.title || undefined;
-    if (options.width && options.height) {
-        if (options.color.length === 4)
-            var colorString = "rgba("+options.color.join(',')+")";
-        else if (options.color.length === 3)
-            var colorString = "rgb("+options.color.join(',')+")";
-        else var colorString = "rgb(0,0,0)";
-        this.surface = new Element(options.height, options.width, {
-            color: colorString,
-            position: options.position || [0,0],
-            borderWidth: options.borderWidth || 0,
-            borderImage: {
-                vSlice: options.borderImage.vSlice || 0,
-                hSlice: options.borderImage.hSlice || 0
-            }
-        });
-    } else {
-        this.surface = undefined;
-    }
-    if (options.items){
-        options.items.forEach(function(item){
-            var newItem = new MenuItem(item);
-            this.items.push(newItem);
-        }, this);
-    }
-
-    this._isActive = false;
-    this.padding = options.padding || 0;
-    if (options.border){
-
-    }
-};
-
-Menu.prototype.isActive = function(){
-    return this._isActive;
-};
-
-Menu.prototype.activate = function(){
-    return this._isActive = true; 
-};
-
-Menu.prototype.deactivate = function(){
-    return this._isActive = false;
-};
-
-Menu.prototype.update = function(dt){
-    this.surface.update(dt);
-};
-
-Menu.prototype.draw = function(surface) {
-    this.surface.draw(surface);
-    this.items.forEach(function(item) {
-        item.draw(this.surface.background);
-    }, this);
-};
-
-var MenuItem = exports.MenuItem = function(options){
-    this.init(options);
-};
-
-MenuItem.prototype.init = function(options){
-    this.widget = options.widget;
-    this.linkedValue = options.linkedValue || undefined;
-    this.activate = options.onSelect || undefined;
-    this._selected = false;
-    this.height;
-    this.width;
-};
-
-MenuItem.prototype.activate = function(){ 
-    this.activate;
-};
-
-MenuItem.prototype.isSelected = function(){
-    return this._selected;
-};
-
-MenuItem.prototype.select = function(){
-    this._selected = true;
-};
-
-MenuItem.prototype.deselect = function(){
-    this._selected = false;
-};
-
-MenuItem.prototype.draw = function(){
-    this.widget.draw();
-};
-
-var MenuWidget = function(options){
-    this.init(options);
-};
-
-MenuWidget.prototype.init = function(options){
-
-};
-
-var TextWidget = function(options){
-    TextWidget.superConstructor.apply(this, arguments);
-};
-objects.extend(TextWidget, MenuWidget);
-
-TextWidget.prototype.init = function(options){
-    this.text = options.text;
-};
-
-var SliderWidget = function(options){
-    SliderWidget.superConstructor.apply(this, arguments);
-};
-objects.extend(SliderWidget, MenuWidget);
-
-SliderWidget.prototype.init = function(options){
-
-};
-*/
-
-},{"./entity":10,"gamejs":20,"super":48,"underscore":49}],19:[function(require,module,exports){
-/*jslint es5: true*/
-/*
- * Vector Utilities
- *
- * For ease of implementing all your 2D Vector needs.
- * Re-uses existing vector functionality available in gamejs
- * with some additional helpful methods to make it easy
- * to work with objects that represent Vectors.
- * */
-
-var gamejs = require('gamejs'),
-    _ = require('underscore'),
-    utils = gamejs.utils;
-
-/*
- * Parse the arguments passed into Vec2d
- */
-function parseArgs(args) {
-    // User passed an array
-    if (Array.isArray(args[0])) {
-        return args[0];
-    }
-    // User passed x and y
-    else if (args.length === 2) {
-        return new Array(args[0], args[1]);
-    }
-    // User passed an object of x and y
-    else if (args[0] === Object(args[0])) {
-        return [args[0].x, args[0].y];
-    } else {
-        return [0, 0];
-    }
-}
-
-// Help get vector (well, any) lengths down to 0
-var dampen = exports.dampen = function(length, amount, min) {
-    min = (min || 0);
-    if (length > min) {
-        return Math.max(min, length - amount);
-    } else if (length < -min) {
-        return Math.min(-min, length + amount);
-    } else {
-        return length;
-    }
-};
-
-var dampenVector = exports.dampenVector = function(vec, amount, min) {
-    var length = vec.length();
-    if (length === 0) return;
-
-    var newLength = dampen(length, amount, min);
-
-    vec.setX(vec.getX() / length * newLength);
-    vec.setY(vec.getY() / length * newLength);
-    return vec;
-};
-
-var Vector = function(v) {
-    this._vec = new Array(v[0], v[1]);
-    return this;
-};
-
-Vector.prototype = {
-    // Expiremental getter and setter support.
-    get x() {
-        return this._vec[0];
-    },
-
-    set x(value) {
-        this._vec[0] = value;
-    },
-
-    get y() {
-        return this._vec[1];
-    },
-
-    set y(value) {
-        this._vec[1] = value;
-    },
-
-    length: function() {
-        return utils.vectors.len(this._vec);
-    },
-
-    set: function(vec) {
-        this._vec[0] = vec[0];
-        this._vec[1] = vec[1];
-        return this;
-    },
-
-    getX: function() {
-        return this._vec[0];
-    },
-
-    getY: function() {
-        return this._vec[1];
-    },
-
-    setX: function(x) {
-        this._vec[0] = x;
-    },
-
-    setY: function(y) {
-        this._vec[1] = y;
-    },
-
-    unpack: function() {
-        return [this._vec[0], this._vec[1]];
-    },
-
-    add: function(right) {
-        // We passed a Vector object
-        if (right === Object(right)) {
-            right = right._vec;
-        }
-        // Number.
-        else {
-            right = [right, right];
-        }
-        this.set(utils.vectors.add(this._vec, right));
-        return this;
-    },
-
-    mul: function(right) {
-        // We passed a Vector object.
-        if (right === Object(right)) {
-            return this.set(utils.vectors.multiply(this._vec, right._vec));
-        }
-        // Passed a number.
-        else {
-            return this.multiplyByScalar(right);
-        }
-    },
-
-    magnitude: function() {
-        return Math.sqrt(
-            (this._vec[0] * this._vec[0]) +
-            (this._vec[1] * this._vec[1])
-        );
-    },
-
-    // Limit the length of a vector.
-    truncate: function(length) {
-        return this.set(utils.vectors.truncate(this._vec, length));
-    },
-
-    // Multiply by a provided number.
-    multiplyByScalar: function(n) {
-        this._vec[0] *= n;
-        this._vec[1] *= n;
-        return this;
-    },
-
-    normalized: function() {
-        return this.set(this.multiplyByScalar(1, this.magnitude())._vec);
-    },
-
-    isZero: function() {
-        return (this._vec[0] === 0 && this._vec[1] === 0);
-    }
-};
-
-// Primary accessor to Vector interface.
-var Vec2d = exports.Vec2d = function() {
-    return this.create(arguments); 
-};
-
-Vec2d.prototype = {
-    Vector: Vector,
-
-    create: function(args) {
-        return new this.Vector(parseArgs(args));
-    }
-};
-
-
-},{"gamejs":20,"underscore":49}],20:[function(require,module,exports){
+},{"./conf":2,"./game":4,"gramework":34}],6:[function(require,module,exports){
 var matrix = require('./gamejs/utils/matrix');
 var objects = require('./gamejs/utils/objects');
 var Callback = require('./gamejs/callback').Callback;
@@ -3496,7 +1813,7 @@ exports.onEvent = function(fn, scope) {
 exports.onTick = function(fn, scope) {
   exports.time._CALLBACK = new Callback(fn, scope);
 };
-},{"./gamejs/callback":21,"./gamejs/display":22,"./gamejs/draw":23,"./gamejs/event":24,"./gamejs/font":25,"./gamejs/http":26,"./gamejs/image":27,"./gamejs/mask":28,"./gamejs/mixer":29,"./gamejs/noise":30,"./gamejs/pathfinding/astar":31,"./gamejs/sprite":32,"./gamejs/surfacearray":33,"./gamejs/time":34,"./gamejs/tmx":35,"./gamejs/transform":36,"./gamejs/utils/arrays":37,"./gamejs/utils/base64":38,"./gamejs/utils/math":40,"./gamejs/utils/matrix":41,"./gamejs/utils/objects":42,"./gamejs/utils/prng":43,"./gamejs/utils/uri":44,"./gamejs/utils/vectors":45,"./gamejs/worker":46,"./gamejs/xml":47}],21:[function(require,module,exports){
+},{"./gamejs/callback":7,"./gamejs/display":8,"./gamejs/draw":9,"./gamejs/event":10,"./gamejs/font":11,"./gamejs/http":12,"./gamejs/image":13,"./gamejs/mask":14,"./gamejs/mixer":15,"./gamejs/noise":16,"./gamejs/pathfinding/astar":17,"./gamejs/sprite":18,"./gamejs/surfacearray":19,"./gamejs/time":20,"./gamejs/tmx":21,"./gamejs/transform":22,"./gamejs/utils/arrays":23,"./gamejs/utils/base64":24,"./gamejs/utils/math":26,"./gamejs/utils/matrix":27,"./gamejs/utils/objects":28,"./gamejs/utils/prng":29,"./gamejs/utils/uri":30,"./gamejs/utils/vectors":31,"./gamejs/worker":32,"./gamejs/xml":33}],7:[function(require,module,exports){
 /**
  * Manage a callback with scope
  */
@@ -3510,7 +1827,7 @@ var Callback = exports.Callback = function(fn, scope) {
 Callback.prototype.trigger = function() {
 	this.fn.apply(this.fnScope, arguments);
 };
-},{}],22:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var Surface = require('../gamejs').Surface;
 
 /**
@@ -3767,7 +2084,7 @@ var getSurface = exports.getSurface = function() {
    return SURFACE;
 };
 
-},{"../gamejs":20,"./event":24}],23:[function(require,module,exports){
+},{"../gamejs":6,"./event":10}],9:[function(require,module,exports){
 /**
  * @fileoverview Utilities for drawing geometrical objects to Surfaces. If you want to put images on
  * the screen see gamejs/image.
@@ -4019,7 +2336,7 @@ exports.bezierCurve = function(surface, color, startPos, endPos, ct1Pos, ct2Pos,
 
    ctx.restore();
 };
-},{}],24:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var display = require('./display');
 var Callback = require('./callback').Callback;
 
@@ -4288,7 +2605,7 @@ exports.init = function() {
 
 };
 
-},{"./callback":21,"./display":22}],25:[function(require,module,exports){
+},{"./callback":7,"./display":8}],11:[function(require,module,exports){
 var Surface = require('../gamejs').Surface;
 var objects = require('./utils/objects');
 
@@ -4379,7 +2696,7 @@ objects.accessors(Font.prototype, {
 
 });
 
-},{"../gamejs":20,"./utils/objects":42}],26:[function(require,module,exports){
+},{"../gamejs":6,"./utils/objects":28}],12:[function(require,module,exports){
 /**
  * @fileoverview Make synchronous http requests to your game's serverside component.
  *
@@ -4497,7 +2814,7 @@ exports.save = function(url, data, type) {
    return stringify(post(ajaxBaseHref() + url, {payload: data}, type));
 };
 
-},{}],27:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var gamejs = require('../gamejs');
 
 /**
@@ -4630,7 +2947,7 @@ var addToCache = function(img) {
    return;
 };
 
-},{"../gamejs":20}],28:[function(require,module,exports){
+},{"../gamejs":6}],14:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var objects = require('./utils/objects');
 
@@ -4882,7 +3199,7 @@ objects.accessors(Mask.prototype, {
    }
 });
 
-},{"../gamejs":20,"./utils/objects":42}],29:[function(require,module,exports){
+},{"../gamejs":6,"./utils/objects":28}],15:[function(require,module,exports){
 var gamejs = require('../gamejs');
 
 /**
@@ -5077,7 +3394,7 @@ exports.Sound = function Sound(uriOrAudio) {
    return this;
 };
 
-},{"../gamejs":20}],30:[function(require,module,exports){
+},{"../gamejs":6}],16:[function(require,module,exports){
 /**
  * @fileoverview
  * A noise generator comparable to Perlin noise, which is useful
@@ -5303,7 +3620,7 @@ Simplex.prototype.get3d = function(xin, yin, zin) {
   return 32.0*(n0 + n1 + n2 + n3);
 };
 
-},{}],31:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /**
  * @fileoverview
  * AStar Path finding algorithm
@@ -5461,7 +3778,7 @@ Map.prototype.actualDistance = function(pointA, pointB) {
    return 1;
 };
 
-},{"../utils/binaryheap":39}],32:[function(require,module,exports){
+},{"../utils/binaryheap":25}],18:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var arrays = require('./utils/arrays');
 var $o = require('./utils/objects');
@@ -5888,7 +4205,7 @@ exports.collideCircle = function(spriteA, spriteB) {
    return $v.distance(spriteA.rect.center, spriteB.rect.center) <= rA + rB;
 };
 
-},{"../gamejs":20,"./utils/arrays":37,"./utils/objects":42,"./utils/vectors":45}],33:[function(require,module,exports){
+},{"../gamejs":6,"./utils/arrays":23,"./utils/objects":28,"./utils/vectors":31}],19:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var accessors = require('./utils/objects').accessors;
 /**
@@ -6020,7 +4337,7 @@ var SurfaceArray = exports.SurfaceArray = function(surfaceOrDimensions) {
    return this;
 };
 
-},{"../gamejs":20,"./utils/objects":42}],34:[function(require,module,exports){
+},{"../gamejs":6,"./utils/objects":28}],20:[function(require,module,exports){
 /**
  * @fileoverview
  * Only used by GameJs internally to provide a game loop.
@@ -6070,7 +4387,7 @@ var perInterval = function() {
    return;
 };
 
-},{"./callback":21}],35:[function(require,module,exports){
+},{"./callback":7}],21:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var objects = require('./utils/objects');
 var xml = require('./xml');
@@ -6370,7 +4687,7 @@ var setProperties = function(object, node) {
    return object;
 };
 
-},{"../gamejs":20,"./utils/base64":38,"./utils/objects":42,"./utils/uri":44,"./xml":47}],36:[function(require,module,exports){
+},{"../gamejs":6,"./utils/base64":24,"./utils/objects":28,"./utils/uri":30,"./xml":33}],22:[function(require,module,exports){
 var Surface = require('../gamejs').Surface;
 var matrix = require('./utils/matrix');
 var math = require('./utils/math');
@@ -6475,7 +4792,7 @@ exports.flip = function(surface, flipHorizontal, flipVertical) {
    return newSurface;
 };
 
-},{"../gamejs":20,"./utils/math":40,"./utils/matrix":41,"./utils/vectors":45}],37:[function(require,module,exports){
+},{"../gamejs":6,"./utils/math":26,"./utils/matrix":27,"./utils/vectors":31}],23:[function(require,module,exports){
 /**
  * @fileoverview Utility functions for working with Obiects
  * @param {Object} item
@@ -6506,7 +4823,7 @@ exports.shuffle = function(array) {
     return array;
 };
 
-},{}],38:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /**
  * @fileoverview
  * Base64 encode / decode
@@ -6567,7 +4884,7 @@ exports.decodeAsArray = function(input, bytes) {
    return array;
 }
 ;
-},{}],39:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /**
  * Binary Heap
  *
@@ -6723,7 +5040,7 @@ BinaryHeap.prototype.bubbleUp = function(idx) {
    return;
 };
 
-},{}],40:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /**
  *
  * absolute angle to relative angle, in degrees
@@ -6792,7 +5109,7 @@ exports.centroid = function() {
    ];
 };
 
-},{}],41:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /**
  * @fileoverview Matrix manipulation, used by GameJs itself. You
  * probably do not need this unless you manipulate a Context's transformation
@@ -6884,7 +5201,7 @@ var scale = exports.scale = function(m1, svec) {
    return multiply(m1, [sx, 0, 0, sy, 0, 0]);
 };
 
-},{}],42:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /**
  * @fileoverview Utility functions for working with Objects
  */
@@ -6987,7 +5304,7 @@ exports.accessors = function(object, props) {
    return;
 };
 
-},{}],43:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 /**
  * @fileoverview A seedable random-number generator.
  *
@@ -7138,7 +5455,7 @@ exports.random = function() {
 exports.init = function(seed) {
   alea = new Alea(seed);
 };
-},{}],44:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /**
  * @fileoverview Utilies for URI handling.
  *
@@ -7256,7 +5573,7 @@ var removeDotSegments = function(path) {
    return out.join('/');
 };
 
-},{}],45:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 var math=require('./math');
 
 /**
@@ -7382,7 +5699,7 @@ exports.truncate = function(v, maxLength) {
    return v;
 };
 
-},{"./math":40}],46:[function(require,module,exports){
+},{"./math":26}],32:[function(require,module,exports){
 var gamejs = require('../gamejs');
 var uri = require('./utils/uri');
 var Callback = require('./callback').Callback;
@@ -7607,7 +5924,7 @@ function guid(moduleId) {
    };
    return moduleId + '@' + (S4()+S4());
 }
-},{"../gamejs":20,"./callback":21,"./utils/uri":44}],47:[function(require,module,exports){
+},{"../gamejs":6,"./callback":7,"./utils/uri":30}],33:[function(require,module,exports){
 /**
  * @fileoverview
  *
@@ -7742,7 +6059,1720 @@ Document.fromURL = function(url) {
    return new Document(response.responseXML);
 };
 
-},{}],48:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
+var gamejs = require('gamejs'),
+    inherits = require('super');
+
+var textures = exports.textures = {
+    //TODO: Replace this hard-coded path
+};
+
+var texturePaths = Object.keys(textures).map(function(img) {
+    return textures[img];
+});
+
+var init = function() {
+    gamejs.preload(texturePaths);
+};
+
+module.exports = {
+    Dispatcher: require('./gramework/dispatcher'),
+    Entity: require('./gramework/entity'),
+    Camera: require('./gramework/camera'),
+    Scene: require('./gramework/scenes').Scene,
+    animate: require('./gramework/animate'),
+    state: require('./gramework/state'),
+    image: require('./gramework/image'),
+    input: require('./gramework/input'),
+    layers: require('./gramework/layers'),
+    particles:  require('./gramework/particles'),
+    tilemap: require('./gramework/tilemap'),
+    vectors: require('./gramework/vectors'),
+    uielements: require('./gramework/uielements'), 
+    gamejs: gamejs,
+    inherits: inherits,
+    init: init
+};
+
+//TODO: Kill this in favour of Entity
+//exports.actors = require('./gramework/actors');
+
+},{"./gramework/animate":35,"./gramework/camera":36,"./gramework/dispatcher":37,"./gramework/entity":38,"./gramework/image":39,"./gramework/input":40,"./gramework/layers":41,"./gramework/particles":42,"./gramework/scenes":43,"./gramework/state":44,"./gramework/tilemap":45,"./gramework/uielements":46,"./gramework/vectors":47,"gamejs":6,"super":48}],35:[function(require,module,exports){
+var gamejs = require('gamejs'),
+    inherits = require('super'),
+    _ = require('underscore');
+
+/*
+ * Prepare a usable image for for a Sprite
+ */
+var SpriteSheet = exports.SpriteSheet = function(image, w, h) {
+    this.width = w;
+    this.height = h;
+
+    this.image = image;
+
+    //this.image._context.imageSmoothingEnabled = false;
+    this.surfaceCache = [];
+
+
+    var imgSize = new gamejs.Rect([0,0],[this.width,this.height]);
+
+    // Extract the cells from the spritesheet image.
+    for (var i = 0; i < this.image.rect.height; i += this.height) {
+        for (var j = 0; j < this.image.rect.width; j += this.width) {
+            var surface = new gamejs.Surface([this.width, this.height]);
+            var rect = new gamejs.Rect(j, i, this.width, this.height);
+            //surface._context.imageSmoothingEnabled = false;
+            surface.blit(this.image, imgSize, rect);
+            this.surfaceCache.push(surface);
+        }
+    }
+
+    this.initialize.apply(this, arguments);
+};
+
+SpriteSheet.extend = inherits.extend;
+
+// An empty function by default. Override it with your own initialization logic.
+SpriteSheet.prototype.initialize = function(options) {};
+
+_.extend(SpriteSheet.prototype, {
+    get: function(index) {
+        return this.surfaceCache[index];
+    }
+});
+
+var Animation = exports.Animation = function(spriteSheet, initial, spec) {
+    this.spec = spec;
+
+    this.currentFrame = null;
+    this.currentFrameDuration = 0;
+    this.currentAnimation = null;
+    this._isFinished = false;
+
+    this.spriteSheet = spriteSheet;
+
+    this.image = spriteSheet.get(0);
+    this.start(initial);
+
+    this.initialize.apply(this, arguments);
+};
+
+Animation.extend = inherits.extend;
+
+// An empty function by default. Override it with your own initialization logic.
+Animation.prototype.initialize = function(options) {};
+
+Animation.prototype.setFrame = function(frame) {
+    this.frameIndex = frame;
+};
+
+Animation.prototype.start = function(name) {
+    this._isFinished = false;
+    this.setState(name);
+    this.update(0);
+    return;
+};
+
+Animation.prototype.setState = function(name) {
+    if (this.currentAnimation === name) {
+        return;
+    }
+
+    this.currentAnimation = name;
+    this.currentFrame = this.spec[name].frames[0];
+    this.frameIndex = 0;
+    this.currentFrameDuration = 0;
+    this.frameDuration = 1000 / this.spec[name].rate;
+};
+
+Animation.prototype.update = function(msDuration) {
+    //if (!this.currentAnimation) {
+    //    throw new Error('No animation started.');
+    //}
+
+    this.currentFrameDuration += msDuration;
+    if (this.currentFrameDuration >= this.frameDuration){
+        var frames = this.spec[this.currentAnimation].frames;
+
+        this.currentFrame = frames[this.frameIndex++];
+        this.currentFrameDuration = 0;
+
+        var length = this.spec[this.currentAnimation].frames.length - 1;
+        if (this.frameIndex > length) {
+            if (this.spec[this.currentAnimation].loop) {
+                this.frameIndex = 0;
+            } else {
+                this._isFinished = true;
+            }
+        }
+    }
+
+    this.image = this.spriteSheet.get(this.currentFrame);
+    return this.image;
+};
+
+Animation.prototype.isFinished = function() {
+    return this._isFinished;
+};
+
+},{"gamejs":6,"super":48,"underscore":49}],36:[function(require,module,exports){
+/*
+ * Create a camera around a display.
+ *
+ * Create a constrainted view around a specific region, and/or 
+ * follow specific positions on the map.
+ *
+ * Example usage:
+ *
+ *  var gamejs = require('gamejs')
+ *      , Camera = require('gramework/camera');
+ *
+ *  var surfaceWidth = 640
+ *      , surfaceHeight = 480;
+ *
+ *  var display = gamejs.display.setMode([surfaceWidth, surfaceHeight]);
+ *  var surface = new gamejs.Surface([surfaceWidth, surfaceHeight]);
+ *  var camera = new Camera(surface, {
+ *      width: surfaceWidth / 2,
+ *      height: surfaceHeight / 2
+ *  })
+ *
+ *  And, on tick:
+ *
+ *  var tick = function(msDuration) {
+ *      camera.update(msDuration);
+ *
+ *      // Draw all your actors, backgrounds, etc on primary surface.
+ *      display.clear()
+ *      surface.blit(aBackground);
+ *      actors.draw(surface);
+ *
+ *      // Then, given the camera has the surface which you've blitted
+ *      // everything onto, it will create a constrained view of the surface, which
+ *      // you can blit back onto the screen. Performance should be ideal.
+ *      var view = camera.draw();
+ *      display.blit(view);
+ *  };
+ */
+
+var gamejs = require('gamejs'),
+    _ = require('underscore');
+
+/* Camera initialization.
+ *
+ * `surface`, an instance of gamejs.Surface.
+ * `options`, a hash containing optional keys for `width` and `height`
+ *      of the camera. As well as a `zoom` level (default: 1).
+ *
+ *
+ */
+
+var Camera = module.exports = function(sceneExtents, options) {
+    this.initialize(sceneExtents, options);
+};
+
+_.extend(Camera.prototype, {
+    initialize: function(sceneExtents, options) {
+        this.width = options.width || 400;
+        this.height = options.height || 300;
+        this.zoom = options.zoom || 1;
+        this.rect = new gamejs.Rect([0,0], [this.width, this.height]);
+
+        this.sceneExtents = sceneExtents;
+
+        this.center = null;
+        this.dest = null;
+        this.xSpeed = 0;
+        this.ySpeed = 0;
+        this.zoom_multiplier = 1;
+        this.targetZoom = null;
+        this.sharp = options.sharp || true;
+
+        // Our constrainted camera view
+        this.view = new gamejs.Surface(this.rect);
+        return this;
+    },
+
+    update: function(dt) {
+        // Pan to dest
+        if (this.dest !== null) {
+            if (this.rect.center[0] < this.dest[0]) {this.rect.moveIp(this.xSpeed,0);}
+            if (this.rect.center[0] > this.dest[0]) {this.rect.moveIp(this.xSpeed,0);}
+            if (this.rect.center[1] < this.dest[1]) {this.rect.moveIp(0,this.ySpeed);}
+            if (this.rect.center[1] > this.dest[1]) {this.rect.moveIp(0,this.ySpeed);}
+
+            this.xSpeed = (this.dest[0] - this.rect.center[0]) / 10;
+            this.ySpeed = (this.dest[1] - this.rect.center[1]) / 10;
+
+            if (this.dest == this.rect.center) {
+                this.dest = null;
+                this.xSpeed = 0;
+                this.ySpeed = 0;
+            }
+        }
+        if (this.center !==null) {
+            this.dest = this.center.center;
+        }
+
+        if (this.targetZoom !== null) {
+            if (this.targetZoom > this.zoom) {
+                this.zoom_multiplier = 1 + ((this.targetZoom - this.zoom) * 0.1);
+            }
+            if (this.targetZoom < this.zoom) {
+                this.zoom_multiplier = 1 + ((this.targetZoom - this.zoom) * 0.1);
+            }
+            if (this.targetZoom == this.zoom) {
+                this.targetZoom = null;
+                this.zoom_multiplier = 1;
+            }
+        }
+
+        if (this.rect.width <= this.sceneExtents.width && this.rect.height <= this.sceneExtents.height) {
+            this.zoom = this.zoom * this.zoom_multiplier;
+        }
+        this.rect.width = this.width / this.zoom;
+        this.rect.height = this.height / this.zoom;
+
+        if (this.sharp) {
+            this.rect.left = Math.round(this.rect.left);
+            this.rect.top = Math.round(this.rect.top);
+        }
+
+        // The camera's extent cannot be bigger than the current surface's size
+        if (this.rect.width > this.sceneExtents.width) {
+            this.rect.width = this.sceneExtents.width;
+        }
+
+        if (this.rect.height > this.sceneExtents.height) {
+            this.rect.height = this.sceneExtents.height;
+        }
+
+        // The camera cannot pan beyond the extents of the scene
+        if (this.rect.top < 0) {
+            this.rect.top = 0;
+        }
+        if (this.rect.left < 0) {
+            this.rect.left = 0;
+        }
+        if (this.rect.bottom > this.sceneExtents.height) {
+            this.rect.bottom = this.sceneExtents.height;
+        }
+        if (this.rect.right > this.sceneExtents.width) {
+            this.rect.right = this.sceneExtents.width;
+        }
+    },
+
+    draw: function(source, destination) {
+        destination.blit(source, destination.rect, this.rect);
+    },
+
+    panTo: function(pos) {
+        this.dest = pos;
+        return;
+    },
+
+    follow: function(rect) {
+        this.center = rect;
+        return;
+    },
+
+    unfollow: function() {
+        this.center = null;
+        return;
+    },
+
+    // TODO: What does this accept exactly?
+    zoomTo: function(zoom) {
+        this.targetZoom = zoom;
+        return;
+    }
+});
+
+},{"gamejs":6,"underscore":49}],37:[function(require,module,exports){
+/*global document*/
+var _ = require('underscore'),
+    inherits = require('super'),
+    Transition = require('./state').Transition;
+
+function DispatcherException(message) {
+    this.message = message;
+    this.name = "DispatcherException";
+}
+
+var Dispatcher = module.exports = function(gamejs, options) {
+    options = (options || {});
+
+    this.stack = [];
+    this.defaultTransition = (typeof options.defaultTransition === "undefined" ? Transition : options.defaultTransition);
+
+    if (options.initial) {
+        this.push(options.initial);
+    }
+
+    options.canvas = (options.canvas || {});
+    var canvas;
+    if (options.canvas.id) {
+        canvas = document.getElementById(options.canvas.id);
+    } else {
+        canvas = document.getElementById("gjs-canvas");
+    }
+
+    if (typeof canvas === "undefined") {
+        throw new DispatcherException(
+            "No canvas element could be found in the document.");
+    }
+
+    var surfaceFlag = options.canvas.flag || undefined;
+    this.mainSurface = this._setSurface(gamejs, canvas, surfaceFlag);
+
+    gamejs.onTick(this.onTick, this);
+    gamejs.onEvent(this.onEvent, this);
+
+    this.initialize.apply(this, arguments);
+};
+
+Dispatcher.extend = inherits.extend;
+_.extend(Dispatcher.prototype, {
+    // Internal function to set surface from canvas. Overrided in tests until we
+    // can better figure out how to mock a *real* canvas.
+    _setSurface: function(gamejs, canvas, surfaceFlag) {
+        var surface = gamejs.display.setMode(
+        [canvas.width, canvas.height], surfaceFlag);
+        return surface;
+    },
+
+    // An empty function by default. Override it with your own initialization logic
+    initialize: function(options) { },
+
+    onTick: function(dt) {
+        this.update(dt);
+        this.draw(this.mainSurface);
+    },
+
+    onEvent: function(ev) {
+        this.event(ev);
+    },
+
+    reset: function(initial) {
+        this.stack = [];
+        this.push(initial);
+    },
+
+    push: function(state, transition) {
+        if (transition !== null) {
+            transition = (transition || this.defaultTransition);
+        }
+
+        if (transition) {
+            var ts = new transition(this.top(), state);
+            ts.dispatcher = this;
+            this.stack.push(ts);
+        } else {
+            state.dispatcher = this;
+            this.stack.push(state);
+        }
+
+    },
+
+    top: function() {
+        return this.stack[this.stack.length - 1];
+    },
+
+    parent: function() {
+        return this.stack[this.stack.length - 2];
+    },
+
+    send: function(eventType) {
+        var current = this.top();
+        if (typeof current[eventType] === "undefined") return;
+        current[eventType].apply(current, Array.prototype.slice.call(arguments, 1));
+    },
+
+    update: function(dt) {
+        this.send("update", dt);
+    },
+
+    event: function(ev) {
+        this.send("event", ev);
+    },
+
+    draw: function(surface) {
+        this.send("draw", surface);
+    }
+});
+
+},{"./state":44,"super":48,"underscore":49}],38:[function(require,module,exports){
+// A stripped down, simpler Actors module.
+var gamejs = require('gamejs'),
+    inherits = require('super'),
+    Sprite = gamejs.sprite.Sprite;
+
+/*
+ * Required:
+ * y: Starting y coordinate
+ * x: Starting x coordinate
+ * width: Width of sprite rectangle.
+ * height: Height of sprite rectangle.
+ */
+var Entity = module.exports = function(options) {
+    Sprite.apply(this, arguments);
+
+    this.w = options.width;
+    this.h = options.height;
+
+    this.rect = new gamejs.Rect([
+        options.x,
+        options.y
+    ], [this.w, this.h]);
+
+    this.initialize.apply(this, arguments);
+};
+
+Entity.extend = inherits.extend;
+inherits(Entity, Sprite);
+
+// An empty function by default. Override it with your own initialization logic.
+Entity.prototype.initialize = function(options) {};
+
+Entity.prototype.move = function(x, y) {
+    this.lastX = this.rect.x;
+    this.lastY = this.rect.y;
+
+    this.rect.x += x;
+    this.rect.y += y;
+};
+
+Entity.prototype.topLeft = function() {
+    return [this.rect.x, this.rect.y];
+};
+
+Entity.prototype.center = function() {
+    return [
+        this.rect.x + this.w / 2,
+        this.rect.y + this.h / 2
+    ];
+};
+
+Entity.prototype.setPos = function(x, y) {
+    this.rect.x = x;
+    this.rect.y = y;
+};
+
+},{"gamejs":6,"super":48}],39:[function(require,module,exports){
+var gamejs = require('gamejs');
+
+var imgfy = exports.imgfy = function(path) {
+    return gamejs.image.load(path);
+};
+
+},{"gamejs":6}],40:[function(require,module,exports){
+var gamejs = require('gamejs'),
+    inherits = require('super'),
+    Vec2d = require('./vectors').Vec2d,
+    _ = require('underscore');
+
+// A class to allow the player to control their character.
+var GameController = exports.GameController = function(options) {
+    this.keyDown = null;
+    this.keyUp = null;
+
+    // User can pass an object of controls. The default is
+    // simple four directional with the arrow keys.
+    this.controls = {
+        left: gamejs.event.K_LEFT,
+        right: gamejs.event.K_RIGHT,
+        up: gamejs.event.K_UP,
+        down: gamejs.event.K_DOWN,
+        reset: gamejs.event.K_r,
+        action: gamejs.event.K_SPACE,
+        cancel: gamejs.event.K_ESC
+    };
+    _.extend(this.controls, options);
+    this.reverseControls = {};
+
+    for (var key in this.controls) {
+        this.reverseControls[this.controls[key]] = key;
+    }
+
+    this.initialize.apply(this, arguments);
+};
+
+GameController.extend = inherits.extend;
+
+// An empty function by default. Override it with your own initialization logic.
+GameController.prototype.initialize = function(options) {};
+
+GameController.prototype.handle = function(event) {
+    if (event.type === gamejs.event.MOUSE_MOTION) {
+        return {
+            action: "mouseMotion",
+            value: event.pos
+        };
+    }
+
+    if (_.indexOf(_.values(this.controls), event.key) == -1) {
+        return;
+    }
+
+    if (event.type === gamejs.event.KEY_DOWN) {
+        this.keyDown = event.key;
+        this.keyUp = null;
+        return {
+            action: "keyDown",
+            value: this.keyDown,
+            label: this.reverseControls[this.keyDown]
+        };
+    } else if (event.type === gamejs.event.KEY_UP) {
+        this.keyUp = event.key;
+        this.keyDown = null;
+        return {
+            action: "keyUp",
+            value: this.keyUp,
+            label: this.reverseControls[this.keyUp]
+        };
+    }
+};
+
+GameController.prototype.reset = function() {
+    if (this.keyDown === this.controls.reset) {
+        return true;
+    }
+    return false;
+};
+
+// Given our four directional input, define a vector that'll push us in the
+// right direction. 
+GameController.prototype.movementVector = function() {
+    var vel = new Vec2d(0, 0);
+
+    if (this.keyDown === this.controls.left) {
+        vel.setX(-1);
+    } else if (this.keyDown === this.controls.right) {
+        vel.setX(1);
+    } else {
+        vel.setX(0);
+    }
+
+    if (this.keyDown === this.controls.up) {
+        vel.setY(-1);
+    } else if (this.keyDown === this.controls.down) {
+        vel.setY(1);
+    } else {
+        vel.setY(0);
+    }
+    return vel.normalized();
+};
+
+},{"./vectors":47,"gamejs":6,"super":48,"underscore":49}],41:[function(require,module,exports){
+var imgfy = require('./image').imgfy;
+
+// Use for repeating Backgrounds on a screen, adjust speed
+// with multiple backgrounds to gain parallax scrolling effect.
+var Scrollable = exports.Scrollable = function(img, pos, options) {
+    this.img = imgfy(img);
+    this.pos = pos;
+    this.init(options);
+};
+
+Scrollable.prototype = {
+    init: function(options) {
+        options = (options || {});
+        this.speed = (options.speed || 0);
+        // Retain original speed.
+        this.originalSpeed = this.speed;
+    },
+
+    draw: function(display) {
+        display.blit(this.img, this.pos);
+    },
+
+    update: function(dt) {
+        if (this.speed > 0) {
+            this.pos[0] -= this.speed * 0.05;
+
+            if (this.pos[0] < -(this.img.rect.width)) {
+                this.pos[0] = 860;
+            }
+        }
+    }
+};
+
+},{"./image":39}],42:[function(require,module,exports){
+var gamejs = require('gamejs');
+
+var Particle = exports.Particle = function(position, options) {
+    this.x = position.x;
+    this.y = position.y;
+    this.size = options.size || [8,8];
+    this.life = options.life || 0;
+    this.elapsed = 0;
+    this.angle = options.angle * Math.PI / 180 || 0;
+    this.speed = options.speed || 1;
+    this.velocity = [
+        this.speed * Math.sin(this.angle),
+        -this.speed * Math.cos(this.angle)
+    ];
+    this.decel = options.decel || 0.05;
+    this.accel = options.accel || [0,0];
+    this.color = options.color || [0,0,0];
+    this.colorString = 'rgb(' + this.color.join(',') + ')';
+    // TODO: We shouldn't force preload these images as they are not necessary
+    // for every game. Instead, allow a Particle to have an image defined
+    // against it.
+    var imageFile = options.imageFile; // || gramework.textures.simpleParticleBlurred;
+    this.image = gamejs.image.load(imageFile);
+    this.rect = this.image.rect;
+};
+
+Particle.prototype.update = function(dt) {
+    this.elapsed += dt;
+    if (this.elapsed >= this.life) return false;
+
+    this.speed = [
+        this.speed[0] + this.accel[0],
+        this.speed[1] + this.accel[1]
+    ];
+
+    this.x += this.velocity[0];
+    this.y += this.velocity[1];
+
+    this.color[0] -= 3;
+    //this.color[3] = 1 - (this.elapsed / this.life);
+    this.image.setAlpha((this.elapsed / this.life));
+
+    this.colorString = 'rgb(' + this.color.join(',') + ')';
+    return true;
+};
+
+Particle.prototype.draw = function(surface) {
+    //gamejs.draw.circle(surface, this.colorString, [this.x, this.y], 1, 0);
+    var colorSurface = this.image.clone();
+    colorSurface.fill(this.colorString);
+    this.image.blit(colorSurface, [0,0], this.rect, 'source-atop');
+    surface.blit(this.image, [this.x, this.y], this.rect, 'lighter');
+};
+
+var Emitter = exports.Emitter = function(position, options) {
+    this.particles = [];
+    this.x = position.x;
+    this.y = position.y;
+    // rate in particles per second
+    this.rate = options.rate || 1;
+    this.elapsed = 0;
+    this.rendering = options.rendering || 'source-over';
+    this.shape = options.shape || 'point';
+    this.maxParticles = options.maxParticles || 1000;
+};
+
+Emitter.prototype.update = function(dt) {
+    this.elapsed += dt;
+    while (this.elapsed > 1000 / this.rate && this.particles.length < this.maxParticles) {
+        var p = new Particle({x: this.x, y: this.y}, {
+            life: 1000,
+            color: [255,50,50],
+            angle: Math.random() * 30 - 15
+        });
+        this.particles.push(p);
+        this.elapsed -= (1000 / this.rate);
+    }
+    this.particles.forEach(function(p, i){
+        var update = p.update(dt);
+        if (update === false)
+            this.particles.splice(i,1);
+    }, this);
+};
+
+Emitter.prototype.draw = function(surface) {
+    this.particles.forEach(function(p) {
+        p.draw(surface);
+    }, this);
+};
+
+},{"gamejs":6}],43:[function(require,module,exports){
+var gamejs = require('gamejs'),
+    inherits = require('super'),
+    Camera = require('./camera'),
+    _ = require('underscore');
+
+var Scene = exports.Scene = function(options) {
+    options = (options || {});
+
+    this._elapsed = 0;
+    this._width = options.width;
+    this._height = options.height;
+    this._pixelScale = options.pixelScale || 1;
+
+    // No options passed, but we can give sensible defaults by getting the games
+    // main surface.
+    if (!this._width || !this._height) {
+        var size = gamejs.display.getSurface().getSize();
+        if (this._pixelScale && this._pixelScale !== 1) {
+            size = [Math.floor(size[0] / this._pixelScale), Math.floor(size[1] / this._pixelScale)];
+        }
+        this._width = (Math.floor(this._width / this._pixelScale) || size[0]);
+        this._height = (Math.floor(this._height / this._pixelScale) || size[1]);
+    }
+
+    // Actors will be deprecated in favour of entities.
+    this.actors = new gamejs.sprite.Group();
+    this.entities = new gamejs.sprite.Group();
+
+    this.layers = [];
+    this.elements = new gamejs.sprite.Group();
+    this.view = new gamejs.Surface([this._width, this._height]);
+
+    this.camera = new Camera(this.view.rect, {
+        width: this._width,
+        height: this._height
+    });
+
+    this.surface = new gamejs.Surface(this.camera.rect);
+
+    this.initialize.apply(this, arguments);
+};
+Scene.extend = inherits.extend;
+
+_.extend(Scene.prototype, {
+    // An empty function by default. Override it with your own initialization logic.
+    initialize: function(options) {},
+
+    width: function() {
+        return this._width;
+    },
+
+    height: function() {
+        return this._height;
+    },
+
+    getElapsedTime: function() {
+        return this._elapsed;
+    },
+
+    pushEntity: function(entity) {
+        this.entities.add(entity);
+    },
+
+    pushElement: function(element) {
+        this.elements.add(element);
+    },
+
+    pushLayer: function(layer) {
+        this.layers.push(layer);
+    },
+
+    update: function(dt) {
+        this.layers.forEach(function(layer) {
+            layer.update(dt);
+        }, this);
+
+        this.entities.update(dt);
+        this.actors.update(dt);
+        this.elements.update(dt);
+        this.camera.update(dt);
+        this._elapsed += dt;
+    },
+
+    draw: function(display, options) {
+        // TODO: Offer same interface as Sprite groups. No need to iterate
+        options = (options || {});
+
+        var defaults = {
+            clear: true
+        };
+        _.extend(defaults, options);
+
+        if (defaults.clear === true) {
+            this.view.clear();
+            display.clear();
+        }
+
+        this.layers.forEach(function(layer) {
+            layer.draw(this.view, this.camera);
+        }, this);
+        this.actors.draw(this.view);
+        this.entities.draw(this.view);
+
+        if (this._pixelScale !== 1) {
+            this.camera.draw(this.view, this.surface);
+            this.elements.draw(this.surface);
+            display.blit(this.surface, display.rect);
+        } else {
+            this.camera.draw(this.view, display);
+            this.elements.draw(display);
+        }
+
+    }
+});
+
+},{"./camera":36,"gamejs":6,"super":48,"underscore":49}],44:[function(require,module,exports){
+var gamejs = require('gamejs'),
+    inherits = require('super');
+
+var Transition = function(before, after, options) {
+    options = (options || {});
+
+    this.before = before;
+    this.after = after;
+
+    if (!this.time) {
+        this.time = (options.time || 2.0);
+    }
+
+    if (!this.colour) {
+        this.colour = (options.colour || [255, 0, 255]);
+    }
+
+    this.p = 0;
+    this.initialize.apply(this, arguments);
+};
+
+Transition.prototype.initialize = function(before, after, options) {};
+Transition.prototype.draw = function(surface) {};
+Transition.prototype.update = function(dt) { this.dispatcher.push(this.after, null); };
+Transition.extend = inherits.extend;
+
+var FadeTransition = Transition.extend({
+    time: 2.0,
+    colour: [0, 0, 0]
+});
+
+FadeTransition.prototype.draw = function(surface) {
+    var alpha;
+    surface.clear();
+
+    // At the start of the transition, we go from a solid block to 0-alpha, and
+    // then we begin showing the new state going from 1-alpha to 0-alpha again.
+    if (this.p < (this.time / 2) && this.before) {
+        alpha = (this.time - this.p) * this.p;
+        this.before.draw(surface);
+    } else {
+        alpha = (this.time - this.p) / this.p;
+        this.after.draw(surface);
+    }
+
+    var rgbaString = ["rgba(", this.colour.join(",") + ",", alpha, ")"].join('');
+    surface.fill(rgbaString);
+};
+FadeTransition.prototype.update = function(dt) {
+    dt = (dt / 1000);
+
+    this.p += dt;
+    if (this.p >= this.time) {
+        this.dispatcher.push(this.after, null);
+    }
+};
+
+module.exports = {
+    Transition: Transition,
+    FadeTransition: FadeTransition
+};
+
+},{"gamejs":6,"super":48}],45:[function(require,module,exports){
+/*jshint es5:true */
+/*
+ * Tilemap module.
+ *
+ */
+var gamejs = require('gamejs'),
+    inherits = require('super'),
+    Sprite = gamejs.sprite.Sprite,
+    extend = gamejs.utils.objects.extend,
+    tmx = gamejs.tmx;
+
+var Tile = function(rect, properties, coords) {
+    gamejs.sprite.Sprite.apply(this, arguments);
+
+    this.rect = rect;
+    this.properties = properties;
+    this.coords = coords;
+
+    this.initialize.apply(this, arguments);
+};
+Tile.extend = inherits.extend;
+inherits(Tile, gamejs.sprite.Sprite);
+
+// An empty function by default. Override it with your own initialization logic.
+Tile.prototype.initialize = function(options) {};
+
+// Loads the Map at `url` and holds all layers.
+var TileMap = exports.TileMap = function(url, options) {
+    options = (options || {});
+    this.tiles = [];
+
+    var callbacks = options.callbacks || {};
+
+    // Draw each layer
+    this.draw = function(display, camera) {
+        // If a layer has a z value != 0, it will be offset relative to the camera
+        // The offset creates a parallax effect
+        // As the z value -> infinity, the scrolling relative to the camera -> 0
+        // ie. a greater z value means the layer is further in the distance
+        layerViews.forEach(function(layerView) {
+            var z = layerView.zValue;
+            var offset = [
+                camera.rect.left * z / (z+1),
+                camera.rect.top * z / (z+1)
+            ];
+            layerView.draw(display, offset);
+        }, this);
+
+    };
+
+    this.getTile = function(x, y){
+        return this.tiles[x][y];
+    };
+
+    // Initialize.
+    var self = this;
+    var map = new tmx.Map(url);
+
+    this.getNeighbours = function(x, y) {
+        var neighbours = [];
+        if (x < map.width - 1) {
+            neighbours.push(this.getTile(x+1, y));
+        }
+        if (y < map.height - 1) {
+            neighbours.push(this.getTile(x, y+1));
+        }
+        if (x > 0) {
+            neighbours.push(this.getTile(x-1, y));
+        }
+        if (y > 0) {
+            neighbours.push(this.getTile(x, y-1));
+        }
+        return neighbours;
+    };
+
+    // Given the TMX Map we've loaded, go through each layer (via map.layers,
+    // provided by gamejs), and return a LayerView that we can deal with.
+    var layerViews = map.layers.map(function(layer) {
+        return new LayerView(self, layer, {
+            tileWidth: map.tileWidth,
+            tileHeight: map.tileHeight,
+            width: map.width,
+            height: map.height,
+            tiles: map.tiles,
+            callbacks: callbacks
+        });
+    });
+    return this;
+};
+
+var LayerView = function(map, layer, opts) {
+    if (layer.properties) {
+        this.zValue = layer.properties.z || 0;
+        this.doDraw = layer.properties.draw || true;
+        this.solid = layer.properties.solid || false;
+    } else {
+        this.zValue = 0;
+        this.doDraw = true;
+        this.solid = false;
+    }
+    this.draw = function(display, offset) {
+        if (this.doDraw === true) display.blit(this.surface, offset);
+    };
+
+    // Initialize.
+    this.surface = new gamejs.Surface(
+        opts.width * opts.tileWidth,
+        opts.height * opts.tileHeight
+    );
+    this.surface.setAlpha(layer.opacity);
+
+    // Note how below we look up the "gid" of the tile images in the TileSet 
+    // from the Map ('opt.tiles') to get the actual Surfaces.
+    layer.gids.forEach(function(row, i) {
+        row.forEach(function(gid, j) {
+            if (!map.tiles[j]) {
+                map.tiles[j] = [];
+            }
+            if (gid === 0) {
+                return;
+            }
+
+            var tileProperties = opts.tiles.getProperties(gid);
+            var tileSurface = opts.tiles.getSurface(gid);
+            if (tileSurface) {
+                var tilePos = [j * opts.tileWidth, i * opts.tileHeight];
+                var tileRect = new gamejs.Rect(
+                  tilePos,
+                  [opts.tileWidth, opts.tileHeight]
+                );
+                this.surface.blit(tileSurface, tileRect);
+                var coords = [j, i];
+                var tile = new Tile(tileRect, tileProperties, coords);
+                map.tiles[j][i] = tile;
+
+                // Tile property callbacks.
+                Object.keys(tileProperties).forEach(function(prop) {
+                    Object.keys(opts.callbacks).forEach(function(fn) {
+                        if (prop === fn) opts.callbacks[fn](tileRect);
+                    });
+                });
+            } else {
+                gamejs.log('No GID ', gid, i, j, 'layer', i);
+            }
+        }, this);
+    }, this);
+    return this;
+};
+
+},{"gamejs":6,"super":48}],46:[function(require,module,exports){
+/*jshint es5:true */
+/*
+ * Interface Entity module.
+ *
+ */
+var gamejs = require('gamejs');
+var Entity = require('./entity'),
+    inherits = require('super'),
+    _ = require('underscore');
+
+var Element = function(options) {
+    Entity.apply(this, arguments);
+};
+
+_.extend(Element.prototype, Entity.prototype, {
+    initialize: function(options) {
+        // TODO: Allow borderWidth to accept array to differentiate between vertical width and horizontal width
+        this.borderWidth = options.borderWidth || 0;
+        this._show = options.show || false;
+
+        if (options.color) {
+            if (options.color.length === 3) {
+                this.color = 'rgb(' + options.color.join(',') + ')';
+            } else if (options.color.length === 4) {
+                this.color = 'rgba(' + options.color.join(',') + ')';
+            }
+        } else {
+            this.color = '#000';
+        }
+
+        if (options.borderColor) {
+            if (options.borderColor.length === 3) {
+                this.borderColor = 'rgb(' + options.borderColor.join(',') + ')';
+            } else if (options.borderColor.length === 4) {
+                this.borderColor = 'rgba(' + options.borderColor.join(',') + ')';
+            }
+        } else {
+            this.borderColor = '#000';
+        }
+
+        if (options.borderImage) {
+            this.borderImage = new BorderImage({
+                slice: options.borderImageSlice,
+                imgPath: options.borderImage,
+                repeat: options.borderImageRepeat,
+                width: this.w + this.borderWidth,
+                height: this.h + this.borderWidth,
+                x: this.rect.left - (this.borderWidth / 2),
+                y: this.rect.top - (this.borderWidth / 2),
+                //size: [width + 2 * this.borderWidth, height + 2 * this.borderWidth],
+                //position: [this.position[0] - this.borderWidth, this.position[1] - this.borderWidth],
+                borderWidth: this.borderWidth
+            });
+        }
+
+        if (options.image) {
+            this.image = gamejs.image.load(options.image);
+        }
+    },
+
+    update: function(dt) {
+
+    },
+
+    draw: function(surface) {
+        if (!this._show) {
+            return;
+        }
+        if (this.image) {
+            Entity.prototype.draw.apply(this, arguments);
+        } else {
+            gamejs.draw.rect(surface, this.color, this.rect);
+        }
+
+        if (this.borderImage) {
+            this.borderImage.draw(surface);
+        } else if (this.borderWidth > 0){
+            gamejs.draw.rect(
+                surface,
+                this.borderColor,
+                this.rect,
+                this.borderWidth
+            );
+        }
+
+    },
+
+    show: function() {
+        this._show = true;
+    },
+
+    hide: function() {
+        this._show = false;
+    },
+
+    setImage: function(image) {
+        // image must be a valid gamejs.Surface instance
+        this.image = image;
+    }
+});
+
+Element.extend = inherits.extend;
+
+var BorderImage = function(options) {
+    Entity.apply(this, arguments);
+};
+
+_.extend(BorderImage.prototype, Entity.prototype, {
+    initialize: function(options) {
+
+        if (typeof options.imgPath === "string") {
+            this.ninePatch = gamejs.image.load(options.imgPath);
+        } else {
+            this.ninePatch = options.imgPath;
+        }
+
+        if (Array.isArray(options.slice) && options.slice.length === 2) {
+            this.vSlice = options.slice[1];
+            this.hSlice = options.slice[0];
+        } else if (typeof options.slice === 'number') {
+            this.vSlice = this.hSlice = options.slice;
+        }
+        this.repeat = options.repeat || 'repeat';
+        this.position = options.position || [0,0];
+        this.borderWidth = options.borderWidth || 0;
+
+        /*
+        This is where the BorderImage object breaks apart the image file into nine sections and creates
+        the respective surfaces for the corners and sides. These will be drawn around the parent element
+        object at the time of rendering
+        */
+
+        var imgSize = this.ninePatch.getSize();
+        if (this.vSlice > imgSize[1]) throw new Error("vert slice greater than image height");
+        if (this.hSlice > imgSize[0]) throw new Error("horz slice greater than image width");
+
+        var columnHeight = imgSize[1] - (2 * this.vSlice);
+        var rowWidth = imgSize[0] - (2 * this.hSlice);
+        var cornerRect = new gamejs.Rect(0,0,this.borderWidth,this.borderWidth);
+        var columnRect = new gamejs.Rect(0,0,this.borderWidth,columnHeight);
+        var rowRect = new gamejs.Rect(0,0,rowWidth,this.borderWidth);
+
+        this.leftBorderFull = new gamejs.Surface(this.borderWidth, this.h - 2 * this.borderWidth);
+        this.rightBorderFull = new gamejs.Surface(this.borderWidth, this.h - 2 * this.borderWidth);
+        this.topBorderFull = new gamejs.Surface(this.w - 2 * this.borderWidth, this.borderWidth);
+        this.bottomBorderFull = new gamejs.Surface(this.w - 2 * this.borderWidth, this.borderWidth);
+
+        this.topLeft = new gamejs.Surface(this.borderWidth, this.borderWidth);
+        this.topRight = new gamejs.Surface(this.borderWidth, this.borderWidth);
+        this.bottomLeft = new gamejs.Surface(this.borderWidth, this.borderWidth);
+        this.bottomRight = new gamejs.Surface(this.borderWidth, this.borderWidth);
+
+        this.leftBorder = new gamejs.Surface(this.borderWidth, columnHeight);
+        this.rightBorder = new gamejs.Surface(this.borderWidth, columnHeight);
+        this.topBorder = new gamejs.Surface(rowWidth, this.borderWidth);
+        this.bottomBorder = new gamejs.Surface(rowWidth, this.borderWidth);
+
+        var topLeftRect = new gamejs.Rect(0,0,this.hSlice,this.vSlice);
+        var topRightRect = new gamejs.Rect(imgSize[0]-this.hSlice,0,this.hSlice,this.vSlice);
+        var bottomLeftRect = new gamejs.Rect(0, imgSize[1]-this.vSlice,this.hSlice,this.vSlice);
+        var bottomRightRect = new gamejs.Rect(imgSize[0]-this.hSlice,imgSize[1]-this.vSlice,this.hSlice,this.vSlice);
+
+        this.topLeft.blit(this.ninePatch, cornerRect, topLeftRect);
+        this.topRight.blit(this.ninePatch, cornerRect, topRightRect);
+        this.bottomLeft.blit(this.ninePatch, cornerRect, bottomLeftRect);
+        this.bottomRight.blit(this.ninePatch, cornerRect, bottomRightRect);
+
+        var leftRect = new gamejs.Rect(0,this.vSlice,this.hSlice,columnHeight);
+        var rightRect = new gamejs.Rect(imgSize[0]-this.hSlice,this.vSlice,this.hSlice,columnHeight);
+        var topRect = new gamejs.Rect(this.hSlice,0,rowWidth,this.vSlice);
+        var bottomRect = new gamejs.Rect(this.hSlice,imgSize[1]-this.vSlice,rowWidth,this.vSlice);
+
+        this.leftBorder.blit(this.ninePatch, columnRect, leftRect);
+        this.rightBorder.blit(this.ninePatch, columnRect, rightRect);
+        this.topBorder.blit(this.ninePatch, rowRect, topRect);
+        this.bottomBorder.blit(this.ninePatch, rowRect, bottomRect);
+
+        this.image = new gamejs.Surface(this.rect);
+
+        console.log(this.x + ' ' + this.y);
+
+        for (var i=0;i*this.leftBorder.getSize()[1] < this.h;i++) {
+            this.leftBorderFull.blit(this.leftBorder, [0,(i*this.leftBorder.getSize()[1])]);
+            this.rightBorderFull.blit(this.rightBorder, [0,(i*this.leftBorder.getSize()[1])]);
+        }
+
+        this.image.blit(this.leftBorderFull, [0, this.borderWidth]);
+        this.image.blit(this.rightBorderFull, [this.w-this.borderWidth, this.borderWidth]);
+
+        for (i=0;i*this.topBorder.getSize()[0] < this.w;i++) {
+            this.topBorderFull.blit(this.topBorder, [(i*this.topBorder.getSize()[0]),0]);
+            this.bottomBorderFull.blit(this.bottomBorder, [(i*this.topBorder.getSize()[0]),0]);
+        }
+
+        this.image.blit(this.topBorderFull, [this.borderWidth, 0]);
+        this.image.blit(this.bottomBorderFull, [this.borderWidth, this.h-this.borderWidth]);
+
+        this.image.blit(this.topLeft);
+        this.image.blit(this.topRight, [this.w-this.borderWidth,0]);
+        this.image.blit(this.bottomLeft, [0,this.h - this.borderWidth]);
+        this.image.blit(this.bottomRight, [this.w-this.borderWidth,this.h - this.borderWidth]);
+
+        console.log(this.image);
+    },
+
+    update: function() {
+
+    }
+});
+
+var gradientSurface = function(surface, options) {
+    var gradSurface = surface.clone();
+
+    var colors = options.colors || [[255, 255, 255]];
+    var steps = options.steps || 1;
+
+    var segHeight = gradSurface.height / this.steps;
+
+    if (colors.length === 1){
+        gradSurface.fill(colors[0]);
+        return gradSurface;
+    }
+    var subSteps = steps / (colors.length - 1);
+    colors.forEach(function(color, i) {
+        if (colors[i+1] === undefined){}
+        var nextColor = colors[i+1];
+        var rStep = (color[0] - nextColor[0]) / subSteps;
+        var gStep = (color[1] - nextColor[1]) / subSteps;
+        var bStep = (color[2] - nextColor[2]) / subSteps;
+
+        for (i=0; i < subSteps; i++) {
+            var subRect = new gamejs.Rect(
+                [0, Math.floor(segHeight * i)],
+                [gradSurface.width, Math.ceil(segHeight)]);
+            var thisColor = [
+                Math.floor(Math.abs(color[0] - (i * rStep))),
+                Math.floor(Math.abs(color[1] - (i * gStep))),
+                Math.floor(Math.abs(color[2] - (i * bStep)))
+            ];
+
+            thisColor = 'rgb(' + thisColor.join(',') + ')';
+            gamejs.draw.rect(gradSurface, thisColor, subRect, 0);
+        }
+    });
+
+    return gradSurface;
+};
+
+
+var TextBlock = Element.extend({
+    initialize: function(options) {
+        Element.prototype.initialize.apply(this, arguments);
+
+        this.font = new gamejs.font.Font(options.font);
+        this.text = options.text || '';
+        //this.fontSurface = this.font.render(this.text, "#fff");
+        this.image = new gamejs.Surface(this.rect);
+        //this.image.blit(this.fontSurface);
+
+        this.rolling = options.rolling || true;
+        this.lineHeight = options.lineHeight;
+
+        if (this.rolling) {
+            this.initText();
+        }
+    },
+
+    initText: function() {
+        this.charTimer = 0;
+        this.charDuration = 20;
+        this.lineSurfaces = [];
+        this.done = false;
+        this.doneDuration = 0;
+        this.slideTo = 0;
+        this.slide = 0;
+        this.currentLine = 0;
+        this.currentChar = 0;
+        this.words = this.text.split(" ");
+        this.lines = [];
+        var i = 0;
+        this.lines[i] = '';
+        //Text line wrapping
+        this.words.forEach(function(word) {
+            var testSurface = this.font.render(
+                this.lines[i] + word + ' ',
+                this.fontColor);
+            var testWidth = testSurface.getSize()[0];
+            if (testWidth > this.rect.width) {
+                //Too wide. Time to wrap
+                i++;
+                this.lines[i] = '';
+            }
+            this.lines[i] +=  word + ' ';
+        }, this);
+    },
+
+    update: function(dt) {
+        if (this.done || !this.rolling) {
+            this.doneDuration += dt;
+            return;
+        }
+        if (this.slide < this.slideTo) {
+            this.slide++;
+        } else {
+            this.charTimer += dt;
+            if (this.charTimer >= this.charDuration) {
+                this.currentChar++;
+                this.charTimer = 0;
+            }
+            if (this.currentChar > this.lines[this.currentLine].length) {
+                this.currentLine++;
+                this.currentChar = 0;
+                if (this.currentLine > 1) {
+                    this.slideUp(this.lineHeight);
+                }
+            }
+            if (this.currentLine >= this.lines.length) {
+                this.done = true;
+            } else {
+                if (this.currentChar > 0) {
+                    this.lineSurfaces[this.currentLine] = this.font.render(
+                        this.lines[this.currentLine].substring(0, this.currentChar),
+                        "#fff");
+                }
+            }
+        }
+    },
+
+    draw: function(surface) {
+        this.image.clear();
+        this.lineSurfaces.forEach(function(lineSurface, index, array){
+            this.image.blit(lineSurface, [0, (this.lineHeight * index) - this.slide]);
+        }, this);
+        Element.prototype.draw.apply(this, arguments);
+    },
+
+    setText: function(string) {
+        this.text = string;
+        this.initText();
+    },
+
+    slideUp: function(height) {
+        this.slideTo += height;
+    }
+});
+
+module.exports = {
+    Element: Element,
+    TextBlock: TextBlock
+};
+
+/*
+
+
+var Menu = exports.Menu = function(options){
+    this.items = [];
+    this.init(options);
+};
+
+Menu.prototype.init = function(options){
+    this.title = options.title || undefined;
+    if (options.width && options.height) {
+        if (options.color.length === 4)
+            var colorString = "rgba("+options.color.join(',')+")";
+        else if (options.color.length === 3)
+            var colorString = "rgb("+options.color.join(',')+")";
+        else var colorString = "rgb(0,0,0)";
+        this.surface = new Element(options.height, options.width, {
+            color: colorString,
+            position: options.position || [0,0],
+            borderWidth: options.borderWidth || 0,
+            borderImage: {
+                vSlice: options.borderImage.vSlice || 0,
+                hSlice: options.borderImage.hSlice || 0
+            }
+        });
+    } else {
+        this.surface = undefined;
+    }
+    if (options.items){
+        options.items.forEach(function(item){
+            var newItem = new MenuItem(item);
+            this.items.push(newItem);
+        }, this);
+    }
+
+    this._isActive = false;
+    this.padding = options.padding || 0;
+    if (options.border){
+
+    }
+};
+
+Menu.prototype.isActive = function(){
+    return this._isActive;
+};
+
+Menu.prototype.activate = function(){
+    return this._isActive = true; 
+};
+
+Menu.prototype.deactivate = function(){
+    return this._isActive = false;
+};
+
+Menu.prototype.update = function(dt){
+    this.surface.update(dt);
+};
+
+Menu.prototype.draw = function(surface) {
+    this.surface.draw(surface);
+    this.items.forEach(function(item) {
+        item.draw(this.surface.background);
+    }, this);
+};
+
+var MenuItem = exports.MenuItem = function(options){
+    this.init(options);
+};
+
+MenuItem.prototype.init = function(options){
+    this.widget = options.widget;
+    this.linkedValue = options.linkedValue || undefined;
+    this.activate = options.onSelect || undefined;
+    this._selected = false;
+    this.height;
+    this.width;
+};
+
+MenuItem.prototype.activate = function(){ 
+    this.activate;
+};
+
+MenuItem.prototype.isSelected = function(){
+    return this._selected;
+};
+
+MenuItem.prototype.select = function(){
+    this._selected = true;
+};
+
+MenuItem.prototype.deselect = function(){
+    this._selected = false;
+};
+
+MenuItem.prototype.draw = function(){
+    this.widget.draw();
+};
+
+var MenuWidget = function(options){
+    this.init(options);
+};
+
+MenuWidget.prototype.init = function(options){
+
+};
+
+var TextWidget = function(options){
+    TextWidget.superConstructor.apply(this, arguments);
+};
+objects.extend(TextWidget, MenuWidget);
+
+TextWidget.prototype.init = function(options){
+    this.text = options.text;
+};
+
+var SliderWidget = function(options){
+    SliderWidget.superConstructor.apply(this, arguments);
+};
+objects.extend(SliderWidget, MenuWidget);
+
+SliderWidget.prototype.init = function(options){
+
+};
+*/
+
+},{"./entity":38,"gamejs":6,"super":48,"underscore":49}],47:[function(require,module,exports){
+/*jslint es5: true*/
+/*
+ * Vector Utilities
+ *
+ * For ease of implementing all your 2D Vector needs.
+ * Re-uses existing vector functionality available in gamejs
+ * with some additional helpful methods to make it easy
+ * to work with objects that represent Vectors.
+ * */
+
+var gamejs = require('gamejs'),
+    _ = require('underscore'),
+    utils = gamejs.utils;
+
+/*
+ * Parse the arguments passed into Vec2d
+ */
+function parseArgs(args) {
+    // User passed an array
+    if (Array.isArray(args[0])) {
+        return args[0];
+    }
+    // User passed x and y
+    else if (args.length === 2) {
+        return new Array(args[0], args[1]);
+    }
+    // User passed an object of x and y
+    else if (args[0] === Object(args[0])) {
+        return [args[0].x, args[0].y];
+    } else {
+        return [0, 0];
+    }
+}
+
+// Help get vector (well, any) lengths down to 0
+var dampen = exports.dampen = function(length, amount, min) {
+    min = (min || 0);
+    if (length > min) {
+        return Math.max(min, length - amount);
+    } else if (length < -min) {
+        return Math.min(-min, length + amount);
+    } else {
+        return length;
+    }
+};
+
+var dampenVector = exports.dampenVector = function(vec, amount, min) {
+    var length = vec.length();
+    if (length === 0) return;
+
+    var newLength = dampen(length, amount, min);
+
+    vec.setX(vec.getX() / length * newLength);
+    vec.setY(vec.getY() / length * newLength);
+    return vec;
+};
+
+var Vector = function(v) {
+    this._vec = new Array(v[0], v[1]);
+    return this;
+};
+
+Vector.prototype = {
+    // Expiremental getter and setter support.
+    get x() {
+        return this._vec[0];
+    },
+
+    set x(value) {
+        this._vec[0] = value;
+    },
+
+    get y() {
+        return this._vec[1];
+    },
+
+    set y(value) {
+        this._vec[1] = value;
+    },
+
+    length: function() {
+        return utils.vectors.len(this._vec);
+    },
+
+    set: function(vec) {
+        this._vec[0] = vec[0];
+        this._vec[1] = vec[1];
+        return this;
+    },
+
+    getX: function() {
+        return this._vec[0];
+    },
+
+    getY: function() {
+        return this._vec[1];
+    },
+
+    setX: function(x) {
+        this._vec[0] = x;
+    },
+
+    setY: function(y) {
+        this._vec[1] = y;
+    },
+
+    unpack: function() {
+        return [this._vec[0], this._vec[1]];
+    },
+
+    add: function(right) {
+        // We passed a Vector object
+        if (right === Object(right)) {
+            right = right._vec;
+        }
+        // Number.
+        else {
+            right = [right, right];
+        }
+        this.set(utils.vectors.add(this._vec, right));
+        return this;
+    },
+
+    mul: function(right) {
+        // We passed a Vector object.
+        if (right === Object(right)) {
+            return this.set(utils.vectors.multiply(this._vec, right._vec));
+        }
+        // Passed a number.
+        else {
+            return this.multiplyByScalar(right);
+        }
+    },
+
+    magnitude: function() {
+        return Math.sqrt(
+            (this._vec[0] * this._vec[0]) +
+            (this._vec[1] * this._vec[1])
+        );
+    },
+
+    // Limit the length of a vector.
+    truncate: function(length) {
+        return this.set(utils.vectors.truncate(this._vec, length));
+    },
+
+    // Multiply by a provided number.
+    multiplyByScalar: function(n) {
+        this._vec[0] *= n;
+        this._vec[1] *= n;
+        return this;
+    },
+
+    normalized: function() {
+        return this.set(this.multiplyByScalar(1, this.magnitude())._vec);
+    },
+
+    isZero: function() {
+        return (this._vec[0] === 0 && this._vec[1] === 0);
+    }
+};
+
+// Primary accessor to Vector interface.
+var Vec2d = exports.Vec2d = function() {
+    return this.create(arguments); 
+};
+
+Vec2d.prototype = {
+    Vector: Vector,
+
+    create: function(args) {
+        return new this.Vector(parseArgs(args));
+    }
+};
+
+
+},{"gamejs":6,"underscore":49}],48:[function(require,module,exports){
 /**
  * slice
  */
@@ -9147,8 +9177,6 @@ exports.merge = function (arr) {
 }).call(this);
 
 },{}],50:[function(require,module,exports){
-module.exports=require(49)
-},{}],51:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     Entity = require('gramework').Entity,
     _ = require('underscore'),
@@ -9727,7 +9755,7 @@ var Car = exports.Car = RoadObject.extend({
         this.accel = 0.001;
     }
 });
-},{"./conf":2,"gramework":6,"underscore":50}],52:[function(require,module,exports){
+},{"./conf":2,"gramework":34,"underscore":49}],51:[function(require,module,exports){
 var Scene = require('gramework').Scene,
     gamejs = require('gramework').gamejs,
     _ = require('underscore');
@@ -9892,4 +9920,4 @@ _.extend(Camera.prototype, {
         display.blit(this.outView, display.rect);
     }
 });
-},{"gramework":6,"underscore":50}]},{},[5])
+},{"gramework":34,"underscore":49}]},{},[5]);
