@@ -14,6 +14,7 @@ var Images = exports.Images = {
     bully02: './assets/enemy-punching2.png',
     bully03: './assets/enemy-punching3.png',
     bully04: './assets/enemy-punching4.png',
+    barricade01: './assets/enemy-roadblock.png',
     // GUI
     mapOverlay: './assets/map.png',
     arrowLeft: './assets/arrow_left.png',

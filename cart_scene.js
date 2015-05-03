@@ -98,6 +98,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
             scene: this,
             spriteSheet: gamejs.image.load(conf.Images.player_cart),
             road: this.road,
+            speed: 0.1,
             distance: 2,
             height: 64,
             width: 80,
@@ -111,7 +112,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.enemy = new Enemy({
             road: this.road,
             spriteSheet: gamejs.image.load(conf.Images.enemy_cart_01),
-            distance: 2,
+            distance: 1,
             height: 48,
             width: 80,
             position: 0
@@ -137,6 +138,13 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.map = true;
         this.turnList = this.generateTurnList(this.difficulty[this.phase]);
         this.d.loseControl();
+        this.enemies.forEach(function(enemy) {
+            enemy.holdBack();
+        }, this);
+    },
+
+    addBarricade: function() {
+        
     },
 
     hideMap: function() {
@@ -145,6 +153,9 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.generateTurns(this.turnList);
         this.p1Ready = false;
         this.p2Ready = false;
+        this.enemies.forEach(function(enemy) {
+            enemy.gunIt();
+        }, this);
     },
 
     generateTurnList: function(numTurns) {
@@ -174,10 +185,17 @@ var CartScene = exports.CartScene = RoadScene.extend({
         CartScene.super_.prototype.update.apply(this, arguments);
 
         this.bullyGenerator.update(dt);
-
+        // ENEMY FALLING BEHIND
         this.enemies.forEach(function(enemy) {
             enemy.setDestinationPosition(this.d.position);
-            enemy.speed = (this.d.distance - enemy.distance) / 10;
+            if (enemy.distance < this.camera.distance - 0.1) {
+                enemy.distance = this.camera.distance - 0.05;
+                if (!this.map && !this.d.isCrashing) {
+                    enemy.gunIt();
+                }
+            } else if (enemy.holdingBack) {
+                enemy.speed = (this.d.speed - enemy.speed) / 10;
+            }
         }, this);
         this.d.checkCollisions(this.road.roadObjects);
         if (this.d.isCrashing) {
@@ -230,6 +248,9 @@ var CartScene = exports.CartScene = RoadScene.extend({
         // PLAYERS HAVE LOST
         if (this.d.isCrashing) {
             this.loseCounter += dt;
+            this.enemies.forEach(function(enemy) {
+                enemy.holdBack();
+            }, this);
         }
         if (this.loseCounter > 4000) {
             this.lost = true;

@@ -7,7 +7,7 @@ ANGLE_SCALE_CONSTANT = 100;
 
 var RoadObject = exports.RoadObject = Entity.extend({
     initialize: function(options) {
-        this.type = 'obstacle';
+        this.type = options.type || 'obstacle';
         this.height = options.height;
         this.width = options.width;
         this.collisionWidth = options.collisionWidth || this.width;
@@ -371,8 +371,12 @@ Road.prototype = {
 
     update: function(dt, camera) {
         for (var i = this.roadObjects.length - 1; i > 0; i--) {
-            if (this.roadObjects[i].distance < camera.distance) {
-                this.roadObjects.splice(i, 1);
+            if (this.roadObjects[i].type == 'obstacle') {
+                if (this.roadObjects[i].distance < camera.distance) {
+                    this.roadObjects.splice(i, 1);
+                } else {
+                    this.roadObjects[i].update(dt, camera);
+                }
             } else {
                 this.roadObjects[i].update(dt, camera);
             }
@@ -570,7 +574,7 @@ var Car = exports.Car = RoadObject.extend({
 
         this.myBox = {
             'position': [this.position - (1/2) * this.collisionWidth, this.position + (1/2) * this.collisionWidth],
-            'distance': [this.distance - 0.3, this.distance + 0.3]
+            'distance': [this.distance - 0.1, this.distance + 0.1]
         };
     },
 

@@ -99,6 +99,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
             scene: this,
             spriteSheet: gamejs.image.load(conf.Images.player_cart),
             road: this.road,
+            speed: 0.1,
             distance: 2,
             height: 64,
             width: 80,
@@ -112,7 +113,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.enemy = new Enemy({
             road: this.road,
             spriteSheet: gamejs.image.load(conf.Images.enemy_cart_01),
-            distance: 2,
+            distance: 1,
             height: 48,
             width: 80,
             position: 0
@@ -138,6 +139,13 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.map = true;
         this.turnList = this.generateTurnList(this.difficulty[this.phase]);
         this.d.loseControl();
+        this.enemies.forEach(function(enemy) {
+            enemy.holdBack();
+        }, this);
+    },
+
+    addBarricade: function() {
+        
     },
 
     hideMap: function() {
@@ -146,6 +154,9 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.generateTurns(this.turnList);
         this.p1Ready = false;
         this.p2Ready = false;
+        this.enemies.forEach(function(enemy) {
+            enemy.gunIt();
+        }, this);
     },
 
     generateTurnList: function(numTurns) {
@@ -175,10 +186,17 @@ var CartScene = exports.CartScene = RoadScene.extend({
         CartScene.super_.prototype.update.apply(this, arguments);
 
         this.bullyGenerator.update(dt);
-
+        // ENEMY FALLING BEHIND
         this.enemies.forEach(function(enemy) {
             enemy.setDestinationPosition(this.d.position);
-            enemy.speed = (this.d.distance - enemy.distance) / 10;
+            if (enemy.distance < this.camera.distance - 0.1) {
+                enemy.distance = this.camera.distance - 0.05;
+                if (!this.map && !this.d.isCrashing) {
+                    enemy.gunIt();
+                }
+            } else if (enemy.holdingBack) {
+                enemy.speed = (this.d.speed - enemy.speed) / 10;
+            }
         }, this);
         this.d.checkCollisions(this.road.roadObjects);
         if (this.d.isCrashing) {
@@ -231,6 +249,9 @@ var CartScene = exports.CartScene = RoadScene.extend({
         // PLAYERS HAVE LOST
         if (this.d.isCrashing) {
             this.loseCounter += dt;
+            this.enemies.forEach(function(enemy) {
+                enemy.holdBack();
+            }, this);
         }
         if (this.loseCounter > 4000) {
             this.lost = true;
@@ -427,6 +448,7 @@ var Images = exports.Images = {
     bully02: './assets/enemy-punching2.png',
     bully03: './assets/enemy-punching3.png',
     bully04: './assets/enemy-punching4.png',
+    barricade01: './assets/enemy-roadblock.png',
     // GUI
     mapOverlay: './assets/map.png',
     arrowLeft: './assets/arrow_left.png',
@@ -506,7 +528,7 @@ var Driver = exports.Driver = RoadObject.extend({
         this.image = options.image;
         this.accel = 0;
         this.topSpeed = 0.5;
-        this.speed = 0;
+        this.speed = options.speed || 0;
         this.angle = 0;
         this.angularSpeed = 0;
         this.rotates = true;
@@ -584,6 +606,20 @@ var Driver = exports.Driver = RoadObject.extend({
                     return true;
                 }
             }
+
+            if (roadObject.type == 'enemy') {
+                if (this.inMyBox(roadObject)) {
+                    if (this.speed < 0.05) {
+                        this.stop();
+                        this.crash();
+                        roadObject.holdBack();
+                    } else {
+                        this.speed -= 0.005;
+                        roadObject.holdBack();
+                    }
+                    return true;
+                }
+            }
         }, this);
     },
 
@@ -633,7 +669,6 @@ var Driver = exports.Driver = RoadObject.extend({
             // PARTICLES
             if (this.particleL > 100) {
                 this.particleL = 0;
-                console.log(Particle);
                 this.scene.particles.push(new Particle({x: this.rect.left + 10, y: this.rect.top + 34}));
             }
 
@@ -719,13 +754,13 @@ var Enemy = exports.Enemy = Car.extend({
 
     update: function(dt) {
         if (this.destinationPosition != this.postion) {
-            this.lateralSpeed = (this.destinationPosition - this.position) / 20;
+            this.lateralSpeed = (this.destinationPosition - this.position) / 10;
         }
         this.image = this.anim.update(dt);
         if (!this.holdingBack) {
             if (this.speed < this.minSpeed) {
                 this.speed = this.minSpeed;
-            }
+            } 
         }
 
         Enemy.super_.prototype.update.apply(this, arguments);
@@ -9360,7 +9395,7 @@ ANGLE_SCALE_CONSTANT = 100;
 
 var RoadObject = exports.RoadObject = Entity.extend({
     initialize: function(options) {
-        this.type = 'obstacle';
+        this.type = options.type || 'obstacle';
         this.height = options.height;
         this.width = options.width;
         this.collisionWidth = options.collisionWidth || this.width;
@@ -9724,8 +9759,12 @@ Road.prototype = {
 
     update: function(dt, camera) {
         for (var i = this.roadObjects.length - 1; i > 0; i--) {
-            if (this.roadObjects[i].distance < camera.distance) {
-                this.roadObjects.splice(i, 1);
+            if (this.roadObjects[i].type == 'obstacle') {
+                if (this.roadObjects[i].distance < camera.distance) {
+                    this.roadObjects.splice(i, 1);
+                } else {
+                    this.roadObjects[i].update(dt, camera);
+                }
             } else {
                 this.roadObjects[i].update(dt, camera);
             }
@@ -9923,7 +9962,7 @@ var Car = exports.Car = RoadObject.extend({
 
         this.myBox = {
             'position': [this.position - (1/2) * this.collisionWidth, this.position + (1/2) * this.collisionWidth],
-            'distance': [this.distance - 0.3, this.distance + 0.3]
+            'distance': [this.distance - 0.1, this.distance + 0.1]
         };
     },
 

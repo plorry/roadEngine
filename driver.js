@@ -33,7 +33,7 @@ var Driver = exports.Driver = RoadObject.extend({
         this.image = options.image;
         this.accel = 0;
         this.topSpeed = 0.5;
-        this.speed = 0;
+        this.speed = options.speed || 0;
         this.angle = 0;
         this.angularSpeed = 0;
         this.rotates = true;
@@ -111,6 +111,20 @@ var Driver = exports.Driver = RoadObject.extend({
                     return true;
                 }
             }
+
+            if (roadObject.type == 'enemy') {
+                if (this.inMyBox(roadObject)) {
+                    if (this.speed < 0.05) {
+                        this.stop();
+                        this.crash();
+                        roadObject.holdBack();
+                    } else {
+                        this.speed -= 0.005;
+                        roadObject.holdBack();
+                    }
+                    return true;
+                }
+            }
         }, this);
     },
 
@@ -160,7 +174,6 @@ var Driver = exports.Driver = RoadObject.extend({
             // PARTICLES
             if (this.particleL > 100) {
                 this.particleL = 0;
-                console.log(Particle);
                 this.scene.particles.push(new Particle({x: this.rect.left + 10, y: this.rect.top + 34}));
             }
 
@@ -246,13 +259,13 @@ var Enemy = exports.Enemy = Car.extend({
 
     update: function(dt) {
         if (this.destinationPosition != this.postion) {
-            this.lateralSpeed = (this.destinationPosition - this.position) / 20;
+            this.lateralSpeed = (this.destinationPosition - this.position) / 10;
         }
         this.image = this.anim.update(dt);
         if (!this.holdingBack) {
             if (this.speed < this.minSpeed) {
                 this.speed = this.minSpeed;
-            }
+            } 
         }
 
         Enemy.super_.prototype.update.apply(this, arguments);
