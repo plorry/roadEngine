@@ -57,6 +57,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
     initialize: function(options) {
         CartScene.super_.prototype.initialize.apply(this, arguments);
         this.startOptions = options;
+        this.type == 'cart_scene';
 
         this.difficulty = options.difficulty;
         this.phase = 0;

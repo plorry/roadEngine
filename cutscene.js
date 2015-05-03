@@ -16,7 +16,7 @@ var CutScene = exports.CutScene = Scene.extend({
         this.images = {};
         this.elapsed = 0;
         this.cleared = false;
-        this.duration = options.duration * 1000 || 3000;
+        this.duration = options.duration * 1000;
         this.pieces.forEach(function(piece) {
             this.images[piece.image] = gamejs.image.load(conf.Images[piece.image]);
         }, this);
@@ -24,9 +24,13 @@ var CutScene = exports.CutScene = Scene.extend({
 
     update: function(dt) {
         this.elapsed += dt;
-        if (this.elapsed > this.duration) {
+        if (this.duration && this.elapsed > this.duration) {
             this.cleared = true;
         }
+    },
+
+    next: function() {
+        this.cleared = true;
     },
 
     draw: function(surface) {
@@ -37,8 +41,11 @@ var CutScene = exports.CutScene = Scene.extend({
                     surface.blit(this.images[piece.image], surface.rect);
                 }
             } else if (piece.move){
-                var xOffset = Math.floor(piece.move[0] * (this.elapsed / this.duration));
-                var yOffset = Math.floor(piece.move[1] * (this.elapsed / this.duration));
+                if (!piece.start) {
+                    piece.start = [0,0];
+                }
+                var xOffset = Math.floor(piece.move[0] * (this.elapsed / this.duration)) + piece.start[0];
+                var yOffset = Math.floor(piece.move[1] * (this.elapsed / this.duration)) + piece.start[1];
                 surface.blit(this.images[piece.image], surface.rect.move(xOffset, yOffset));
             } else {
                 surface.blit(this.images[piece.image], surface.rect);
