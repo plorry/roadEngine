@@ -10,11 +10,45 @@ var animate = require('gramework').animate,
 
 var themeSets = {
     'woods': [
+        {image: 'bigRock', height: 200, width: 200, collisionWidth: 200},
+        {image: 'rocks', height: 300, width: 300, collisionWidth: 250},
+        {image: 'tree02', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree03', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree04', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree05', height: 400, width: 400, collisionWidth: 100},
+        {image: 'water', height: 75, width: 300, collisionWidth: 200},
+        {image: 'tree06', height: 400, width: 400, collisionWidth: 100}
+    ],
+    'town': [
+        {image: 'house01', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house02', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house03', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house04', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house05', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house06', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house07', height: 250, width: 250, collisionWidth: 250},
         {image: 'tree02', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree03', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree04', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree05', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree06', height: 400, width: 400, collisionWidth: 100}
+    ],
+    'spooky': [
+        {image: 'ghostHouse03', height: 250, width: 250, collisionWidth: 250},
+        {image: 'ghostHouse05', height: 250, width: 250, collisionWidth: 250},
+        {image: 'ghostTree01', height: 400, width: 400, collisionWidth: 100},
+        {image: 'ghostTree02', height: 400, width: 400, collisionWidth: 100},
+        {image: 'ghostTree03', height: 400, width: 400, collisionWidth: 100}
+    ],
+    'lava': [
+        {image: 'volcano01', height: 250, width: 250, collisionWidth: 250},
+        {image: 'volcano02', height: 250, width: 250, collisionWidth: 250},
+        {image: 'volcano03', height: 250, width: 250, collisionWidth: 250},
+        {image: 'lavaTree01', height: 400, width: 400, collisionWidth: 100},
+        {image: 'lavaTree02', height: 200, width: 200, collisionWidth: 50},
+        {image: 'lavaTree03', height: 400, width: 400, collisionWidth: 100},
+        {image: 'lava01', height: 75, width: 300, collisionWidth: 300},
+        {image: 'lava02', height: 75, width: 300, collisionWidth: 300},
     ]
 };
 
@@ -29,7 +63,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.leftArrow = gamejs.image.load(conf.Images.arrowLeft);
         this.rightArrow = gamejs.image.load(conf.Images.arrowRight);
         this.mapHeight = 220;
-        this.theme = options.theme || 'woods';
+        this.theme = options.theme || 'lava';
         this.turnList = [];
         this.particles = [];
 

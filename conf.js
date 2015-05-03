@@ -28,12 +28,30 @@ var Images = exports.Images = {
     tree06: './assets/tree06.png',
     shrub02: './assets/shrub02.png',
     shrub03: './assets/shrub03.png',
+    water: './assets/water.png',
     // Ghost Theme
     ghostHouse03: './assets/ghosthouse03.png',
     ghostHouse05: './assets/ghosthouse05.png',
     ghostTree01: './assets/ghosttree01.png',
     ghostTree02: './assets/ghosttree02.png',
     ghostTree03: './assets/ghosttree03.png',
+    // Town Theme
+    house01: './assets/house01.png',
+    house02: './assets/house02.png',
+    house03: './assets/house03.png',
+    house04: './assets/house04.png',
+    house05: './assets/house05.png',
+    house06: './assets/house06.png',
+    house07: './assets/house07.png',
+    // Lava Theme
+    volcano01: './assets/volcano01.png',
+    volcano02: './assets/volcano02.png',
+    volcano03: './assets/volcano03.png',
+    lava01: './assets/lava01.png',
+    lava02: './assets/lava02.png',
+    lavaTree01: './assets/lavatree01.png',
+    lavaTree02: './assets/lavatree02.png',
+    lavaTree03: './assets/lavatree03.png'
 };
 
 var globals = exports.globals = {
