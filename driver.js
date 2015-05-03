@@ -6,6 +6,7 @@ var animate = require('gramework').animate,
     Car = require('./road').Car;
 
 var DRAG_FACTOR = 0.01;
+var DRAG_FACTOR_GRASS = 0.05;
 
 var Driver = exports.Driver = RoadObject.extend({
     initialize: function(options) {
@@ -180,7 +181,11 @@ var Driver = exports.Driver = RoadObject.extend({
         }
 
         if (this.speed > 0.0005) {
-            this.accel -= DRAG_FACTOR * this.speed;
+            if (this.position < 400 && this.position > -400) {
+                this.accel -= DRAG_FACTOR * this.speed;
+            } else {
+                this.accel -= DRAG_FACTOR_GRASS * this.speed;
+            }
         } else {
             this.speed = 0;
         }
@@ -216,6 +221,7 @@ var Enemy = exports.Enemy = Car.extend({
         this.type = 'enemy';
         this.destinationPosition = 0;
         this.minSpeed = 0.13;
+        this.holdingBack = true;
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 40, 24);
         this.anim = new animate.Animation(this.spriteSheet, 'static', {
             'static': {
@@ -224,6 +230,14 @@ var Enemy = exports.Enemy = Car.extend({
                 loop: true
             }
         });
+    },
+
+    holdBack: function() {
+        this.holdingBack = true;
+    },
+
+    gunIt: function() {
+        this.holdingBack = false;
     },
 
     setDestinationPosition: function(position) {
@@ -235,8 +249,10 @@ var Enemy = exports.Enemy = Car.extend({
             this.lateralSpeed = (this.destinationPosition - this.position) / 20;
         }
         this.image = this.anim.update(dt);
-        if (this.speed < this.minSpeed) {
-            this.speed = this.minSpeed;
+        if (!this.holdingBack) {
+            if (this.speed < this.minSpeed) {
+                this.speed = this.minSpeed;
+            }
         }
 
         Enemy.super_.prototype.update.apply(this, arguments);

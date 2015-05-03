@@ -55,6 +55,7 @@ var themeSets = {
 var CartScene = exports.CartScene = RoadScene.extend({
     initialize: function(options) {
         CartScene.super_.prototype.initialize.apply(this, arguments);
+        this.startOptions = options;
 
         this.difficulty = options.difficulty;
         this.phase = 0;
@@ -62,10 +63,15 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.mapImage = gamejs.image.load(conf.Images.mapOverlay);
         this.leftArrow = gamejs.image.load(conf.Images.arrowLeft);
         this.rightArrow = gamejs.image.load(conf.Images.arrowRight);
+        this.road.clear();
         this.mapHeight = 220;
-        this.theme = options.theme || 'lava';
+        this.theme = options.theme || 'woods';
         this.turnList = [];
         this.particles = [];
+        this.levelClear = false;
+        // Restart level if lost
+        this.loseCounter = 0;
+        this.lost = false;
 
         // MAP MODE VARS
         this.p1Ready = false;
@@ -121,6 +127,10 @@ var CartScene = exports.CartScene = RoadScene.extend({
         });
 
         this.showMap();
+    },
+
+    restart: function() {
+        this.initialize(this.startOptions);
     },
 
     showMap: function() {
@@ -215,6 +225,14 @@ var CartScene = exports.CartScene = RoadScene.extend({
             if (this.particles[i].dead) {
                 this.particles.splice(i, 1);
             }
+        }
+
+        // PLAYERS HAVE LOST
+        if (this.d.isCrashing) {
+            this.loseCounter += dt;
+        }
+        if (this.loseCounter > 4000) {
+            this.lost = true;
         }
     },
 

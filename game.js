@@ -36,6 +36,33 @@ var Game = exports.Game = function () {
             texturePath: conf.Images.test_texture,
             roadSpec: roadSpec
         }),
+        theme: 'woods',
+        image_path: conf.Images.background
+    });
+
+    this.level02 = new CartScene({
+        width:320,
+        height:220,
+        pixelScale: 2,
+        difficulty: [6, 8, 8],
+        road: new Road({
+            texturePath: conf.Images.test_texture,
+            roadSpec: roadSpec
+        }),
+        theme: 'town',
+        image_path: conf.Images.background
+    });
+
+    this.level03 = new CartScene({
+        width:320,
+        height:220,
+        pixelScale: 2,
+        difficulty: [10, 12, 14],
+        road: new Road({
+            texturePath: conf.Images.test_texture,
+            roadSpec: roadSpec
+        }),
+        theme: 'spooky',
         image_path: conf.Images.background
     });
 
@@ -148,5 +175,10 @@ Game.prototype.setScene = function(scene) {
 Game.prototype.update = function(dt) {
     if (dt > 1000 / 3) dt = 1000 / 3;
     this.currentScene.update(dt);
-    document.getElementById('fps').innerHTML = Math.floor(1 / (dt / 1000));
+
+    if (this.currentScene.lost) {
+        this.currentScene.restart();
+    }
+
+    // document.getElementById('fps').innerHTML = Math.floor(1 / (dt / 1000));
 };

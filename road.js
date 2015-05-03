@@ -64,6 +64,7 @@ var RoadObject = exports.RoadObject = Entity.extend({
         //this.angleOffset = thisLine.angleOffset * this.scaleFactor;
         var width = this.width * this.scaleFactor;
         var tHeight = this.height * this.scaleFactor;
+
         this.rect = new gamejs.Rect(
             [(this.road.displayWidth/2) + (this.position - this.width / 2) * this.scaleFactor - offset, height - tHeight],
             [width, tHeight]
@@ -300,6 +301,12 @@ Road.prototype = {
             angle: angle,
             end: distance + length
         };
+    },
+
+    clear: function() {
+        this.currentRoad.turns = {};
+        this.currentRoad.hills = {};
+        this.roadObjects = [];
     },
 
     collectTurns: function(distance) {
