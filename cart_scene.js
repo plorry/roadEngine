@@ -74,6 +74,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.musicIsPlaying = false;
         this.music = new Audio(options.music);
         this.loseMusic = new Audio('./assets/Youlose.ogg');
+        this.loseMusic.loop = false;
 
         this.particles = [];
         this.levelClear = false;
@@ -305,6 +306,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
         // PLAYERS HAVE LOST
         if (this.d.isCrashing) {
             this.music = this.loseMusic;
+            this.music.loop = false;
             this.loseCounter += dt;
             this.enemies.forEach(function(enemy) {
                 enemy.holdBack();
