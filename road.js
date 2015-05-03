@@ -10,6 +10,7 @@ var RoadObject = exports.RoadObject = Entity.extend({
         this.type = 'obstacle';
         this.height = options.height;
         this.width = options.width;
+        this.collisionWidth = options.collisionWidth || this.width;
         this.color = options.color;
         this.distance = options.distance;
         this.currentDistance = 0;
@@ -31,7 +32,7 @@ var RoadObject = exports.RoadObject = Entity.extend({
 
 
         this.myBox = {
-            'position': [this.position - this.width / 2, this.position + this.width / 2],
+            'position': [this.position - (1/2) * this.collisionWidth, this.position + (1/2) * this.collisionWidth],
             'distance': [this.distance - 0.3, this.distance + 0.3]
         };
     },
@@ -362,9 +363,18 @@ Road.prototype = {
     },
 
     update: function(dt, camera) {
+        for (var i = this.roadObjects.length - 1; i > 0; i--) {
+            if (this.roadObjects[i].distance < camera.distance) {
+                this.roadObjects.splice(i, 1);
+            } else {
+                this.roadObjects[i].update(dt, camera);
+            }
+        }
+        /*
         this.roadObjects.forEach(function(ro) {
             ro.update(dt, camera);
         });
+        */
         this.drawRoadObjects = this.collectRoadObjects(camera.distance);
         this.upcomingTurns = this.collectTurns(camera.distance);
         this.upcomingHills = this.collectHills(camera.distance);
@@ -513,8 +523,8 @@ Line.prototype = {
 
             this.road.roadObjects.forEach(function(ro) {
                 if (ro.distance >= this.nextDistance && ro.distance <= this.distance) {
-                        this.toDraw.push(ro);
-                    }
+                    this.toDraw.push(ro);
+                }
             }, this);
             // Now we draw
             // var stripe = Math.floor(Math.cos(distance * 3));
@@ -557,7 +567,7 @@ var Car = exports.Car = RoadObject.extend({
         Car.super_.prototype.update.apply(this, arguments);
 
         this.myBox = {
-            'position': [this.position - this.width / 2, this.position + this.width / 2],
+            'position': [this.position - (1/2) * this.collisionWidth, this.position + (1/2) * this.collisionWidth],
             'distance': [this.distance - 0.3, this.distance + 0.3]
         };
     },

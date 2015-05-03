@@ -8,19 +8,42 @@ var animate = require('gramework').animate,
     _ = require('underscore');
 
 
+var themeSets = {
+    'woods': [
+        {image: 'tree02', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree03', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree04', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree05', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree06', height: 400, width: 400, collisionWidth: 100}
+    ]
+};
+
 var CartScene = exports.CartScene = RoadScene.extend({
     initialize: function(options) {
         CartScene.super_.prototype.initialize.apply(this, arguments);
 
+        this.map = false;
+        this.mapImage = gamejs.image.load(conf.Images.mapOverlay);
+        this.mapHeight = 220;
+        this.theme = options.theme || 'woods';
+        this.turnList = [];
+
+        // MAP MODE VARS
+        this.p1Ready = false;
+        this.p2Ready = false;
+
         _.range(0,180).forEach(function(value){
-            this.road.addRoadObject(value, {
+            var distance = Math.random() * 180;
+            var asset = _.sample(themeSets[this.theme]);
+            this.road.addRoadObject(distance + 5, {
                 road: this.road,
-                distance: value + 5,
-                height: 200,
-                width: 200,
-                position: 500,
+                distance: distance + 5,
+                height: asset.height,
+                width: asset.width,
+                collisionWidth: asset.collisionWidth,
+                position: Math.random() * 300 + 500,
                 side: _.sample(['right', 'left']),
-                image: 'hHouse01'
+                image: asset.image
             });
         }, this);
 
@@ -55,13 +78,33 @@ var CartScene = exports.CartScene = RoadScene.extend({
             scene: this
         });
 
-        this.generateTurns(4);
+        this.showMap();
     },
 
-    generateTurns: function(numTurns) {
+    showMap: function() {
+        this.map = true;
+        this.turnList = this.generateTurnList(this.difficulty);
+        this.d.loseControl();
+    },
+
+    hideMap: function() {
+        this.map = false;
+        this.d.gainControl();
+        this.generateTurns(this.turnList);
+    },
+
+    generateTurnList: function(numTurns) {
+        var turnList = [];
         _.range(numTurns).forEach(function(i) {
-            var direction = _.sample(['left', 'right']);
-            this.addRandomTurn((i + 1) * 80, direction);
+            this.turnList.push(_.sample(['left', 'right']));
+        }, this);
+        return turnList;
+    },
+
+    generateTurns: function(turnList) {
+        _.range(turnList.length - 1).forEach(function(i) {
+            var direction = turnList[i];
+            this.addRandomTurn((i + 1) * 80 + this.camera.distance, direction);
         }, this);
     },
 
@@ -87,14 +130,51 @@ var CartScene = exports.CartScene = RoadScene.extend({
         if (this.d.isCrashing) {
             this.bullyGenerator.activate();
         }
+
+        if (this.road.roadObjects.length < 200) {
+            var distance = Math.random() * 180 + this.camera.distance + 50;
+            var asset = _.sample(themeSets[this.theme]);
+            this.road.addRoadObject(distance, {
+                road: this.road,
+                distance: distance + 5,
+                height: asset.height,
+                width: asset.width,
+                collisionWidth: asset.collisionWidth,
+                position: Math.random() * 300 + 500,
+                side: _.sample(['right', 'left']),
+                image: asset.image
+            });
+        }
+
+        // MAP MODE
+        if (this.map) {
+            if (!this.p1Ready || !this.p2Ready) {
+                if (this.mapHeight > 0) {
+                    this.mapHeight -= 5;
+                }
+            } else {
+                if (this.mapHeight < 220) {
+                    this.mapHeight += 15;
+                } else {
+                    this.hideMap();
+                }
+            }
+        }
     },
 
     left_boost_on: function() {
         this.d.left_boost_on();
+
+        if (this.map) {
+            this.p1Ready = true;
+        }
     },
 
     right_boost_on: function() {
         this.d.right_boost_on();
+        if (this.map) {
+            this.p2Ready = true;
+        }
     },
 
     left_boost_off: function() {
@@ -103,6 +183,24 @@ var CartScene = exports.CartScene = RoadScene.extend({
 
     right_boost_off: function() {
         this.d.right_boost_off();
+    },
+
+    draw: function(display, options) {
+        this.camera.view.fill('#fff');
+        this.camera.view.blit(this.image, [0, (this.camera.horizon - 475)]);
+        this.road.draw(this.camera);
+        if (this.map) {
+            this.camera.view.blit(this.mapImage, [0, this.mapHeight]);
+            this.turnList.forEach(function(turn) {
+                if (turn == 'left') {
+
+                } else {
+                    
+                }
+            }, this);
+        }
+        this.camera.draw(display);
+        RoadScene.super_.prototype.draw.call(this, display, options);
     }
 });
 
@@ -124,7 +222,7 @@ var Bully = Car.extend({
             },
             'punch': {
                 frames: [4,5,6],
-                rate: 15,
+                rate: 7,
                 loop: true
             }
         });
@@ -141,7 +239,7 @@ var Bully = Car.extend({
             } else if (this.destinationPosition < this.position) {
                 this.lateralSpeed = -3;
             }
-            if (this.position + 5 > this.destinationPosition && this.position - 5 < this.destinationPosition) {
+            if (this.position + 10 > this.destinationPosition && this.position - 10 < this.destinationPosition) {
                 this.lateralSpeed = 0;
                 this.atDestinationPosition = true;
             }

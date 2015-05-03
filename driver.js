@@ -132,17 +132,16 @@ var Driver = exports.Driver = RoadObject.extend({
         this.topSpeed = 0;
         this.angularSpeed = 0;
 
-        if (this.road.getAltitudeRateAt(this.distance) != 0) {
-            this.accel += (0.0005 * Math.cos(this.angle)) * this.road.getAltitudeRateAt(this.distance);
-        }
-
         if (this.hasControl()) {
+            if (this.road.getAltitudeRateAt(this.distance) != 0) {
+                this.accel += (0.0005 * Math.cos(this.angle)) * this.road.getAltitudeRateAt(this.distance);
+            }
             if (this.left_boost) {
-                this.accel += 0.001;
+                this.accel += 0.0005;
                 this.angularSpeed += 0.02;
             }
             if (this.right_boost) {
-                this.accel += 0.001;
+                this.accel += 0.0005;
                 this.angularSpeed -= 0.02;
             }
             if (this.right_boost && this.left_boost) {
@@ -151,6 +150,12 @@ var Driver = exports.Driver = RoadObject.extend({
                 } else if (this.angle > 0) {
                     this.angularSpeed -= 0.01;
                 }
+            }
+        }
+
+        if(!this.isCrashing) {
+            if (this.accel < 0.0006) {
+                this.accel = 0.0006;
             }
         }
 
@@ -190,7 +195,7 @@ var Enemy = exports.Enemy = Car.extend({
         Enemy.super_.prototype.initialize.apply(this, arguments);
         this.type = 'enemy';
         this.destinationPosition = 0;
-        this.minSpeed = 0.2;
+        this.minSpeed = 0.13;
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 40, 24);
         this.anim = new animate.Animation(this.spriteSheet, 'static', {
             'static': {
