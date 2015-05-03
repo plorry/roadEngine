@@ -370,11 +370,6 @@ Road.prototype = {
                 this.roadObjects[i].update(dt, camera);
             }
         }
-        /*
-        this.roadObjects.forEach(function(ro) {
-            ro.update(dt, camera);
-        });
-        */
         this.drawRoadObjects = this.collectRoadObjects(camera.distance);
         this.upcomingTurns = this.collectTurns(camera.distance);
         this.upcomingHills = this.collectHills(camera.distance);
