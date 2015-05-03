@@ -510,6 +510,25 @@ var Images = exports.Images = {
     lavaTree03: './assets/lavatree03.png'
 };
 
+var sounds = exports.sounds = {
+    blockade01: './assets/Blockade.ogg',
+    blockade02: './assets/Blockade2.ogg',
+    blockade03: './assets/Blockade3.ogg',
+    glassbreak: './assets/Glassbreak.ogg',
+    hit01: './assets/Hit.ogg',
+    hit02: './assets/Hit2.ogg',
+    hit03: './assets/Hit3.ogg',
+    punch01: './assets/Punch.ogg',
+    punch02: './assets/Punch2.ogg',
+    punch03: './assets/Punch3.ogg',
+    punch04: './assets/Punch4.ogg',
+    punch05: './assets/Punch5.ogg',
+    punch06: './assets/Punch6.ogg',
+    schoolbell: './assets/schoolbell.ogg',
+    ticktock: './assets/ticktock.ogg',
+    woosh: './assets/Woosh.ogg'
+}
+
 var globals = exports.globals = {
     fps: 30
 };
