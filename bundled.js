@@ -622,6 +622,7 @@ var Game = exports.Game = function () {
         width:320,
         height:220,
         pixelScale: 2,
+        difficulty: 4,
         road: new Road({
             texturePath: conf.Images.test_texture,
             roadSpec: roadSpec
