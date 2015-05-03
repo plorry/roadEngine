@@ -332,7 +332,8 @@ Game.prototype.update = function(dt) {
     if (dt > 1000 / 3) dt = 1000 / 3;
     this.currentScene.update(dt);
     document.getElementById('fps').innerHTML = Math.floor(1 / (dt / 1000));
-    if (this.music != this.currentScene.music) {
+    if (this.music != this.currentScene.music && this.currentScene.music != 'continue') {
+        this.stopMusic();
         this.setMusic(this.currentScene.music);
         this.playMusic();
     }
