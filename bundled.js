@@ -23,8 +23,11 @@ var CartScene = exports.CartScene = RoadScene.extend({
     initialize: function(options) {
         CartScene.super_.prototype.initialize.apply(this, arguments);
 
+        this.difficulty = options.difficulty;
         this.map = false;
         this.mapImage = gamejs.image.load(conf.Images.mapOverlay);
+        this.leftArrow = gamejs.image.load(conf.Images.arrowLeft);
+        this.rightArrow = gamejs.image.load(conf.Images.arrowRight);
         this.mapHeight = 220;
         this.theme = options.theme || 'woods';
         this.turnList = [];
@@ -97,13 +100,13 @@ var CartScene = exports.CartScene = RoadScene.extend({
     generateTurnList: function(numTurns) {
         var turnList = [];
         _.range(numTurns).forEach(function(i) {
-            this.turnList.push(_.sample(['left', 'right']));
+            turnList.push(_.sample(['left', 'right']));
         }, this);
         return turnList;
     },
 
     generateTurns: function(turnList) {
-        _.range(turnList.length - 1).forEach(function(i) {
+        _.range(turnList.length).forEach(function(i) {
             var direction = turnList[i];
             this.addRandomTurn((i + 1) * 80 + this.camera.distance, direction);
         }, this);
@@ -111,7 +114,6 @@ var CartScene = exports.CartScene = RoadScene.extend({
 
     addRandomTurn: function(distance, direction) {
         var multiplier;
-        console.log(direction);
         (direction == 'right') ? multiplier = 1 : multiplier = -1;
 
         this.road.addHill(distance, 5, 30);
@@ -192,13 +194,13 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.road.draw(this.camera);
         if (this.map) {
             this.camera.view.blit(this.mapImage, [0, this.mapHeight]);
-            this.turnList.forEach(function(turn) {
-                if (turn == 'left') {
-
+            for (var i = 0; i < this.turnList.length; i++) {
+                if (this.turnList[i] == 'left') {
+                    this.camera.view.blit(this.leftArrow, [55 + i * 30, this.mapHeight + 45]);
                 } else {
-                    
+                    this.camera.view.blit(this.rightArrow, [55 + i * 30, this.mapHeight + 45]);
                 }
-            }, this);
+            }
         }
         this.camera.draw(display);
         RoadScene.super_.prototype.draw.call(this, display, options);
@@ -622,6 +624,7 @@ var Game = exports.Game = function () {
         width:320,
         height:220,
         pixelScale: 2,
+        difficulty: 4,
         road: new Road({
             texturePath: conf.Images.test_texture,
             roadSpec: roadSpec
