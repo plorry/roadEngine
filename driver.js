@@ -6,10 +6,12 @@ var animate = require('gramework').animate,
     Car = require('./road').Car;
 
 var DRAG_FACTOR = 0.01;
+var DRAG_FACTOR_GRASS = 0.05;
 
 var Driver = exports.Driver = RoadObject.extend({
     initialize: function(options) {
         Driver.super_.prototype.initialize.apply(this, arguments);
+        this.scene = options.scene;
         this.type = 'driver';
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 80, 64);
         this.loseSpriteSheet = new animate.SpriteSheet(gamejs.image.load(conf.Images.lose_01), 144, 96);
@@ -25,11 +27,13 @@ var Driver = exports.Driver = RoadObject.extend({
                 frames: _.range(0, 11), rate: 7, loop: false
             }
         });
+        this.particleL = 0;
+        this.particleR = 0;
         this.road.roadObjects.push(this);
         this.image = options.image;
         this.accel = 0;
         this.topSpeed = 0.5;
-        this.speed = 0;
+        this.speed = options.speed || 0;
         this.angle = 0;
         this.angularSpeed = 0;
         this.rotates = true;
@@ -107,6 +111,20 @@ var Driver = exports.Driver = RoadObject.extend({
                     return true;
                 }
             }
+
+            if (roadObject.type == 'enemy') {
+                if (this.inMyBox(roadObject)) {
+                    if (this.speed < 0.05) {
+                        this.stop();
+                        this.crash();
+                        roadObject.holdBack();
+                    } else {
+                        this.speed -= 0.003;
+                        roadObject.holdBack();
+                    }
+                    return true;
+                }
+            }
         }, this);
     },
 
@@ -139,10 +157,12 @@ var Driver = exports.Driver = RoadObject.extend({
             if (this.left_boost) {
                 this.accel += 0.0005;
                 this.angularSpeed += 0.02;
+                this.particleL += dt;
             }
             if (this.right_boost) {
                 this.accel += 0.0005;
                 this.angularSpeed -= 0.02;
+                this.particleR += dt;
             }
             if (this.right_boost && this.left_boost) {
                 if (this.angle < 0) {
@@ -151,6 +171,20 @@ var Driver = exports.Driver = RoadObject.extend({
                     this.angularSpeed -= 0.01;
                 }
             }
+            // PARTICLES
+            if (this.particleL > 100) {
+                this.particleL = 0;
+                this.scene.particles.push(new Particle({x: this.rect.left + 10, y: this.rect.top + 34}));
+            }
+
+            if (this.particleR > 100) {
+                this.particleR = 0;
+                this.scene.particles.push(new Particle({x: this.rect.right - 10, y: this.rect.top + 34}));
+            }
+
+        } else {
+            this.angle = 0;
+            this.angularSpeed = 0;
         }
 
         if(!this.isCrashing) {
@@ -160,7 +194,11 @@ var Driver = exports.Driver = RoadObject.extend({
         }
 
         if (this.speed > 0.0005) {
-            this.accel -= DRAG_FACTOR * this.speed;
+            if (this.position < 400 && this.position > -400) {
+                this.accel -= DRAG_FACTOR * this.speed;
+            } else {
+                this.accel -= DRAG_FACTOR_GRASS * this.speed;
+            }
         } else {
             this.speed = 0;
         }
@@ -196,6 +234,9 @@ var Enemy = exports.Enemy = Car.extend({
         this.type = 'enemy';
         this.destinationPosition = 0;
         this.minSpeed = 0.13;
+        this.holdingBack = true;
+        this.randomSpeedCounter = 0;
+        this.randomSpeed = 0;
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 40, 24);
         this.anim = new animate.Animation(this.spriteSheet, 'static', {
             'static': {
@@ -206,19 +247,61 @@ var Enemy = exports.Enemy = Car.extend({
         });
     },
 
+    holdBack: function() {
+        this.holdingBack = true;
+    },
+
+    gunIt: function() {
+        this.holdingBack = false;
+    },
+
     setDestinationPosition: function(position) {
         this.destinationPosition = position;
     },
 
     update: function(dt) {
         if (this.destinationPosition != this.postion) {
-            this.lateralSpeed = (this.destinationPosition - this.position) / 20;
+            this.lateralSpeed = this.randomSpeed + (this.destinationPosition - this.position) / 10;
         }
         this.image = this.anim.update(dt);
-        if (this.speed < this.minSpeed) {
-            this.speed = this.minSpeed;
+        if (!this.holdingBack) {
+            if (this.speed < this.minSpeed) {
+                this.speed = this.minSpeed - ((this.randomSpeed + 2) / 200);
+            } 
+        }
+
+        this.randomSpeedCounter += dt;
+
+        if (this.randomSpeedCounter > 1000) {
+            this.randomSpeedCounter = 0;
+            this.randomSpeed = Math.random() * 12 - 6;
         }
 
         Enemy.super_.prototype.update.apply(this, arguments);
+    }
+});
+
+
+var Particle = exports.Particle = function(options) {
+    this.init(options);
+};
+
+_.extend(Particle.prototype, {
+    init: function(options) {
+        this.rect = new gamejs.Rect([options.x, options.y], [4, 4]);
+        this.elapsed = 0;
+        this.dead = false;
+    },
+
+    update: function(dt) {
+        this.elapsed += dt;
+        this.rect.top += 2;
+        if (this.elapsed > 1000) {
+            this.dead = true;
+        }
+    },
+
+    draw: function(surface) {
+        gamejs.draw.rect(surface, "rgba(200,230,255,0.3)", this.rect);
     }
 });

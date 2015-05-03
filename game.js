@@ -31,13 +31,42 @@ var Game = exports.Game = function () {
         width:320,
         height:220,
         pixelScale: 2,
-        difficulty: 4,
+        difficulty: [4, 4, 6],
         road: new Road({
             texturePath: conf.Images.test_texture,
             roadSpec: roadSpec
         }),
-        image_path: conf.Images.background,
-        music: './assets/Happysong.ogg'
+        music: './assets/Happysong.ogg',
+        theme: 'woods',
+        image_path: conf.Images.background
+    });
+
+    this.level02 = new CartScene({
+        width:320,
+        height:220,
+        pixelScale: 2,
+        difficulty: [6, 8, 8],
+        music: './assets/Happysong.ogg',
+        road: new Road({
+            texturePath: conf.Images.test_texture,
+            roadSpec: roadSpec
+        }),
+        theme: 'town',
+        image_path: conf.Images.background
+    });
+
+    this.level03 = new CartScene({
+        width:320,
+        height:220,
+        pixelScale: 2,
+        difficulty: [10, 12, 14],
+        music: './assets/Happysong.ogg',
+        road: new Road({
+            texturePath: conf.Images.test_texture,
+            roadSpec: roadSpec
+        }),
+        theme: 'spooky',
+        image_path: conf.Images.background
     });
 
     this.initialize();
@@ -152,5 +181,9 @@ Game.prototype.update = function(dt) {
     document.getElementById('fps').innerHTML = Math.floor(1 / (dt / 1000));
     if (this.currentScene.music && this.currentScene.musicIsPlaying == false){
         this.currentScene.playMusic();
+    }
+
+    if (this.currentScene.lost) {
+        this.currentScene.restart();
     }
 };

@@ -11,32 +11,77 @@ var animate = require('gramework').animate,
 
 var themeSets = {
     'woods': [
+        {image: 'bigRock', height: 200, width: 200, collisionWidth: 200},
+        {image: 'rocks', height: 300, width: 300, collisionWidth: 250},
+        {image: 'tree02', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree03', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree04', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree05', height: 400, width: 400, collisionWidth: 100},
+        {image: 'water', height: 75, width: 300, collisionWidth: 200},
+        {image: 'tree06', height: 400, width: 400, collisionWidth: 100}
+    ],
+    'town': [
+        {image: 'house01', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house02', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house03', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house04', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house05', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house06', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house07', height: 250, width: 250, collisionWidth: 250},
         {image: 'tree02', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree03', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree04', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree05', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree06', height: 400, width: 400, collisionWidth: 100}
+    ],
+    'spooky': [
+        {image: 'ghostHouse03', height: 250, width: 250, collisionWidth: 250},
+        {image: 'ghostHouse05', height: 250, width: 250, collisionWidth: 250},
+        {image: 'ghostTree01', height: 400, width: 400, collisionWidth: 100},
+        {image: 'ghostTree02', height: 400, width: 400, collisionWidth: 100},
+        {image: 'ghostTree03', height: 400, width: 400, collisionWidth: 100}
+    ],
+    'lava': [
+        {image: 'volcano01', height: 250, width: 250, collisionWidth: 250},
+        {image: 'volcano02', height: 250, width: 250, collisionWidth: 250},
+        {image: 'volcano03', height: 250, width: 250, collisionWidth: 250},
+        {image: 'lavaTree01', height: 400, width: 400, collisionWidth: 100},
+        {image: 'lavaTree02', height: 200, width: 200, collisionWidth: 50},
+        {image: 'lavaTree03', height: 400, width: 400, collisionWidth: 100},
+        {image: 'lava01', height: 75, width: 300, collisionWidth: 300},
+        {image: 'lava02', height: 75, width: 300, collisionWidth: 300},
     ]
 };
 
 var CartScene = exports.CartScene = RoadScene.extend({
     initialize: function(options) {
         CartScene.super_.prototype.initialize.apply(this, arguments);
+        this.startOptions = options;
 
         this.difficulty = options.difficulty;
+        this.phase = 0;
         this.map = false;
         this.mapImage = gamejs.image.load(conf.Images.mapOverlay);
         this.leftArrow = gamejs.image.load(conf.Images.arrowLeft);
         this.rightArrow = gamejs.image.load(conf.Images.arrowRight);
+        this.road.clear();
         this.mapHeight = 220;
         this.theme = options.theme || 'woods';
         this.turnList = [];
         this.musicIsPlaying = false;
         this.music = new Audio(options.music);
 
+        this.particles = [];
+        this.levelClear = false;
+        // Restart level if lost
+        this.loseCounter = 0;
+        this.lost = false;
+
         // MAP MODE VARS
         this.p1Ready = false;
         this.p2Ready = false;
+        this.p1ReadyForInput = true;
+        this.p2ReadyForInput = true;
 
         _.range(0,180).forEach(function(value){
             var distance = Math.random() * 180;
@@ -54,8 +99,10 @@ var CartScene = exports.CartScene = RoadScene.extend({
         }, this);
 
         this.d = new Driver({
+            scene: this,
             spriteSheet: gamejs.image.load(conf.Images.player_cart),
             road: this.road,
+            speed: 0.1,
             distance: 2,
             height: 64,
             width: 80,
@@ -66,18 +113,20 @@ var CartScene = exports.CartScene = RoadScene.extend({
 
         this.enemies = [];
 
-        this.enemy = new Enemy({
-            road: this.road,
-            spriteSheet: gamejs.image.load(conf.Images.enemy_cart_01),
-            distance: 2,
-            height: 48,
-            width: 80,
-            position: 0
-        });
+        for (var i = 0; i < 3; i++) {
+            var enemy = new Enemy({
+                road: this.road,
+                spriteSheet: gamejs.image.load(conf.Images.enemy_cart_01),
+                distance: 1,
+                height: 48,
+                width: 80,
+                position: 0
+            });
+            this.road.roadObjects.push(enemy);
+            this.enemies.push(enemy);
+        }
 
-        this.road.roadObjects.push(this.enemy);
         this.road.roadObjects.push(this.d);
-        this.enemies.push(this.enemy);
 
         this.bullyGenerator = new BullyGenerator({
             road: this.road,
@@ -87,16 +136,32 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.showMap();
     },
 
+    restart: function() {
+        this.initialize(this.startOptions);
+    },
+
     showMap: function() {
         this.map = true;
-        this.turnList = this.generateTurnList(this.difficulty);
+        this.turnList = this.generateTurnList(this.difficulty[this.phase]);
         this.d.loseControl();
+        this.enemies.forEach(function(enemy) {
+            enemy.holdBack();
+        }, this);
+    },
+
+    addBarricade: function() {
+
     },
 
     hideMap: function() {
         this.map = false;
         this.d.gainControl();
         this.generateTurns(this.turnList);
+        this.p1Ready = false;
+        this.p2Ready = false;
+        this.enemies.forEach(function(enemy) {
+            enemy.gunIt();
+        }, this);
     },
 
     generateTurnList: function(numTurns) {
@@ -132,10 +197,22 @@ var CartScene = exports.CartScene = RoadScene.extend({
         CartScene.super_.prototype.update.apply(this, arguments);
 
         this.bullyGenerator.update(dt);
-
+        // ENEMY FALLING BEHIND
         this.enemies.forEach(function(enemy) {
             enemy.setDestinationPosition(this.d.position);
-            enemy.speed = (this.d.distance - enemy.distance) / 10;
+            if (enemy.distance < this.camera.distance - 0.1) {
+                enemy.distance = this.camera.distance - 0.05;
+                if (!this.map && !this.d.isCrashing) {
+                    enemy.gunIt();
+                }
+            } else if (enemy.holdingBack) {
+                enemy.speed = (this.d.speed - enemy.speed) / 10;
+            }
+
+            if (enemy.distance > this.d.distance) {
+                enemy.holdBack();
+            }
+
         }, this);
         this.d.checkCollisions(this.road.roadObjects);
         if (this.d.isCrashing) {
@@ -143,7 +220,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
         }
 
         if (this.road.roadObjects.length < 200) {
-            var distance = Math.random() * 180 + this.camera.distance + 50;
+            var distance = Math.random() * 180 + this.camera.distance + 20;
             var asset = _.sample(themeSets[this.theme]);
             this.road.addRoadObject(distance, {
                 road: this.road,
@@ -155,6 +232,12 @@ var CartScene = exports.CartScene = RoadScene.extend({
                 side: _.sample(['right', 'left']),
                 image: asset.image
             });
+        }
+
+        if (Object.keys(this.road.upcomingTurns).length == 0 && !this.map) {
+            // Cleared all the turns - go to map!
+            this.phase++;
+            this.showMap();
         }
 
         // MAP MODE
@@ -171,42 +254,76 @@ var CartScene = exports.CartScene = RoadScene.extend({
                 }
             }
         }
+
+        for (var i = this.particles.length - 1; i > 0; i--) {
+            this.particles[i].update(dt);
+            if (this.particles[i].dead) {
+                this.particles.splice(i, 1);
+            }
+        }
+
+        // PLAYERS HAVE LOST
+        if (this.d.isCrashing) {
+            this.loseCounter += dt;
+            this.enemies.forEach(function(enemy) {
+                enemy.holdBack();
+            }, this);
+        }
+        if (this.loseCounter > 4000) {
+            this.lost = true;
+        }
     },
 
     left_boost_on: function() {
         this.d.left_boost_on();
-
-        if (this.map) {
+        if (this.map && this.p2ReadyForInput) {
             this.p1Ready = true;
         }
+        this.p1ReadyForInput = false;
     },
 
     right_boost_on: function() {
         this.d.right_boost_on();
-        if (this.map) {
+        if (this.map && this.p2ReadyForInput) {
             this.p2Ready = true;
         }
+        this.p2ReadyForInput = false;
     },
 
     left_boost_off: function() {
         this.d.left_boost_off();
+        this.p1ReadyForInput = true;
     },
 
     right_boost_off: function() {
         this.d.right_boost_off();
+        this.p2ReadyForInput = true;
     },
 
     draw: function(display, options) {
         this.camera.view.fill('#fff');
         this.camera.view.blit(this.image, [0, (this.camera.horizon - 475)]);
         this.road.draw(this.camera);
+
+        this.particles.forEach(function(particle) {
+            particle.draw(this.camera.view);
+        }, this);
+
         if (this.map) {
             this.camera.view.blit(this.mapImage, [0, this.mapHeight]);
             for (var i = 0; i < this.turnList.length; i++) {
-                if (this.turnList[i] == 'left') {
-                    this.camera.view.blit(this.leftArrow, [55 + i * 30, this.mapHeight + 45]);
+                if (i < 7) {
+                    if (this.turnList[i] == 'left') {
+                        this.camera.view.blit(this.leftArrow, [55 + i * 30, this.mapHeight + 35]);
+                    } else {
+                        this.camera.view.blit(this.rightArrow, [55 + i * 30, this.mapHeight + 35]);
+                    }
                 } else {
-                    this.camera.view.blit(this.rightArrow, [55 + i * 30, this.mapHeight + 45]);
+                    if (this.turnList[i] == 'left') {
+                        this.camera.view.blit(this.leftArrow, [55 + (i - 7) * 30, this.mapHeight + 70]);
+                    } else {
+                        this.camera.view.blit(this.rightArrow, [55 + (i - 7) * 30, this.mapHeight + 70]);
+                    }
                 }
             }
         }
@@ -347,6 +464,7 @@ var Images = exports.Images = {
     bully02: './assets/enemy-punching2.png',
     bully03: './assets/enemy-punching3.png',
     bully04: './assets/enemy-punching4.png',
+    barricade01: './assets/enemy-roadblock.png',
     // GUI
     mapOverlay: './assets/map.png',
     arrowLeft: './assets/arrow_left.png',
@@ -361,12 +479,30 @@ var Images = exports.Images = {
     tree06: './assets/tree06.png',
     shrub02: './assets/shrub02.png',
     shrub03: './assets/shrub03.png',
+    water: './assets/water.png',
     // Ghost Theme
     ghostHouse03: './assets/ghosthouse03.png',
     ghostHouse05: './assets/ghosthouse05.png',
     ghostTree01: './assets/ghosttree01.png',
     ghostTree02: './assets/ghosttree02.png',
     ghostTree03: './assets/ghosttree03.png',
+    // Town Theme
+    house01: './assets/house01.png',
+    house02: './assets/house02.png',
+    house03: './assets/house03.png',
+    house04: './assets/house04.png',
+    house05: './assets/house05.png',
+    house06: './assets/house06.png',
+    house07: './assets/house07.png',
+    // Lava Theme
+    volcano01: './assets/volcano01.png',
+    volcano02: './assets/volcano02.png',
+    volcano03: './assets/volcano03.png',
+    lava01: './assets/lava01.png',
+    lava02: './assets/lava02.png',
+    lavaTree01: './assets/lavatree01.png',
+    lavaTree02: './assets/lavatree02.png',
+    lavaTree03: './assets/lavatree03.png'
 };
 
 var sounds = exports.sounds = {
@@ -400,10 +536,12 @@ var animate = require('gramework').animate,
     Car = require('./road').Car;
 
 var DRAG_FACTOR = 0.01;
+var DRAG_FACTOR_GRASS = 0.05;
 
 var Driver = exports.Driver = RoadObject.extend({
     initialize: function(options) {
         Driver.super_.prototype.initialize.apply(this, arguments);
+        this.scene = options.scene;
         this.type = 'driver';
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 80, 64);
         this.loseSpriteSheet = new animate.SpriteSheet(gamejs.image.load(conf.Images.lose_01), 144, 96);
@@ -419,11 +557,13 @@ var Driver = exports.Driver = RoadObject.extend({
                 frames: _.range(0, 11), rate: 7, loop: false
             }
         });
+        this.particleL = 0;
+        this.particleR = 0;
         this.road.roadObjects.push(this);
         this.image = options.image;
         this.accel = 0;
         this.topSpeed = 0.5;
-        this.speed = 0;
+        this.speed = options.speed || 0;
         this.angle = 0;
         this.angularSpeed = 0;
         this.rotates = true;
@@ -501,6 +641,20 @@ var Driver = exports.Driver = RoadObject.extend({
                     return true;
                 }
             }
+
+            if (roadObject.type == 'enemy') {
+                if (this.inMyBox(roadObject)) {
+                    if (this.speed < 0.05) {
+                        this.stop();
+                        this.crash();
+                        roadObject.holdBack();
+                    } else {
+                        this.speed -= 0.003;
+                        roadObject.holdBack();
+                    }
+                    return true;
+                }
+            }
         }, this);
     },
 
@@ -533,10 +687,12 @@ var Driver = exports.Driver = RoadObject.extend({
             if (this.left_boost) {
                 this.accel += 0.0005;
                 this.angularSpeed += 0.02;
+                this.particleL += dt;
             }
             if (this.right_boost) {
                 this.accel += 0.0005;
                 this.angularSpeed -= 0.02;
+                this.particleR += dt;
             }
             if (this.right_boost && this.left_boost) {
                 if (this.angle < 0) {
@@ -545,6 +701,20 @@ var Driver = exports.Driver = RoadObject.extend({
                     this.angularSpeed -= 0.01;
                 }
             }
+            // PARTICLES
+            if (this.particleL > 100) {
+                this.particleL = 0;
+                this.scene.particles.push(new Particle({x: this.rect.left + 10, y: this.rect.top + 34}));
+            }
+
+            if (this.particleR > 100) {
+                this.particleR = 0;
+                this.scene.particles.push(new Particle({x: this.rect.right - 10, y: this.rect.top + 34}));
+            }
+
+        } else {
+            this.angle = 0;
+            this.angularSpeed = 0;
         }
 
         if(!this.isCrashing) {
@@ -554,7 +724,11 @@ var Driver = exports.Driver = RoadObject.extend({
         }
 
         if (this.speed > 0.0005) {
-            this.accel -= DRAG_FACTOR * this.speed;
+            if (this.position < 400 && this.position > -400) {
+                this.accel -= DRAG_FACTOR * this.speed;
+            } else {
+                this.accel -= DRAG_FACTOR_GRASS * this.speed;
+            }
         } else {
             this.speed = 0;
         }
@@ -590,6 +764,9 @@ var Enemy = exports.Enemy = Car.extend({
         this.type = 'enemy';
         this.destinationPosition = 0;
         this.minSpeed = 0.13;
+        this.holdingBack = true;
+        this.randomSpeedCounter = 0;
+        this.randomSpeed = 0;
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 40, 24);
         this.anim = new animate.Animation(this.spriteSheet, 'static', {
             'static': {
@@ -600,20 +777,62 @@ var Enemy = exports.Enemy = Car.extend({
         });
     },
 
+    holdBack: function() {
+        this.holdingBack = true;
+    },
+
+    gunIt: function() {
+        this.holdingBack = false;
+    },
+
     setDestinationPosition: function(position) {
         this.destinationPosition = position;
     },
 
     update: function(dt) {
         if (this.destinationPosition != this.postion) {
-            this.lateralSpeed = (this.destinationPosition - this.position) / 20;
+            this.lateralSpeed = this.randomSpeed + (this.destinationPosition - this.position) / 10;
         }
         this.image = this.anim.update(dt);
-        if (this.speed < this.minSpeed) {
-            this.speed = this.minSpeed;
+        if (!this.holdingBack) {
+            if (this.speed < this.minSpeed) {
+                this.speed = this.minSpeed - ((this.randomSpeed + 2) / 200);
+            } 
+        }
+
+        this.randomSpeedCounter += dt;
+
+        if (this.randomSpeedCounter > 1000) {
+            this.randomSpeedCounter = 0;
+            this.randomSpeed = Math.random() * 12 - 6;
         }
 
         Enemy.super_.prototype.update.apply(this, arguments);
+    }
+});
+
+
+var Particle = exports.Particle = function(options) {
+    this.init(options);
+};
+
+_.extend(Particle.prototype, {
+    init: function(options) {
+        this.rect = new gamejs.Rect([options.x, options.y], [4, 4]);
+        this.elapsed = 0;
+        this.dead = false;
+    },
+
+    update: function(dt) {
+        this.elapsed += dt;
+        this.rect.top += 2;
+        if (this.elapsed > 1000) {
+            this.dead = true;
+        }
+    },
+
+    draw: function(surface) {
+        gamejs.draw.rect(surface, "rgba(200,230,255,0.3)", this.rect);
     }
 });
 
@@ -651,13 +870,42 @@ var Game = exports.Game = function () {
         width:320,
         height:220,
         pixelScale: 2,
-        difficulty: 4,
+        difficulty: [4, 4, 6],
         road: new Road({
             texturePath: conf.Images.test_texture,
             roadSpec: roadSpec
         }),
-        image_path: conf.Images.background,
-        music: './assets/Happysong.ogg'
+        music: './assets/Happysong.ogg',
+        theme: 'woods',
+        image_path: conf.Images.background
+    });
+
+    this.level02 = new CartScene({
+        width:320,
+        height:220,
+        pixelScale: 2,
+        difficulty: [6, 8, 8],
+        music: './assets/Happysong.ogg',
+        road: new Road({
+            texturePath: conf.Images.test_texture,
+            roadSpec: roadSpec
+        }),
+        theme: 'town',
+        image_path: conf.Images.background
+    });
+
+    this.level03 = new CartScene({
+        width:320,
+        height:220,
+        pixelScale: 2,
+        difficulty: [10, 12, 14],
+        music: './assets/Happysong.ogg',
+        road: new Road({
+            texturePath: conf.Images.test_texture,
+            roadSpec: roadSpec
+        }),
+        theme: 'spooky',
+        image_path: conf.Images.background
     });
 
     this.initialize();
@@ -772,6 +1020,10 @@ Game.prototype.update = function(dt) {
     document.getElementById('fps').innerHTML = Math.floor(1 / (dt / 1000));
     if (this.currentScene.music && this.currentScene.musicIsPlaying == false){
         this.currentScene.playMusic();
+    }
+
+    if (this.currentScene.lost) {
+        this.currentScene.restart();
     }
 };
 
@@ -9168,7 +9420,7 @@ ANGLE_SCALE_CONSTANT = 100;
 
 var RoadObject = exports.RoadObject = Entity.extend({
     initialize: function(options) {
-        this.type = 'obstacle';
+        this.type = options.type || 'obstacle';
         this.height = options.height;
         this.width = options.width;
         this.collisionWidth = options.collisionWidth || this.width;
@@ -9225,6 +9477,7 @@ var RoadObject = exports.RoadObject = Entity.extend({
         //this.angleOffset = thisLine.angleOffset * this.scaleFactor;
         var width = this.width * this.scaleFactor;
         var tHeight = this.height * this.scaleFactor;
+
         this.rect = new gamejs.Rect(
             [(this.road.displayWidth/2) + (this.position - this.width / 2) * this.scaleFactor - offset, height - tHeight],
             [width, tHeight]
@@ -9463,6 +9716,12 @@ Road.prototype = {
         };
     },
 
+    clear: function() {
+        this.currentRoad.turns = {};
+        this.currentRoad.hills = {};
+        this.roadObjects = [];
+    },
+
     collectTurns: function(distance) {
         var upcomingTurns = {};
         for (i in this.currentRoad.turns) {
@@ -9525,17 +9784,16 @@ Road.prototype = {
 
     update: function(dt, camera) {
         for (var i = this.roadObjects.length - 1; i > 0; i--) {
-            if (this.roadObjects[i].distance < camera.distance) {
-                this.roadObjects.splice(i, 1);
+            if (this.roadObjects[i].type == 'obstacle') {
+                if (this.roadObjects[i].distance < camera.distance) {
+                    this.roadObjects.splice(i, 1);
+                } else {
+                    this.roadObjects[i].update(dt, camera);
+                }
             } else {
                 this.roadObjects[i].update(dt, camera);
             }
         }
-        /*
-        this.roadObjects.forEach(function(ro) {
-            ro.update(dt, camera);
-        });
-        */
         this.drawRoadObjects = this.collectRoadObjects(camera.distance);
         this.upcomingTurns = this.collectTurns(camera.distance);
         this.upcomingHills = this.collectHills(camera.distance);
@@ -9729,7 +9987,7 @@ var Car = exports.Car = RoadObject.extend({
 
         this.myBox = {
             'position': [this.position - (1/2) * this.collisionWidth, this.position + (1/2) * this.collisionWidth],
-            'distance': [this.distance - 0.3, this.distance + 0.3]
+            'distance': [this.distance - 0.1, this.distance + 0.1]
         };
     },
 
