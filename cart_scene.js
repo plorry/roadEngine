@@ -10,32 +10,77 @@ var animate = require('gramework').animate,
 
 var themeSets = {
     'woods': [
+        {image: 'bigRock', height: 200, width: 200, collisionWidth: 200},
+        {image: 'rocks', height: 300, width: 300, collisionWidth: 250},
+        {image: 'tree02', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree03', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree04', height: 400, width: 400, collisionWidth: 100},
+        {image: 'tree05', height: 400, width: 400, collisionWidth: 100},
+        {image: 'water', height: 75, width: 300, collisionWidth: 200},
+        {image: 'tree06', height: 400, width: 400, collisionWidth: 100}
+    ],
+    'town': [
+        {image: 'house01', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house02', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house03', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house04', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house05', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house06', height: 250, width: 250, collisionWidth: 250},
+        {image: 'house07', height: 250, width: 250, collisionWidth: 250},
         {image: 'tree02', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree03', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree04', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree05', height: 400, width: 400, collisionWidth: 100},
         {image: 'tree06', height: 400, width: 400, collisionWidth: 100}
+    ],
+    'spooky': [
+        {image: 'ghostHouse03', height: 250, width: 250, collisionWidth: 250},
+        {image: 'ghostHouse05', height: 250, width: 250, collisionWidth: 250},
+        {image: 'ghostTree01', height: 400, width: 400, collisionWidth: 100},
+        {image: 'ghostTree02', height: 400, width: 400, collisionWidth: 100},
+        {image: 'ghostTree03', height: 400, width: 400, collisionWidth: 100}
+    ],
+    'lava': [
+        {image: 'volcano01', height: 250, width: 250, collisionWidth: 250},
+        {image: 'volcano02', height: 250, width: 250, collisionWidth: 250},
+        {image: 'volcano03', height: 250, width: 250, collisionWidth: 250},
+        {image: 'lavaTree01', height: 400, width: 400, collisionWidth: 100},
+        {image: 'lavaTree02', height: 200, width: 200, collisionWidth: 50},
+        {image: 'lavaTree03', height: 400, width: 400, collisionWidth: 100},
+        {image: 'lava01', height: 75, width: 300, collisionWidth: 300},
+        {image: 'lava02', height: 75, width: 300, collisionWidth: 300},
     ]
 };
 
 var CartScene = exports.CartScene = RoadScene.extend({
     initialize: function(options) {
         CartScene.super_.prototype.initialize.apply(this, arguments);
+        this.startOptions = options;
 
         this.difficulty = options.difficulty;
+        this.phase = 0;
         this.map = false;
         this.mapImage = gamejs.image.load(conf.Images.mapOverlay);
         this.leftArrow = gamejs.image.load(conf.Images.arrowLeft);
         this.rightArrow = gamejs.image.load(conf.Images.arrowRight);
+        this.road.clear();
         this.mapHeight = 220;
         this.theme = options.theme || 'woods';
         this.turnList = [];
         this.musicIsPlaying = false;
         this.music = new Audio(options.music);
 
+        this.particles = [];
+        this.levelClear = false;
+        // Restart level if lost
+        this.loseCounter = 0;
+        this.lost = false;
+
         // MAP MODE VARS
         this.p1Ready = false;
         this.p2Ready = false;
+        this.p1ReadyForInput = true;
+        this.p2ReadyForInput = true;
 
         _.range(0,180).forEach(function(value){
             var distance = Math.random() * 180;
@@ -53,8 +98,10 @@ var CartScene = exports.CartScene = RoadScene.extend({
         }, this);
 
         this.d = new Driver({
+            scene: this,
             spriteSheet: gamejs.image.load(conf.Images.player_cart),
             road: this.road,
+            speed: 0.1,
             distance: 2,
             height: 64,
             width: 80,
@@ -65,18 +112,20 @@ var CartScene = exports.CartScene = RoadScene.extend({
 
         this.enemies = [];
 
-        this.enemy = new Enemy({
-            road: this.road,
-            spriteSheet: gamejs.image.load(conf.Images.enemy_cart_01),
-            distance: 2,
-            height: 48,
-            width: 80,
-            position: 0
-        });
+        for (var i = 0; i < 3; i++) {
+            var enemy = new Enemy({
+                road: this.road,
+                spriteSheet: gamejs.image.load(conf.Images.enemy_cart_01),
+                distance: 1,
+                height: 48,
+                width: 80,
+                position: 0
+            });
+            this.road.roadObjects.push(enemy);
+            this.enemies.push(enemy);
+        }
 
-        this.road.roadObjects.push(this.enemy);
         this.road.roadObjects.push(this.d);
-        this.enemies.push(this.enemy);
 
         this.bullyGenerator = new BullyGenerator({
             road: this.road,
@@ -86,16 +135,32 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.showMap();
     },
 
+    restart: function() {
+        this.initialize(this.startOptions);
+    },
+
     showMap: function() {
         this.map = true;
-        this.turnList = this.generateTurnList(this.difficulty);
+        this.turnList = this.generateTurnList(this.difficulty[this.phase]);
         this.d.loseControl();
+        this.enemies.forEach(function(enemy) {
+            enemy.holdBack();
+        }, this);
+    },
+
+    addBarricade: function() {
+
     },
 
     hideMap: function() {
         this.map = false;
         this.d.gainControl();
         this.generateTurns(this.turnList);
+        this.p1Ready = false;
+        this.p2Ready = false;
+        this.enemies.forEach(function(enemy) {
+            enemy.gunIt();
+        }, this);
     },
 
     generateTurnList: function(numTurns) {
@@ -131,10 +196,22 @@ var CartScene = exports.CartScene = RoadScene.extend({
         CartScene.super_.prototype.update.apply(this, arguments);
 
         this.bullyGenerator.update(dt);
-
+        // ENEMY FALLING BEHIND
         this.enemies.forEach(function(enemy) {
             enemy.setDestinationPosition(this.d.position);
-            enemy.speed = (this.d.distance - enemy.distance) / 10;
+            if (enemy.distance < this.camera.distance - 0.1) {
+                enemy.distance = this.camera.distance - 0.05;
+                if (!this.map && !this.d.isCrashing) {
+                    enemy.gunIt();
+                }
+            } else if (enemy.holdingBack) {
+                enemy.speed = (this.d.speed - enemy.speed) / 10;
+            }
+
+            if (enemy.distance > this.d.distance) {
+                enemy.holdBack();
+            }
+
         }, this);
         this.d.checkCollisions(this.road.roadObjects);
         if (this.d.isCrashing) {
@@ -142,7 +219,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
         }
 
         if (this.road.roadObjects.length < 200) {
-            var distance = Math.random() * 180 + this.camera.distance + 50;
+            var distance = Math.random() * 180 + this.camera.distance + 20;
             var asset = _.sample(themeSets[this.theme]);
             this.road.addRoadObject(distance, {
                 road: this.road,
@@ -154,6 +231,12 @@ var CartScene = exports.CartScene = RoadScene.extend({
                 side: _.sample(['right', 'left']),
                 image: asset.image
             });
+        }
+
+        if (Object.keys(this.road.upcomingTurns).length == 0 && !this.map) {
+            // Cleared all the turns - go to map!
+            this.phase++;
+            this.showMap();
         }
 
         // MAP MODE
@@ -170,42 +253,76 @@ var CartScene = exports.CartScene = RoadScene.extend({
                 }
             }
         }
+
+        for (var i = this.particles.length - 1; i > 0; i--) {
+            this.particles[i].update(dt);
+            if (this.particles[i].dead) {
+                this.particles.splice(i, 1);
+            }
+        }
+
+        // PLAYERS HAVE LOST
+        if (this.d.isCrashing) {
+            this.loseCounter += dt;
+            this.enemies.forEach(function(enemy) {
+                enemy.holdBack();
+            }, this);
+        }
+        if (this.loseCounter > 4000) {
+            this.lost = true;
+        }
     },
 
     left_boost_on: function() {
         this.d.left_boost_on();
-
-        if (this.map) {
+        if (this.map && this.p2ReadyForInput) {
             this.p1Ready = true;
         }
+        this.p1ReadyForInput = false;
     },
 
     right_boost_on: function() {
         this.d.right_boost_on();
-        if (this.map) {
+        if (this.map && this.p2ReadyForInput) {
             this.p2Ready = true;
         }
+        this.p2ReadyForInput = false;
     },
 
     left_boost_off: function() {
         this.d.left_boost_off();
+        this.p1ReadyForInput = true;
     },
 
     right_boost_off: function() {
         this.d.right_boost_off();
+        this.p2ReadyForInput = true;
     },
 
     draw: function(display, options) {
         this.camera.view.fill('#fff');
         this.camera.view.blit(this.image, [0, (this.camera.horizon - 475)]);
         this.road.draw(this.camera);
+
+        this.particles.forEach(function(particle) {
+            particle.draw(this.camera.view);
+        }, this);
+
         if (this.map) {
             this.camera.view.blit(this.mapImage, [0, this.mapHeight]);
             for (var i = 0; i < this.turnList.length; i++) {
-                if (this.turnList[i] == 'left') {
-                    this.camera.view.blit(this.leftArrow, [55 + i * 30, this.mapHeight + 45]);
+                if (i < 7) {
+                    if (this.turnList[i] == 'left') {
+                        this.camera.view.blit(this.leftArrow, [55 + i * 30, this.mapHeight + 35]);
+                    } else {
+                        this.camera.view.blit(this.rightArrow, [55 + i * 30, this.mapHeight + 35]);
+                    }
                 } else {
-                    this.camera.view.blit(this.rightArrow, [55 + i * 30, this.mapHeight + 45]);
+                    if (this.turnList[i] == 'left') {
+                        this.camera.view.blit(this.leftArrow, [55 + (i - 7) * 30, this.mapHeight + 70]);
+                    } else {
+                        this.camera.view.blit(this.rightArrow, [55 + (i - 7) * 30, this.mapHeight + 70]);
+                    }
                 }
             }
         }
