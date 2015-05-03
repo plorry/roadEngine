@@ -109,18 +109,20 @@ var CartScene = exports.CartScene = RoadScene.extend({
 
         this.enemies = [];
 
-        this.enemy = new Enemy({
-            road: this.road,
-            spriteSheet: gamejs.image.load(conf.Images.enemy_cart_01),
-            distance: 1,
-            height: 48,
-            width: 80,
-            position: 0
-        });
+        for (var i = 0; i < 3; i++) {
+            var enemy = new Enemy({
+                road: this.road,
+                spriteSheet: gamejs.image.load(conf.Images.enemy_cart_01),
+                distance: 1,
+                height: 48,
+                width: 80,
+                position: 0
+            });
+            this.road.roadObjects.push(enemy);
+            this.enemies.push(enemy);
+        }
 
-        this.road.roadObjects.push(this.enemy);
         this.road.roadObjects.push(this.d);
-        this.enemies.push(this.enemy);
 
         this.bullyGenerator = new BullyGenerator({
             road: this.road,
@@ -144,7 +146,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
     },
 
     addBarricade: function() {
-        
+
     },
 
     hideMap: function() {
@@ -196,6 +198,11 @@ var CartScene = exports.CartScene = RoadScene.extend({
             } else if (enemy.holdingBack) {
                 enemy.speed = (this.d.speed - enemy.speed) / 10;
             }
+
+            if (enemy.distance > this.d.distance) {
+                enemy.holdBack();
+            }
+
         }, this);
         this.d.checkCollisions(this.road.roadObjects);
         if (this.d.isCrashing) {
@@ -297,15 +304,15 @@ var CartScene = exports.CartScene = RoadScene.extend({
             for (var i = 0; i < this.turnList.length; i++) {
                 if (i < 7) {
                     if (this.turnList[i] == 'left') {
-                        this.camera.view.blit(this.leftArrow, [55 + i * 30, this.mapHeight + 45]);
+                        this.camera.view.blit(this.leftArrow, [55 + i * 30, this.mapHeight + 35]);
                     } else {
-                        this.camera.view.blit(this.rightArrow, [55 + i * 30, this.mapHeight + 45]);
+                        this.camera.view.blit(this.rightArrow, [55 + i * 30, this.mapHeight + 35]);
                     }
                 } else {
                     if (this.turnList[i] == 'left') {
-                        this.camera.view.blit(this.leftArrow, [55 + (i - 7) * 30, this.mapHeight + 80]);
+                        this.camera.view.blit(this.leftArrow, [55 + (i - 7) * 30, this.mapHeight + 70]);
                     } else {
-                        this.camera.view.blit(this.rightArrow, [55 + (i - 7) * 30, this.mapHeight + 80]);
+                        this.camera.view.blit(this.rightArrow, [55 + (i - 7) * 30, this.mapHeight + 70]);
                     }
                 }
             }

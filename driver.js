@@ -119,7 +119,7 @@ var Driver = exports.Driver = RoadObject.extend({
                         this.crash();
                         roadObject.holdBack();
                     } else {
-                        this.speed -= 0.005;
+                        this.speed -= 0.003;
                         roadObject.holdBack();
                     }
                     return true;
@@ -235,6 +235,8 @@ var Enemy = exports.Enemy = Car.extend({
         this.destinationPosition = 0;
         this.minSpeed = 0.13;
         this.holdingBack = true;
+        this.randomSpeedCounter = 0;
+        this.randomSpeed = 0;
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 40, 24);
         this.anim = new animate.Animation(this.spriteSheet, 'static', {
             'static': {
@@ -259,13 +261,20 @@ var Enemy = exports.Enemy = Car.extend({
 
     update: function(dt) {
         if (this.destinationPosition != this.postion) {
-            this.lateralSpeed = (this.destinationPosition - this.position) / 10;
+            this.lateralSpeed = this.randomSpeed + (this.destinationPosition - this.position) / 10;
         }
         this.image = this.anim.update(dt);
         if (!this.holdingBack) {
             if (this.speed < this.minSpeed) {
-                this.speed = this.minSpeed;
+                this.speed = this.minSpeed - ((this.randomSpeed + 2) / 200);
             } 
+        }
+
+        this.randomSpeedCounter += dt;
+
+        if (this.randomSpeedCounter > 1000) {
+            this.randomSpeedCounter = 0;
+            this.randomSpeed = Math.random() * 12 - 6;
         }
 
         Enemy.super_.prototype.update.apply(this, arguments);

@@ -110,18 +110,20 @@ var CartScene = exports.CartScene = RoadScene.extend({
 
         this.enemies = [];
 
-        this.enemy = new Enemy({
-            road: this.road,
-            spriteSheet: gamejs.image.load(conf.Images.enemy_cart_01),
-            distance: 1,
-            height: 48,
-            width: 80,
-            position: 0
-        });
+        for (var i = 0; i < 3; i++) {
+            var enemy = new Enemy({
+                road: this.road,
+                spriteSheet: gamejs.image.load(conf.Images.enemy_cart_01),
+                distance: 1,
+                height: 48,
+                width: 80,
+                position: 0
+            });
+            this.road.roadObjects.push(enemy);
+            this.enemies.push(enemy);
+        }
 
-        this.road.roadObjects.push(this.enemy);
         this.road.roadObjects.push(this.d);
-        this.enemies.push(this.enemy);
 
         this.bullyGenerator = new BullyGenerator({
             road: this.road,
@@ -145,7 +147,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
     },
 
     addBarricade: function() {
-        
+
     },
 
     hideMap: function() {
@@ -197,6 +199,11 @@ var CartScene = exports.CartScene = RoadScene.extend({
             } else if (enemy.holdingBack) {
                 enemy.speed = (this.d.speed - enemy.speed) / 10;
             }
+
+            if (enemy.distance > this.d.distance) {
+                enemy.holdBack();
+            }
+
         }, this);
         this.d.checkCollisions(this.road.roadObjects);
         if (this.d.isCrashing) {
@@ -298,15 +305,15 @@ var CartScene = exports.CartScene = RoadScene.extend({
             for (var i = 0; i < this.turnList.length; i++) {
                 if (i < 7) {
                     if (this.turnList[i] == 'left') {
-                        this.camera.view.blit(this.leftArrow, [55 + i * 30, this.mapHeight + 45]);
+                        this.camera.view.blit(this.leftArrow, [55 + i * 30, this.mapHeight + 35]);
                     } else {
-                        this.camera.view.blit(this.rightArrow, [55 + i * 30, this.mapHeight + 45]);
+                        this.camera.view.blit(this.rightArrow, [55 + i * 30, this.mapHeight + 35]);
                     }
                 } else {
                     if (this.turnList[i] == 'left') {
-                        this.camera.view.blit(this.leftArrow, [55 + (i - 7) * 30, this.mapHeight + 80]);
+                        this.camera.view.blit(this.leftArrow, [55 + (i - 7) * 30, this.mapHeight + 70]);
                     } else {
-                        this.camera.view.blit(this.rightArrow, [55 + (i - 7) * 30, this.mapHeight + 80]);
+                        this.camera.view.blit(this.rightArrow, [55 + (i - 7) * 30, this.mapHeight + 70]);
                     }
                 }
             }
@@ -614,7 +621,7 @@ var Driver = exports.Driver = RoadObject.extend({
                         this.crash();
                         roadObject.holdBack();
                     } else {
-                        this.speed -= 0.005;
+                        this.speed -= 0.003;
                         roadObject.holdBack();
                     }
                     return true;
@@ -730,6 +737,8 @@ var Enemy = exports.Enemy = Car.extend({
         this.destinationPosition = 0;
         this.minSpeed = 0.13;
         this.holdingBack = true;
+        this.randomSpeedCounter = 0;
+        this.randomSpeed = 0;
         this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, 40, 24);
         this.anim = new animate.Animation(this.spriteSheet, 'static', {
             'static': {
@@ -754,13 +763,20 @@ var Enemy = exports.Enemy = Car.extend({
 
     update: function(dt) {
         if (this.destinationPosition != this.postion) {
-            this.lateralSpeed = (this.destinationPosition - this.position) / 10;
+            this.lateralSpeed = this.randomSpeed + (this.destinationPosition - this.position) / 10;
         }
         this.image = this.anim.update(dt);
         if (!this.holdingBack) {
             if (this.speed < this.minSpeed) {
-                this.speed = this.minSpeed;
+                this.speed = this.minSpeed - ((this.randomSpeed + 2) / 200);
             } 
+        }
+
+        this.randomSpeedCounter += dt;
+
+        if (this.randomSpeedCounter > 1000) {
+            this.randomSpeedCounter = 0;
+            this.randomSpeed = Math.random() * 12 - 6;
         }
 
         Enemy.super_.prototype.update.apply(this, arguments);
