@@ -71,6 +71,13 @@ var Game = exports.Game = function () {
         image_path: conf.Images.background
     });
 
+    this.level = 0;
+    this.levels = [
+        this.level01,
+        this.level02,
+        this.level03
+    ];
+
     this.initialize();
 };
 
@@ -205,6 +212,12 @@ Game.prototype.update = function(dt) {
 
     if (this.currentScene.lost) {
         this.stopMusic();
+        this.currentScene.restart();
+    }
+
+    if (this.currentScene.cleared) {
+        this.level++;
+        this.setScene(this.levels[this.level]);
         this.currentScene.restart();
     }
 };

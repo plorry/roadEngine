@@ -5,6 +5,7 @@ var animate = require('gramework').animate,
     Enemy = require('./driver').Enemy,
     Car = require('./road').Car,
     conf = require('./conf'),
+    Barricade = require('./driver').Barricade,
     _ = require('underscore');
 
 
@@ -63,6 +64,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.mapImage = gamejs.image.load(conf.Images.mapOverlay);
         this.leftArrow = gamejs.image.load(conf.Images.arrowLeft);
         this.rightArrow = gamejs.image.load(conf.Images.arrowRight);
+        this.stageClear = gamejs.image.load(conf.Images.stageClear);
         this.road.clear();
         this.mapHeight = 220;
         this.theme = options.theme || 'woods';
@@ -75,6 +77,10 @@ var CartScene = exports.CartScene = RoadScene.extend({
         // Restart level if lost
         this.loseCounter = 0;
         this.lost = false;
+        // Next level if cleared
+        this.done = false;
+        this.clearedCounter = 0;
+        this.cleared = false;
 
         // MAP MODE VARS
         this.p1Ready = false;
@@ -132,6 +138,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
             scene: this
         });
 
+        this.addBarricade();
         this.showMap();
     },
 
@@ -149,7 +156,19 @@ var CartScene = exports.CartScene = RoadScene.extend({
     },
 
     addBarricade: function() {
+        var spriteSheet = gamejs.image.load(conf.Images.barricade01);
+        var barricade = new Barricade({
+            distance: this.camera.distance + 40,
+            width: 144,
+            height: 80,
+            spriteSheet: spriteSheet,
+            type: 'barricade',
+            position: Math.random() * 400,
+            side: _.sample(['right', 'left']),
+            road: this.road
+        });
 
+        this.road.roadObjects.push(barricade);
     },
 
     hideMap: function() {
@@ -185,17 +204,6 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.road.addHill(distance, 5, 30);
         this.road.addTurn(distance + 1, 6, multiplier * 70);
     },
-    
-    playMusic: function() {
-        this.music.play();
-        this.musicIsPlaying = true;
-        this.music.loop = true;
-    },
-
-    stopMusic: function() {
-        this.music.stop();
-        this.musicIsPlaying = false;    
-    },
 
     update: function(dt, camera) {
         CartScene.super_.prototype.update.apply(this, arguments);
@@ -206,7 +214,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
             enemy.setDestinationPosition(this.d.position);
             if (enemy.distance < this.camera.distance - 0.1) {
                 enemy.distance = this.camera.distance - 0.05;
-                if (!this.map && !this.d.isCrashing) {
+                if (!this.map && !this.d.isCrashing && !this.done) {
                     enemy.gunIt();
                 }
             } else if (enemy.holdingBack) {
@@ -241,7 +249,24 @@ var CartScene = exports.CartScene = RoadScene.extend({
         if (Object.keys(this.road.upcomingTurns).length == 0 && !this.map) {
             // Cleared all the turns - go to map!
             this.phase++;
-            this.showMap();
+            if (this.phase < this.difficulty.length) {
+                this.showMap();
+            } else {
+                // We've won!
+                this.done = true;
+            }
+        }
+        // WINNER!
+        if (this.done) {
+            this.enemies.forEach(function(enemy) {
+                enemy.holdBack();
+            });
+
+            this.clearedCounter += dt;
+            this.d.loseControl();
+        }
+        if (this.clearedCounter > 3000) {
+            this.cleared = true;
         }
 
         // MAP MODE
@@ -330,6 +355,10 @@ var CartScene = exports.CartScene = RoadScene.extend({
                     }
                 }
             }
+        }
+
+        if (this.done) {
+            this.camera.view.blit(this.stageClear);
         }
         this.camera.draw(display);
         RoadScene.super_.prototype.draw.call(this, display, options);

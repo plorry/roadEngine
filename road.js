@@ -74,6 +74,11 @@ var RoadObject = exports.RoadObject = Entity.extend({
         } else {
             gamejs.draw.rect(display, "rgb(200,0,0)", this.rect);
         }
+    },
+
+    kill: function() {
+        var index = this.road.roadObjects.indexOf(this);
+        this.road.roadObjects.splice(index, 1);
     }
 });
 

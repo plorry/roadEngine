@@ -6,6 +6,7 @@ var animate = require('gramework').animate,
     Enemy = require('./driver').Enemy,
     Car = require('./road').Car,
     conf = require('./conf'),
+    Barricade = require('./driver').Barricade,
     _ = require('underscore');
 
 
@@ -64,6 +65,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.mapImage = gamejs.image.load(conf.Images.mapOverlay);
         this.leftArrow = gamejs.image.load(conf.Images.arrowLeft);
         this.rightArrow = gamejs.image.load(conf.Images.arrowRight);
+        this.stageClear = gamejs.image.load(conf.Images.stageClear);
         this.road.clear();
         this.mapHeight = 220;
         this.theme = options.theme || 'woods';
@@ -76,6 +78,10 @@ var CartScene = exports.CartScene = RoadScene.extend({
         // Restart level if lost
         this.loseCounter = 0;
         this.lost = false;
+        // Next level if cleared
+        this.done = false;
+        this.clearedCounter = 0;
+        this.cleared = false;
 
         // MAP MODE VARS
         this.p1Ready = false;
@@ -133,6 +139,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
             scene: this
         });
 
+        this.addBarricade();
         this.showMap();
     },
 
@@ -150,7 +157,19 @@ var CartScene = exports.CartScene = RoadScene.extend({
     },
 
     addBarricade: function() {
+        var spriteSheet = gamejs.image.load(conf.Images.barricade01);
+        var barricade = new Barricade({
+            distance: this.camera.distance + 40,
+            width: 144,
+            height: 80,
+            spriteSheet: spriteSheet,
+            type: 'barricade',
+            position: Math.random() * 400,
+            side: _.sample(['right', 'left']),
+            road: this.road
+        });
 
+        this.road.roadObjects.push(barricade);
     },
 
     hideMap: function() {
@@ -186,17 +205,6 @@ var CartScene = exports.CartScene = RoadScene.extend({
         this.road.addHill(distance, 5, 30);
         this.road.addTurn(distance + 1, 6, multiplier * 70);
     },
-    
-    playMusic: function() {
-        this.music.play();
-        this.musicIsPlaying = true;
-        this.music.loop = true;
-    },
-
-    stopMusic: function() {
-        this.music.stop();
-        this.musicIsPlaying = false;    
-    },
 
     update: function(dt, camera) {
         CartScene.super_.prototype.update.apply(this, arguments);
@@ -207,7 +215,7 @@ var CartScene = exports.CartScene = RoadScene.extend({
             enemy.setDestinationPosition(this.d.position);
             if (enemy.distance < this.camera.distance - 0.1) {
                 enemy.distance = this.camera.distance - 0.05;
-                if (!this.map && !this.d.isCrashing) {
+                if (!this.map && !this.d.isCrashing && !this.done) {
                     enemy.gunIt();
                 }
             } else if (enemy.holdingBack) {
@@ -242,7 +250,24 @@ var CartScene = exports.CartScene = RoadScene.extend({
         if (Object.keys(this.road.upcomingTurns).length == 0 && !this.map) {
             // Cleared all the turns - go to map!
             this.phase++;
-            this.showMap();
+            if (this.phase < this.difficulty.length) {
+                this.showMap();
+            } else {
+                // We've won!
+                this.done = true;
+            }
+        }
+        // WINNER!
+        if (this.done) {
+            this.enemies.forEach(function(enemy) {
+                enemy.holdBack();
+            });
+
+            this.clearedCounter += dt;
+            this.d.loseControl();
+        }
+        if (this.clearedCounter > 3000) {
+            this.cleared = true;
         }
 
         // MAP MODE
@@ -331,6 +356,10 @@ var CartScene = exports.CartScene = RoadScene.extend({
                     }
                 }
             }
+        }
+
+        if (this.done) {
+            this.camera.view.blit(this.stageClear);
         }
         this.camera.draw(display);
         RoadScene.super_.prototype.draw.call(this, display, options);
@@ -469,11 +498,12 @@ var Images = exports.Images = {
     bully02: './assets/enemy-punching2.png',
     bully03: './assets/enemy-punching3.png',
     bully04: './assets/enemy-punching4.png',
-    barricade01: './assets/enemy-roadblock.png',
+    barricade01: './assets/enemy-roadbloack.png',
     // GUI
     mapOverlay: './assets/map.png',
     arrowLeft: './assets/arrow_left.png',
     arrowRight: './assets/arrow_right.png',
+    stageClear: './assets/stage-clear.png',
     // Nature Theme
     bigRock: './assets/bigrock.png',
     rocks: './assets/rocks.png',
@@ -660,6 +690,15 @@ var Driver = exports.Driver = RoadObject.extend({
                     return true;
                 }
             }
+
+            if (roadObject.type == 'barricade') {
+                if (this.inMyBox(roadObject)) {
+                    if (!roadObject.crashed) {
+                        this.speed -= 0.06;
+                        roadObject.crash();
+                    }
+                }                
+            }
         }, this);
     },
 
@@ -841,6 +880,43 @@ _.extend(Particle.prototype, {
     }
 });
 
+
+var Barricade = exports.Barricade = RoadObject.extend({
+    initialize: function(options) {
+        Barricade.super_.prototype.initialize.apply(this, arguments);
+        this.type = 'barricade';
+        this.crashed = false;
+        this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, options.width, options.height);
+        this.anim = new animate.Animation(this.spriteSheet, 'static', {
+            'static': {
+                frames: [0],
+                rate: 15,
+                loop: true
+            },
+
+            'crash': {
+                frames: _.range(1,6),
+                rate: 15,
+                loop: false
+            }
+        });
+    },
+
+    crash: function() {
+        this.crashed = true;
+        if (this.anim.currentAnimation != 'crash') {
+            this.anim.start('crash');
+        }
+    },
+
+    update: function(dt, camera) {
+        this.image = this.anim.update(dt);
+        if (camera.distance > this.distance) {
+            this.kill();
+        }
+        Barricade.super_.prototype.update.apply(this, arguments);
+    }
+});
 },{"./conf":2,"./road":51,"gramework":6,"underscore":50}],4:[function(require,module,exports){
 var gamejs = require('gramework').gamejs,
     conf = require('./conf'),
@@ -914,6 +990,13 @@ var Game = exports.Game = function () {
         theme: 'spooky',
         image_path: conf.Images.background
     });
+
+    this.level = 0;
+    this.levels = [
+        this.level01,
+        this.level02,
+        this.level03
+    ];
 
     this.initialize();
 };
@@ -1049,6 +1132,12 @@ Game.prototype.update = function(dt) {
 
     if (this.currentScene.lost) {
         this.stopMusic();
+        this.currentScene.restart();
+    }
+
+    if (this.currentScene.cleared) {
+        this.level++;
+        this.setScene(this.levels[this.level]);
         this.currentScene.restart();
     }
 };
@@ -9537,6 +9626,11 @@ var RoadObject = exports.RoadObject = Entity.extend({
         } else {
             gamejs.draw.rect(display, "rgb(200,0,0)", this.rect);
         }
+    },
+
+    kill: function() {
+        var index = this.road.roadObjects.indexOf(this);
+        this.road.roadObjects.splice(index, 1);
     }
 });
 

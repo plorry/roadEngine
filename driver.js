@@ -125,6 +125,15 @@ var Driver = exports.Driver = RoadObject.extend({
                     return true;
                 }
             }
+
+            if (roadObject.type == 'barricade') {
+                if (this.inMyBox(roadObject)) {
+                    if (!roadObject.crashed) {
+                        this.speed -= 0.06;
+                        roadObject.crash();
+                    }
+                }                
+            }
         }, this);
     },
 
@@ -303,5 +312,43 @@ _.extend(Particle.prototype, {
 
     draw: function(surface) {
         gamejs.draw.rect(surface, "rgba(200,230,255,0.3)", this.rect);
+    }
+});
+
+
+var Barricade = exports.Barricade = RoadObject.extend({
+    initialize: function(options) {
+        Barricade.super_.prototype.initialize.apply(this, arguments);
+        this.type = 'barricade';
+        this.crashed = false;
+        this.spriteSheet = new animate.SpriteSheet(options.spriteSheet, options.width, options.height);
+        this.anim = new animate.Animation(this.spriteSheet, 'static', {
+            'static': {
+                frames: [0],
+                rate: 15,
+                loop: true
+            },
+
+            'crash': {
+                frames: _.range(1,6),
+                rate: 15,
+                loop: false
+            }
+        });
+    },
+
+    crash: function() {
+        this.crashed = true;
+        if (this.anim.currentAnimation != 'crash') {
+            this.anim.start('crash');
+        }
+    },
+
+    update: function(dt, camera) {
+        this.image = this.anim.update(dt);
+        if (camera.distance > this.distance) {
+            this.kill();
+        }
+        Barricade.super_.prototype.update.apply(this, arguments);
     }
 });
