@@ -2,7 +2,7 @@
     "name": "TacticsEngine",
     "version": "0.0.1",
     "scripts": {
-        "start": "node ./scripts/server.js",
+        "start": "nodejs ./scripts/server.js",
         "build": "browserify main.js --outfile bundled.js",
         "watch": "watchify main.js --outfile bundled.js",
         "deploy": "node ./scripts/deploy.js"
